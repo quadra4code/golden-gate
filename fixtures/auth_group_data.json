@@ -1,0 +1,16 @@
+[
+  {
+    "model": "auth.Group",
+    "pk": 3,
+    "fields": {
+      "name": "Sales"
+    }
+  },
+  {
+    "model": "auth.Group",
+    "pk": 4,
+    "fields": {
+      "name": "Client"
+    }
+  }
+]
