@@ -9,6 +9,8 @@ class LandSerializer(serializers.Serializer):
     pcp_id = serializers.IntegerField(read_only=True)
     description = serializers.CharField(max_length=1000)
     area = serializers.IntegerField()
+    price = serializers.DecimalField(decimal_places=4, max_digits=16)
+    title = serializers.CharField(max_length=200)
     payment_method = serializers.CharField(max_length=2)
     installment_period = serializers.IntegerField()
     first_installment_value = serializers.DecimalField(decimal_places=4, max_digits=16)
@@ -17,14 +19,12 @@ class LandSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         project_id, project_type_id, city_id = validated_data.pop('project_id'), validated_data.pop('project_type_id'), validated_data.pop('city_id')
-        print(project_id, project_type_id, city_id)
         pcp_obj, created = models.PCP.objects.get_or_create(project_id=project_id, project_type_id=project_type_id, city_id=city_id)
         if created:
-          pcp_obj.created_by_id = validated_data.get('created_by_id')
-          pcp_obj.save()
-          validated_data['pcp'] = pcp_obj
+            pcp_obj.created_by_id = validated_data.get('created_by_id')
+            pcp_obj.save()
+        validated_data['pcp'] = pcp_obj
         validated_data['status'] = models.Status.objects.filter(code=1).first()# For Sale
-        print(validated_data)
         return models.Land.objects.create(**validated_data)
 
 class UnitSerializer(serializers.Serializer):
@@ -34,6 +34,8 @@ class UnitSerializer(serializers.Serializer):
     pcp_id = serializers.IntegerField(read_only=True)
     description = serializers.CharField(max_length=1000)
     area = serializers.IntegerField()
+    price = serializers.DecimalField(decimal_places=4, max_digits=16)
+    title = serializers.CharField(max_length=200)
     payment_method = serializers.CharField(max_length=2)
     installment_period = serializers.IntegerField()
     first_installment_value = serializers.DecimalField(decimal_places=4, max_digits=16)
@@ -43,14 +45,12 @@ class UnitSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         project_id, project_type_id, city_id = validated_data.pop('project_id'), validated_data.pop('project_type_id'), validated_data.pop('city_id')
-        print(project_id, project_type_id, city_id)
         pcp_obj, created = models.PCP.objects.get_or_create(project_id=project_id, project_type_id=project_type_id, city_id=city_id)
         if created:
-          pcp_obj.created_by_id = validated_data.get('created_by_id')
-          pcp_obj.save()
-          validated_data['pcp'] = pcp_obj
+            pcp_obj.created_by_id = validated_data.get('created_by_id')
+            pcp_obj.save()
+        validated_data['pcp'] = pcp_obj
         validated_data['status'] = models.Status.objects.filter(code=1).first()# For Sale
-        print(validated_data)
         return models.Unit.objects.create(**validated_data)
 
 class PropertyRequestSerializer(serializers.Serializer):

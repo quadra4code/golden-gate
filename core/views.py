@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
-from core.services import propose_property_service, request_property_service#, reqeust_unit_service, propose_unit_service
+from core import services
 
 # Create your views here.
 
@@ -38,7 +38,7 @@ output
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def propose_property_view(request):
-    propose_result = propose_property_service(request.data, request.headers)
+    propose_result = services.propose_property_service(request.data, request.headers)
     status_code = (
         status.HTTP_201_CREATED if propose_result.is_success
         else status.HTTP_401_UNAUTHORIZED if propose_result.msg.__contains__('unauthorized')
@@ -49,7 +49,7 @@ def propose_property_view(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def request_property_view(request):
-    request_result = request_property_service(request.data, request.headers)
+    request_result = services.request_property_service(request.data, request.headers)
     status_code = (
         status.HTTP_201_CREATED if request_result.is_success
         else status.HTTP_401_UNAUTHORIZED if request_result.msg.__contains__('unauthorized')
@@ -57,35 +57,25 @@ def request_property_view(request):
     )
     return Response(request_result.to_dict(), status=status_code)
 
-'''
-input
-{
-    "arabic": true,  // this indicates the language of the result should be in english or arabic (Arabic if true else or not provided english)
-    "phone_number": "3232323",
-    "project_id": "1",
-    "project_type_id": "1",
-    "city_id": "1",
-    "area": 400,
-    "payment_method": "CS",
-    "first_installment_value": "25000",
-    "installment_period": "5"
-}
-output
-{
-    "is_success": true,
-    "data": {
-        "phone_number": "3232323",
-        "project": "The most distinguished",
-        "project_type": "Lands",
-        "city": "6th Of October",
-        "first_installment_value": "25000",
-        "installment_period": "5"
-    },
-    "msg": "Request saved successfully"
-}
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def proposal_form_data_view(request):
+    form_data_result = services.proposal_form_data_service()
+    status_code = (
+        status.HTTP_201_CREATED if form_data_result.is_success
+        else status.HTTP_401_UNAUTHORIZED if form_data_result.msg.__contains__('unauthorized')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(form_data_result.to_dict(), status=status_code)
 
-{
-    "detail": "User not found",
-    "code": "user_not_found"
-}
-'''
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def all_properties_view(request):
+    all_units_result = services.all_properties_service()
+    status_code = (
+        status.HTTP_201_CREATED if all_units_result.is_success
+        else status.HTTP_401_UNAUTHORIZED if all_units_result.msg.__contains__('unauthorized')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(all_units_result.to_dict(), status=status_code)
+

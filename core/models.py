@@ -49,11 +49,14 @@ class BaseProperty(BaseEntity):
         ('IN', 'Installment'),
     ]
     pcp = models.ForeignKey(PCP, on_delete=models.PROTECT)
+    title = models.CharField(max_length=200)
     description = models.CharField(max_length=1000)
     area = models.PositiveIntegerField(default=0)
     payment_method = models.CharField(max_length=2, choices=PAYMENT_METHOD_CHOICES, default='CS')
     installment_period = models.IntegerField()
     first_installment_value = models.DecimalField(decimal_places=4, max_digits=16)
+    price = models.DecimalField(decimal_places=4, max_digits=16)
+    rate = models.IntegerField(default=1)
     status = models.ForeignKey(Status, on_delete=models.PROTECT)
     phone_number = models.CharField(max_length=20)
     # user = models.ForeignKey(User, on_delete=models.PROTECT)
