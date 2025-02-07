@@ -10,10 +10,11 @@ class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=60, min_length=8, required=False, allow_blank=True, allow_null=True)
     image_url = serializers.CharField(max_length=1000, required=False, allow_blank=True, allow_null=True)
     user_type = serializers.CharField(max_length=2, default=5)
+    interested_city = serializers.CharField(max_length=40, required=False, allow_blank=True, allow_null=True)
     password = serializers.CharField(write_only=True)
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'username', 'email', 'image_url', 'user_type', 'password']
+        fields = ['first_name', 'last_name', 'username', 'email', 'image_url', 'user_type', 'interested_city', 'password']
 
     def create(self, validated_data):
         validated_data['password'] = make_password(validated_data['password'])

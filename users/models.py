@@ -23,6 +23,7 @@ class CustomUser(AbstractUser):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     user_type = models.CharField(max_length=2, default='5')
+    interested_city = models.CharField(max_length=40, null=True, blank=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
