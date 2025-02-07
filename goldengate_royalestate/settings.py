@@ -33,12 +33,10 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'golden-gate-three.vercel.app']
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    'http://192.168.1.33:3000',
-    'https://hyper-ecommerce.quadracode.net',
-    '*'
+    
 ]
-
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_CREDENTIALS = True
 # Application definition
 
 INSTALLED_APPS = [
@@ -63,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     # 'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
