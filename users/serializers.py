@@ -4,11 +4,11 @@ from django.contrib.auth.hashers import make_password
 # Create your serializers here.
 
 class RegisterSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(max_length=60, required=True, min_length=3)
-    last_name = serializers.CharField(max_length=60, required=False, min_length=3)
-    username = serializers.CharField(max_length=20, required=True, min_length=8)
-    email = serializers.EmailField(max_length=60, min_length=8, required=False)
-    image_url = serializers.CharField(max_length=1000, required=False)
+    first_name = serializers.CharField(max_length=60, min_length=3)
+    last_name = serializers.CharField(max_length=60, min_length=3, required=False, allow_blank=True, allow_null=True)
+    username = serializers.CharField(max_length=20, min_length=8)
+    email = serializers.EmailField(max_length=60, min_length=8, required=False, allow_blank=True, allow_null=True)
+    image_url = serializers.CharField(max_length=1000, required=False, allow_blank=True, allow_null=True)
     user_type = serializers.CharField(max_length=2, default=5)
     password = serializers.CharField(write_only=True)
     class Meta:
