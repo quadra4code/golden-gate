@@ -2,9 +2,8 @@
   {
     "model": "core.Status",
     "fields": {
-      "name": "تم الطلب",
-      // "name_ar": "تم الطلب",
-      // "name_en": "Requested",
+      "name_ar": "تم الطلب",
+      "name_en": "Requested",
       "code": "0",
       "color": "#42ddf5",
       "created_at": "2025-01-24 18:32:52.790 +0200",
@@ -14,9 +13,8 @@
   {
     "model": "core.Status",
     "fields": {
-      "name": "للبيع",
-      // "name_ar": "للبيع",
-      // "name_en": "For Sale",
+      "name_ar": "للبيع",
+      "name_en": "For Sale",
       "code": "1",
       "color": "#f59042",
       "created_at": "2025-01-24 18:32:52.790 +0200",
@@ -26,9 +24,8 @@
   {
     "model": "core.Status",
     "fields": {
-      "name": "جارى التفاوض",
-      // "name_ar": "جارى التفاوض",
-      // "name_en": "Under Negotiations",
+      "name_ar": "جارى التفاوض",
+      "name_en": "Under Negotiations",
       "code": "2",
       "color": "#8a42f5",
       "created_at": "2025-01-24 18:32:52.790 +0200",
@@ -38,9 +35,8 @@
   {
     "model": "core.Status",
     "fields": {
-      "name": "تم الشراء",
-      // "name_ar": "تم الشراء",
-      // "name_en": "Bought",
+      "name_ar": "تم الشراء",
+      "name_en": "Bought",
       "code": "3",
       "color": "#1b6123",
       "created_at": "2025-01-24 18:32:52.790 +0200",
@@ -50,9 +46,8 @@
   {
     "model": "core.Status",
     "fields": {
-      "name": "تم البيع",
-      // "name_ar": "تم البيع",
-      // "name_en": "Sold",
+      "name_ar": "تم البيع",
+      "name_en": "Sold",
       "code": "4",
       "color": "#1c1b61",
       "created_at": "2025-01-24 18:32:52.790 +0200",

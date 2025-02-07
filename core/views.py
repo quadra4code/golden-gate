@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
-from core.services import create_base_property_request_service, propose_land_service
+from core.services import propose_land_service, request_property_service#, reqeust_unit_service, propose_unit_service
 
 # Create your views here.
 
@@ -45,6 +45,18 @@ def propose_land_view(request):
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(propose_result.to_dict(), status=status_code)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def request_property_view(request):
+    request_result = request_property_service(request.data, request.headers)
+    status_code = (
+        status.HTTP_201_CREATED if request_result.is_success
+        else status.HTTP_401_UNAUTHORIZED if request_result.msg.__contains__('unauthorized')
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(request_result.to_dict(), status=status_code)
+
 '''
 input
 {
@@ -77,24 +89,3 @@ output
     "code": "user_not_found"
 }
 '''
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def create_land_request_view(request):
-    request_result = create_base_property_request_service(request.data, request.headers, land=True, buy=True)
-    status_code = (
-        status.HTTP_201_CREATED if request_result.is_success
-        else status.HTTP_401_UNAUTHORIZED if request_result.msg.__contains__('unauthorized')
-        else status.HTTP_400_BAD_REQUEST
-    )
-    return Response(request_result.to_dict(), status=status_code)
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def create_unit_request_view(request):
-    request_result = create_base_property_request_service(request.data, request.headers, land=False, buy=True)
-    status_code = (
-        status.HTTP_201_CREATED if request_result.is_success
-        else status.HTTP_401_UNAUTHORIZED if request_result.msg.__contains__('unauthorized')
-        else status.HTTP_400_BAD_REQUEST
-    )
-    return Response(request_result.to_dict(), status=status_code)

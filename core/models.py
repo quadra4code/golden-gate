@@ -79,3 +79,9 @@ class Unit(BaseProperty):
 class UnitImage(BaseEntity):
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
     image = models.ImageField(upload_to='properties')
+
+class LandRequest(BaseEntity):
+    land = models.ForeignKey(Land, on_delete=models.PROTECT)
+
+class UnitRequest(BaseEntity):
+    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
