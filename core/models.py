@@ -49,6 +49,7 @@ class BaseProperty(BaseEntity):
         ('IN', 'Installment'),
     ]
     pcp = models.ForeignKey(PCP, on_delete=models.PROTECT)
+    description = models.CharField(max_length=1000)
     area = models.PositiveIntegerField(default=0)
     payment_method = models.CharField(max_length=2, choices=PAYMENT_METHOD_CHOICES, default='CS')
     installment_period = models.IntegerField()
@@ -74,3 +75,7 @@ class Unit(BaseProperty):
         ('LA', 'Last'),
     ]
     floor = models.CharField(max_length=7, choices=FLOOR_CHOICES, default='GR')
+
+class UnitImage(BaseEntity):
+    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+    image = models.ImageField(upload_to='properties')
