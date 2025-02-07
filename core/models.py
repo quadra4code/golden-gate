@@ -74,7 +74,7 @@ class Unit(BaseProperty):
         ('RP', 'Repeated'),
         ('LA', 'Last'),
     ]
-    floor = models.CharField(max_length=7, choices=FLOOR_CHOICES, default='GR')
+    floor = models.CharField(max_length=2, choices=FLOOR_CHOICES, default='GR')
 
 class UnitImage(BaseEntity):
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)

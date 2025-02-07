@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
-from core.services import propose_land_service, request_property_service#, reqeust_unit_service, propose_unit_service
+from core.services import propose_property_service, request_property_service#, reqeust_unit_service, propose_unit_service
 
 # Create your views here.
 
@@ -37,8 +37,8 @@ output
 '''
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def propose_land_view(request):
-    propose_result = propose_land_service(request.data, request.headers)
+def propose_property_view(request):
+    propose_result = propose_property_service(request.data, request.headers)
     status_code = (
         status.HTTP_201_CREATED if propose_result.is_success
         else status.HTTP_401_UNAUTHORIZED if propose_result.msg.__contains__('unauthorized')

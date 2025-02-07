@@ -4,24 +4,27 @@ from core.base_models import ResultView
 from users.utils import extract_payload_from_jwt
 # Create your services here.
 
-def propose_land_service(request_data, request_headers):
+def propose_property_service(request_data, request_headers):
     result = ResultView()
     try:
         token = request_headers.get('Authorization', '')
         token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
         request_data['created_by_id'] = str(token_decode_result.get('user_id'))
-        if request_data.get('project_type_id') != "1":
-            result.msg = "Not land"
-            return result
-        serialized_land_request = serializers.LandSerializer(data=request_data)
-        if serialized_land_request.is_valid():
-            serialized_land_request.save()
+        serialized_property = None
+        if request_data.get('project_type_id') == "1":
+            serialized_property = serializers.LandSerializer(data=request_data)
+        elif request_data.get('project_type_id') == "2":
+            serialized_property = serializers.UnitSerializer(data=request_data)
+        else:
+            raise LookupError("Invalid Project Type")
+        if serialized_property.is_valid():
+            serialized_property.save()
             result.msg = 'Request saved successfully'
             result.is_success = True
-            result.data = serialized_land_request.data
+            result.data = serialized_property.data
         else:
             result.msg = 'Error happened while serializing data'
-            result.data = serialized_land_request.errors
+            result.data = serialized_property.errors
     except Exception as e:
         result.msg = 'Unexpected error happened while saving request'
         result.data = {'error': str(e)}
