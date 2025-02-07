@@ -33,9 +33,10 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'golden-gate-three.vercel.app']
 
 CORS_ALLOWED_ORIGINS = [
-    
+    "https://golden-beit.vercel.app",
+    "http://localhost:3000"
 ]
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 # CORS_ALLOW_CREDENTIALS = True
 # Application definition
 
