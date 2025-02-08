@@ -39,14 +39,14 @@ class Status(BaseEntity):
     4 : تم البيع : Sold
     '''
 
-class BaseProperty(BaseEntity):
+class Property(BaseEntity):
     # PAYMENT_METHOD_CHOICES = [
     #     ('CS', {'name_ar': 'نقدى', 'name_en': 'Cash'}),
     #     ('IN', {'name_ar': 'تقسيط', 'name_en': 'Installment'}),
     # ]
     PAYMENT_METHOD_CHOICES = [
-        ('CS', 'Cash'),
-        ('IN', 'Installment'),
+        ('CS', 'كاش'),
+        ('IN', 'تقسيط'),
     ]
     pcp = models.ForeignKey(PCP, on_delete=models.PROTECT)
     title = models.CharField(max_length=200)
@@ -59,32 +59,58 @@ class BaseProperty(BaseEntity):
     rate = models.IntegerField(default=1)
     status = models.ForeignKey(Status, on_delete=models.PROTECT)
     phone_number = models.CharField(max_length=20)
-    # user = models.ForeignKey(User, on_delete=models.PROTECT)
-    class Meta:
-        abstract = True
-
-class Land(BaseProperty):
-    pass
-
-class Unit(BaseProperty):
-    # FLOOR_CHOICES = [
-    #     ('GR', {'name_ar': 'أرضى', 'name_en': 'Ground'}),
-    #     ('RP', {'name_ar': 'متكرر', 'name_en': 'Repeated'}),
-    #     ('LA', {'name_ar': 'أخير', 'name_en': 'Last'}),
-    # ]
     FLOOR_CHOICES = [
-        ('GR', 'Ground'),
-        ('RP', 'Repeated'),
-        ('LA', 'Last'),
+        ('GR', 'أرضى'),
+        ('RP', 'متكرر'),
+        ('LA', 'أخير'),
     ]
-    floor = models.CharField(max_length=2, choices=FLOOR_CHOICES, default='GR')
+    floor = models.CharField(max_length=2, choices=FLOOR_CHOICES, null=True, blank=True)
+    # user = models.ForeignKey(User, on_delete=models.PROTECT)
+    # class Meta:
+    #     abstract = True
 
-class UnitImage(BaseEntity):
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+# class Land(BaseProperty):
+#     pass
+
+# class Unit(BaseProperty):
+#     # FLOOR_CHOICES = [
+#     #     ('GR', {'name_ar': 'أرضى', 'name_en': 'Ground'}),
+#     #     ('RP', {'name_ar': 'متكرر', 'name_en': 'Repeated'}),
+#     #     ('LA', {'name_ar': 'أخير', 'name_en': 'Last'}),
+#     # ]
+#     FLOOR_CHOICES = [
+#         ('GR', 'Ground'),
+#         ('RP', 'Repeated'),
+#         ('LA', 'Last'),
+#     ]
+#     floor = models.CharField(max_length=2, choices=FLOOR_CHOICES, default='GR')
+
+# class UnitImage(BaseEntity):
+#     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+#     image = models.ImageField(upload_to='properties')
+
+# class LandRequest(BaseEntity):
+#     land = models.ForeignKey(Land, on_delete=models.PROTECT)
+
+# class UnitRequest(BaseEntity):
+#     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+
+class PropertyImage(BaseEntity):
+    property = models.ForeignKey(Property, on_delete=models.PROTECT)
     image = models.ImageField(upload_to='properties')
 
-class LandRequest(BaseEntity):
-    land = models.ForeignKey(Land, on_delete=models.PROTECT)
+class PropertyRequest(BaseEntity):
+    property = models.ForeignKey(Property, on_delete=models.PROTECT)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['created_by', 'property'], name='created_by_property_request_unique_constraint', violation_error_message='Each client car request a property only once')
+        ]
 
-class UnitRequest(BaseEntity):
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+class ClientReviews(BaseEntity):
+    rate = models.IntegerField()
+    review = models.CharField()
+    property = models.ForeignKey(Property, on_delete=models.PROTECT)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['created_by', 'property'], name='created_by_property_review_unique_constraint', violation_error_message='Each client car review a property only once')
+        ]
