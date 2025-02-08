@@ -1,3 +1,5 @@
+from datetime import timedelta
+from django.utils import timezone
 from core import models
 from core import serializers
 from core.base_models import ResultView
@@ -88,14 +90,20 @@ def proposal_form_data_service():
 def all_properties_service():
     result = ResultView()
     try:
+        now = timezone.now()
+        twenty_four_hours_ago = now - timedelta(hours=24)
         for_sale_status = models.Status.objects.get(code=1)
         lands = models.Land.objects.filter(is_deleted=False, status=for_sale_status)
         units = models.Unit.objects.filter(is_deleted=False, status=for_sale_status)
-        props_data = []
+        props_data = {
+            "recent": [],
+            "all": []
+        }
         def add_properties(properties):
             for prop in properties:
+                is_recent = prop.created_at >= twenty_four_hours_ago if hasattr(prop, 'created_at') else False
                 payment_method = prop.get_payment_method_display()
-                props_data.append({
+                property_data = {
                     "id": prop.id,
                     "title": prop.title,
                     "description": prop.description,
@@ -105,7 +113,10 @@ def all_properties_service():
                     "rate": prop.rate,
                     "area": prop.area,
                     "price": prop.price
-                })
+                }
+                if is_recent:
+                    props_data["recent"].append(property_data)
+                props_data["all"].append(property_data)
         add_properties(lands)
         add_properties(units)
         result.data = props_data
