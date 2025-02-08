@@ -103,6 +103,7 @@ def all_properties_service():
             for prop in properties:
                 is_recent = prop.created_at >= twenty_four_hours_ago if hasattr(prop, 'created_at') else False
                 payment_method = prop.get_payment_method_display()
+                rate_list = [''] * prop.rate if prop.rate else []
                 property_data = {
                     "id": prop.id,
                     "title": prop.title,
@@ -110,14 +111,13 @@ def all_properties_service():
                     "city": prop.pcp.city.name,
                     "payment_method": payment_method,
                     "project": prop.pcp.project.name,
-                    "rate": prop.rate,
+                    "rate": rate_list,
                     "area": prop.area,
                     "price": prop.price
                 }
                 if is_recent:
                     props_data["recent"].append(property_data)
-                else:
-                    props_data["all"].append(property_data)
+                props_data["all"].append(property_data)
         add_properties(lands)
         add_properties(units)
         result.data = props_data
@@ -128,3 +128,66 @@ def all_properties_service():
         result.data = {'error': str(e)}
     finally:
         return result
+
+def filter_properties_service(request_data):
+    result = ResultView()
+    try:
+        project_id = request_data.get('project_id')
+        project_type_id = request_data.get('project_type_id')
+        min_price = request_data.get('min_price')
+        max_price = request_data.get('max_price')
+        payment_method = request_data.get('payment_method')
+        if min_price is not None:
+            try:
+                min_price = float(min_price)
+            except (TypeError, ValueError):
+                raise ValueError("min_price must be a valid number")
+        if max_price is not None:
+            try:
+                max_price = float(max_price)
+            except (TypeError, ValueError):
+                raise ValueError("max_price must be a valid number")
+        if min_price is not None and max_price is not None and min_price > max_price:
+            raise ValueError("min_price cannot be greater than max_price")
+        for_sale_status = models.Status.objects.get(code=1)
+        lands = models.Land.objects.filter(is_deleted=False, status=for_sale_status)
+        units = models.Unit.objects.filter(is_deleted=False, status=for_sale_status)
+        if project_id:
+            lands = lands.filter(pcp__project__id=project_id)
+            units = units.filter(pcp__project__id=project_id)
+        if project_type_id:
+            lands = lands.filter(pcp__project__project_type__id=project_type_id)
+            units = units.filter(pcp__project__project_type__id=project_type_id)
+        if min_price and max_price:
+            lands = lands.filter(price__gte=min_price, price__lte=max_price)
+            units = units.filter(price__gte=min_price, price__lte=max_price)
+        if payment_method:
+            lands = lands.filter(payment_method=payment_method)
+            units = units.filter(payment_method=payment_method)
+        props_data = []
+        def add_properties(properties):
+            for prop in properties:
+                payment_method = prop.get_payment_method_display()
+                rate_list = [''] * prop.rate if prop.rate else []
+                props_data.append({
+                    "id": prop.id,
+                    "title": prop.title,
+                    "description": prop.description,
+                    "city": prop.pcp.city.name,
+                    "payment_method": payment_method,
+                    "project": prop.pcp.project.name,
+                    "rate": rate_list,
+                    "area": prop.area,
+                    "price": prop.price
+                })
+        add_properties(lands)
+        add_properties(units)
+        result.data = props_data
+        result.is_success = True
+        result.msg = 'Success'
+    except Exception as e:
+        result.msg = 'Unexpected error happened while saving request'
+        result.data = {'error': str(e)}
+    finally:
+        return result
+

@@ -79,3 +79,14 @@ def all_properties_view(request):
     )
     return Response(all_units_result.to_dict(), status=status_code)
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def filter_properties_view(request):
+    filter_units_result = services.filter_properties_service(request.data)
+    status_code = (
+        status.HTTP_201_CREATED if filter_units_result.is_success
+        else status.HTTP_401_UNAUTHORIZED if filter_units_result.msg.__contains__('unauthorized')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(filter_units_result.to_dict(), status=status_code)
+
