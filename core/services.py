@@ -116,7 +116,8 @@ def all_properties_service():
                 }
                 if is_recent:
                     props_data["recent"].append(property_data)
-                props_data["all"].append(property_data)
+                else:
+                    props_data["all"].append(property_data)
         add_properties(lands)
         add_properties(units)
         result.data = props_data
