@@ -1,22 +1,15 @@
 from django.db import models
-# from users.models import UserPhoneNumbers
 from core.base_models import BaseEntity
 
 # Create your models here.
 
 class City(BaseEntity):
-    # name_ar = models.CharField(max_length=50, unique=True)
-    # name_en = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=50, unique=True)
 
 class Project(BaseEntity):
-    # name_ar = models.CharField(max_length=50, unique=True)
-    # name_en = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=50, unique=True)
 
 class ProjectType(BaseEntity):
-    # name_ar = models.CharField(max_length=40, unique=True)
-    # name_en = models.CharField(max_length=40, unique=True)
     name = models.CharField(max_length=40, unique=True)
 
 class PCP(BaseEntity): # Project City ProjectType
@@ -25,8 +18,6 @@ class PCP(BaseEntity): # Project City ProjectType
     city = models.ForeignKey(City, on_delete=models.PROTECT)
 
 class Status(BaseEntity):
-    # name_ar = models.CharField(max_length=20, unique=True)
-    # name_en = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=20, unique=True)
     code = models.CharField(max_length=2, unique=True)
     color = models.CharField(max_length=7, unique=True)
@@ -40,10 +31,6 @@ class Status(BaseEntity):
     '''
 
 class Property(BaseEntity):
-    # PAYMENT_METHOD_CHOICES = [
-    #     ('CS', {'name_ar': 'نقدى', 'name_en': 'Cash'}),
-    #     ('IN', {'name_ar': 'تقسيط', 'name_en': 'Installment'}),
-    # ]
     PAYMENT_METHOD_CHOICES = [
         ('CS', 'كاش'),
         ('IN', 'تقسيط'),
@@ -59,41 +46,14 @@ class Property(BaseEntity):
     rate = models.IntegerField(default=1)
     status = models.ForeignKey(Status, on_delete=models.PROTECT)
     phone_number = models.CharField(max_length=20)
+    property_number = models.CharField(max_length=5)
+    building_or_region = models.CharField(max_length=150)
     FLOOR_CHOICES = [
         ('GR', 'أرضى'),
         ('RP', 'متكرر'),
         ('LA', 'أخير'),
     ]
     floor = models.CharField(max_length=2, choices=FLOOR_CHOICES, null=True, blank=True)
-    # user = models.ForeignKey(User, on_delete=models.PROTECT)
-    # class Meta:
-    #     abstract = True
-
-# class Land(BaseProperty):
-#     pass
-
-# class Unit(BaseProperty):
-#     # FLOOR_CHOICES = [
-#     #     ('GR', {'name_ar': 'أرضى', 'name_en': 'Ground'}),
-#     #     ('RP', {'name_ar': 'متكرر', 'name_en': 'Repeated'}),
-#     #     ('LA', {'name_ar': 'أخير', 'name_en': 'Last'}),
-#     # ]
-#     FLOOR_CHOICES = [
-#         ('GR', 'Ground'),
-#         ('RP', 'Repeated'),
-#         ('LA', 'Last'),
-#     ]
-#     floor = models.CharField(max_length=2, choices=FLOOR_CHOICES, default='GR')
-
-# class UnitImage(BaseEntity):
-#     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
-#     image = models.ImageField(upload_to='properties')
-
-# class LandRequest(BaseEntity):
-#     land = models.ForeignKey(Land, on_delete=models.PROTECT)
-
-# class UnitRequest(BaseEntity):
-#     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
 
 class PropertyImage(BaseEntity):
     property = models.ForeignKey(Property, on_delete=models.PROTECT)
@@ -106,11 +66,31 @@ class PropertyRequest(BaseEntity):
             models.UniqueConstraint(fields=['created_by', 'property'], name='created_by_property_request_unique_constraint', violation_error_message='Each client car request a property only once')
         ]
 
-class ClientReviews(BaseEntity):
+class PropertyClientReview(BaseEntity):
     rate = models.IntegerField()
-    review = models.CharField()
+    review = models.CharField(max_length=800)
     property = models.ForeignKey(Property, on_delete=models.PROTECT)
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['created_by', 'property'], name='created_by_property_review_unique_constraint', violation_error_message='Each client car review a property only once')
         ]
+
+class Article(BaseEntity):
+    title = models.CharField(max_length=250)
+    body = models.CharField(max_length=2000)
+
+class Consultation(BaseEntity):
+    title = models.CharField(max_length=250)
+    body = models.CharField(max_length=2000)
+    type = models.CharField(max_length=120)
+
+# class DrawResult(models.Model):
+#     FLOOR_CHOICES = Property.FLOOR_CHOICES
+
+#     winner_name = models.CharField(max_length=150)
+#     property_number = models.CharField(max_length=5)
+#     building_or_region = models.CharField(max_length=150)
+#     floor = models.CharField(max_length=10, choices=FLOOR_CHOICES, null=True, blank=True)
+
+#     def __str__(self):
+#         return f"{self.winner_name} - {self.building_or_region} - {self.property_number}{f' - {self.floor}' if self.floor else ''}"
