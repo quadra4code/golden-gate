@@ -79,7 +79,7 @@ def all_properties_view(request):
     return Response(all_units_result.to_dict(), status=status_code)
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def filter_properties_view(request):
     filter_units_result = services.filter_properties_service(request.data)
     status_code = (
