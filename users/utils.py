@@ -23,12 +23,10 @@ def generate_jwt_token(user):
 def extract_payload_from_jwt(token):
     try:
         payload = jwt.decode(jwt=token, key=settings.SECRET_KEY, algorithms=['HS256'])
-        print(f'payload is => {payload}')
         return payload
     except jwt.ExpiredSignatureError as e:
         return {'error': str(e), 'msg': 'Token is expired'}
     except jwt.InvalidTokenError as e:
-        print('invalid token error', e, sep='\n=>')
         return {'error': str(e), 'msg': 'Invalid token'}
     except Exception as e:
         return {'error': str(e), 'msg': 'Unexpected error happened while decoding token'}
