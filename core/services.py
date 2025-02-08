@@ -134,6 +134,7 @@ def filter_properties_service(request_data):
     try:
         project_id = request_data.get('project_id')
         project_type_id = request_data.get('project_type_id')
+        city_id = request_data.get('city_id')
         min_price = request_data.get('min_price')
         max_price = request_data.get('max_price')
         payment_method = request_data.get('payment_method')
@@ -158,6 +159,9 @@ def filter_properties_service(request_data):
         if project_type_id:
             lands = lands.filter(pcp__project__project_type__id=project_type_id)
             units = units.filter(pcp__project__project_type__id=project_type_id)
+        if city_id:
+            lands = lands.filter(pcp__project__city__id=city_id)
+            units = units.filter(pcp__project__city__id=city_id)
         if min_price and max_price:
             lands = lands.filter(price__gte=min_price, price__lte=max_price)
             units = units.filter(price__gte=min_price, price__lte=max_price)
