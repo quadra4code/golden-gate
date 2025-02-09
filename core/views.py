@@ -117,23 +117,23 @@ def home_consultations_view(request):
     return Response(consultations_result.to_dict(), status=status_code)
 
 
-# @api_view(["GET"])
-# def draw_results_view(request):
-#     draw_results = services.draw_results_service()
-#     status_code = (
-#         status.HTTP_200_OK if draw_results.is_success
-#         else status.HTTP_500_INTERNAL_SERVER_ERROR
-#     )
-#     return Response(draw_results.to_dict(), status=status_code)
+@api_view(["GET"])
+def draw_results_view(request):
+    draw_results = services.draw_results_service()
+    status_code = (
+        status.HTTP_200_OK if draw_results.is_success
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(draw_results.to_dict(), status=status_code)
 
 
-# @api_view(["POST"])
-# @permission_classes([IsAuthenticated])
-# def add_draw_result_view(request):
-#     send_result = services.add_draw_result_service(request.data, request.headers)
-#     status_code = (
-#         status.HTTP_200_OK if send_result.is_success
-#         else status.HTTP_401_UNAUTHORIZED if send_result.msg.lower().__contains__('unauthorized')
-#         else status.HTTP_400_BAD_REQUEST
-#     )
-#     return Response(send_result.to_dict(), status=status_code)
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def add_draw_result_view(request):
+    send_result = services.add_draw_result_service(request.data, request.headers)
+    status_code = (
+        status.HTTP_200_OK if send_result.is_success
+        else status.HTTP_401_UNAUTHORIZED if send_result.msg.lower().__contains__('unauthorized')
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(send_result.to_dict(), status=status_code)

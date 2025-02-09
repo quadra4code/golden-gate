@@ -223,43 +223,43 @@ def home_consultations_service():
     finally:
         return result
 
-# def draw_results_service():
-#     result = ResultView()
-#     try:
-#         today = timezone.now().date()
-#         draw_results = models.DrawResult.objects.filter(is_deleted=False, created_at__date=today)
-#         serialized_draw_results = serializers.DrawResultSerializer(draw_results, many=True)
-#         result.data = serialized_draw_results.data
-#         result.is_success = True
-#         result.msg = "Success"
-#     except Exception as e:
-#         result.msg = 'Unexpected error happened while fetching data'
-#         result.data = {'error': str(e)}
-#     finally:
-#         return result
+def draw_results_service():
+    result = ResultView()
+    try:
+        today = timezone.now().date()
+        draw_results = models.DrawResult.objects.filter(is_deleted=False, created_at__date=today)
+        serialized_draw_results = serializers.DrawResultSerializer(draw_results, many=True)
+        result.data = serialized_draw_results.data
+        result.is_success = True
+        result.msg = "Success"
+    except Exception as e:
+        result.msg = 'Unexpected error happened while fetching data'
+        result.data = {'error': str(e)}
+    finally:
+        return result
 
 
-# def add_draw_result_service(request_data, request_headers):
-#     result = ResultView()
-#     try:
-#         token = request_headers.get('Authorization', '')
-#         token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
-#         request_data['created_by_id'] = str(token_decode_result.get('user_id'))
-#         if 'Admin' not in token_decode_result.get('roles'):
-#             result.msg = 'Unauthorized user, only admins can access'
-#         else:
-#             serialized_draw_result = serializers.DrawResultSerializer(data=request_data)
-#             if serialized_draw_result.is_valid():
-#                 serialized_draw_result.save()
-#                 result.data = serialized_draw_result.data
-#                 result.is_success = True
-#                 result.msg = "Request saved successfully"
-#             else:
-#                 result.msg = "Error occured while serializing data"
-#                 result.data = serialized_draw_result.errors
-#     except Exception as e:
-#         result.msg = 'Unexpected error happened while fetching data'
-#         result.data = {'error': str(e)}
-#     finally:
-#         return result
+def add_draw_result_service(request_data, request_headers):
+    result = ResultView()
+    try:
+        token = request_headers.get('Authorization', '')
+        token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
+        request_data['created_by_id'] = str(token_decode_result.get('user_id'))
+        if 'Admin' not in token_decode_result.get('roles'):
+            result.msg = 'Unauthorized user, only admins can access'
+        else:
+            serialized_draw_result = serializers.DrawResultSerializer(data=request_data)
+            if serialized_draw_result.is_valid():
+                serialized_draw_result.save()
+                result.data = serialized_draw_result.data
+                result.is_success = True
+                result.msg = "Request saved successfully"
+            else:
+                result.msg = "Error occured while serializing data"
+                result.data = serialized_draw_result.errors
+    except Exception as e:
+        result.msg = 'Unexpected error happened while fetching data'
+        result.data = {'error': str(e)}
+    finally:
+        return result
 

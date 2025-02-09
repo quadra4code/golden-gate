@@ -84,13 +84,13 @@ class Consultation(BaseEntity):
     body = models.CharField(max_length=2000)
     type = models.CharField(max_length=120)
 
-# class DrawResult(models.Model):
-#     FLOOR_CHOICES = Property.FLOOR_CHOICES
+class DrawResult(models.Model):
+    FLOOR_CHOICES = Property.FLOOR_CHOICES
 
-#     winner_name = models.CharField(max_length=150)
-#     property_number = models.CharField(max_length=5)
-#     building_or_region = models.CharField(max_length=150)
-#     floor = models.CharField(max_length=10, choices=FLOOR_CHOICES, null=True, blank=True)
+    winner_name = models.CharField(max_length=150)
+    property_number = models.CharField(max_length=5)
+    building_or_region = models.CharField(max_length=150)
+    floor = models.CharField(max_length=10, choices=FLOOR_CHOICES, null=True, blank=True)
 
-#     def __str__(self):
-#         return f"{self.winner_name} - {self.building_or_region} - {self.property_number}{f' - {self.floor}' if self.floor else ''}"
+    def __str__(self):
+        return f"{self.winner_name} - {self.building_or_region} - {self.property_number}{f' - {self.floor}' if self.floor else ''}"
