@@ -226,8 +226,9 @@ def home_consultations_service():
 def draw_results_service():
     result = ResultView()
     try:
-        today = timezone.now().date()
-        draw_results = models.DrawResult.objects.filter(is_deleted=False, created_at__date=today)
+        # today = timezone.now().date()
+        # draw_results = models.DrawResult.objects.filter(is_deleted=False, created_at__date=today)
+        draw_results = models.DrawResult.objects.filter(is_deleted=False)
         serialized_draw_results = serializers.DrawResultSerializer(draw_results, many=True)
         result.data = serialized_draw_results.data
         result.is_success = True
