@@ -14,4 +14,5 @@ admin.site.register([
     models.Article,
     models.Consultation,
     models.Status,
+    models.DrawResult,
 ])
