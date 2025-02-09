@@ -70,7 +70,7 @@ class ConsultationSerializer(serializers.ModelSerializer):
         model = models.Consultation
         fields = ['id', 'title', 'body', 'type']
 
-# class DrawResultSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = models.DrawResult
-#         fields = ['id', 'winner_name', 'property_number', 'building_or_region', 'floor']
+class DrawResultSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.DrawResult
+        fields = ['id', 'winner_name', 'property_number', 'building_or_region', 'floor']
