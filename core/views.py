@@ -117,9 +117,9 @@ def home_consultations_view(request):
     return Response(consultations_result.to_dict(), status=status_code)
 
 
-@api_view(["GET"])
+@api_view(["POST"])
 def draw_results_view(request):
-    draw_results = services.draw_results_service()
+    draw_results = services.draw_results_service(request.data)
     status_code = (
         status.HTTP_200_OK if draw_results.is_success
         else status.HTTP_500_INTERNAL_SERVER_ERROR

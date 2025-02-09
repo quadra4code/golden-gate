@@ -223,16 +223,23 @@ def home_consultations_service():
     finally:
         return result
 
-def draw_results_service():
+def draw_results_service(request_data):
     result = ResultView()
     try:
-        # today = timezone.now().date()
-        # draw_results = models.DrawResult.objects.filter(is_deleted=False, created_at__date=today)
-        draw_results = models.DrawResult.objects.filter(is_deleted=False)
-        serialized_draw_results = serializers.DrawResultSerializer(draw_results, many=True)
-        result.data = serialized_draw_results.data
-        result.is_success = True
-        result.msg = "Success"
+        applicant_name = request_data.get('full_name')
+        if applicant_name:
+            draw_results = models.DrawResult.objects.filter(is_deleted=False, winner_name__icontains=applicant_name)
+            if draw_results.count() == 1:
+                serialized_draw_results = serializers.DrawResultSerializer(draw_results.first())
+                result.data = serialized_draw_results.data
+                result.is_success = True
+                result.msg = "Success"
+            elif draw_results.count() > 1:
+                result.msg = "Multiple records found, please provide more specific name"
+            else:
+                result.msg = "This name was not found or didn't win"
+        else:
+            result.msg = f"Full name was not provided for search. Instead, we got: {applicant_name}"
     except Exception as e:
         result.msg = 'Unexpected error happened while fetching data'
         result.data = {'error': str(e)}

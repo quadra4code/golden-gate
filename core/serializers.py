@@ -71,6 +71,7 @@ class ConsultationSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'body', 'type']
 
 class DrawResultSerializer(serializers.ModelSerializer):
+    project_name = serializers.CharField(source='project.name', read_only=True)
     class Meta:
         model = models.DrawResult
-        fields = ['id', 'winner_name', 'property_number', 'building_or_region', 'floor']
+        fields = ['id', 'winner_name', 'property_number', 'building_or_region', 'project_name', 'floor']

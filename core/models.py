@@ -90,7 +90,12 @@ class DrawResult(BaseEntity):
     winner_name = models.CharField(max_length=150)
     property_number = models.CharField(max_length=5)
     building_or_region = models.CharField(max_length=150)
+    project = models.ForeignKey(Project, on_delete=models.PROTECT)
     floor = models.CharField(max_length=10, choices=FLOOR_CHOICES, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.winner_name} - {self.building_or_region} - {self.property_number}{f' - {self.floor}' if self.floor else ''}"
+        return f"{self.winner_name} - {self.building_or_region} - {self.property_number} - {self.project.name}{f' - {self.floor}' if self.floor else ''}"
+    
+
+
+    #   الطرح + المدينه تحتوى على اكثر من منطقة والعكس ليس صحيح
