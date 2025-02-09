@@ -84,7 +84,7 @@ class Consultation(BaseEntity):
     body = models.CharField(max_length=2000)
     type = models.CharField(max_length=120)
 
-class DrawResult(models.Model):
+class DrawResult(BaseEntity):
     FLOOR_CHOICES = Property.FLOOR_CHOICES
 
     winner_name = models.CharField(max_length=150)
