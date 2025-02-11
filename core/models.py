@@ -85,17 +85,26 @@ class Consultation(BaseEntity):
     type = models.CharField(max_length=120)
 
 class DrawResult(BaseEntity):
-    FLOOR_CHOICES = Property.FLOOR_CHOICES
-
     winner_name = models.CharField(max_length=150)
-    property_number = models.CharField(max_length=5)
-    building_or_region = models.CharField(max_length=150)
-    project = models.ForeignKey(Project, on_delete=models.PROTECT)
-    floor = models.CharField(max_length=10, choices=FLOOR_CHOICES, null=True, blank=True)
+    property_number = models.CharField(max_length=5, default='---')
+    building_or_region = models.CharField(max_length=150, default='---')
+    project_name = models.CharField(max_length=150, default='---')
+    floor = models.CharField(max_length=10, default='---')
+    area = models.CharField(max_length=4, default='---')
 
     def __str__(self):
-        return f"{self.winner_name} - {self.building_or_region} - {self.property_number} - {self.project.name}{f' - {self.floor}' if self.floor else ''}"
+        return f"{self.winner_name} - {self.building_or_region} - {self.property_number} - {self.project_name}{f' - {self.floor}' if self.floor else ''}"
     
 
-
     #   الطرح + المدينه تحتوى على اكثر من منطقة والعكس ليس صحيح
+
+# class Region(BaseEntity):
+#     name = models.CharField(max_length=100)
+#     city = models.ForeignKey(City, on_delete=models.PROTECT)
+
+# class Tarh(BaseEntity):
+#     name = models.CharField(max_length=100)
+
+# class TarhCity(BaseEntity):
+#     tarh = models.ForeignKey(Tarh, on_delete=models.PROTECT)
+#     city = models.ForeignKey(City, on_delete=models.PROTECT)
