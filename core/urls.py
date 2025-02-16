@@ -11,4 +11,5 @@ urlpatterns = [
     path('home-consultations', CoreViews.home_consultations_view, name='home_consultations'),
     path('draw-results', CoreViews.draw_results_view, name='draw_results'),
     path('add-draw-result', CoreViews.add_draw_result_view, name='add_draw_result'),
+    path('createjson', CoreViews.createjson, name='add_draw_result'),
 ]

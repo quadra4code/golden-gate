@@ -6,6 +6,63 @@ from core import services
 
 # Create your views here.
 
+@api_view(["GET"])
+def createjson(request):
+
+    import pandas as pd
+    import json
+    import os
+
+    # Define the path to the Excel file
+    excel_file_path = os.path.join(os.path.dirname(__file__), 'day11.xlsx')
+
+    # Read the Excel file
+    df = pd.read_excel(excel_file_path)
+
+    # Initialize an empty list to store the JSON data
+    json_data = []
+
+    # Loop through the DataFrame and convert each row to the desired JSON format
+    for index, row in df.iterrows():
+        # print(row.values[0])
+        # print('0 => ', row.values[0])
+        # print('1 => ', row.values[1])
+        # print('2 => ', str(row.values[1]), type(row.values[2]))
+        # if str(row.values[1]) == 'nan':
+        #     print("yes truthy")
+        # print('3 => ', row.values[3])
+        # print('4 => ', row.values[4])
+        # print('5 => ', row.values[5])
+        # print('6 => ', row.values[6])
+        print(row.values[1])
+        prop = 0 if str(row.values[1]) == 'nan' else row.values[1]
+        record = {
+            "model": "core.DrawResult",
+            "pk": index + 1 + 1923,
+            "fields": {
+                "winner_name": row.values[6],
+                "property_number": prop,
+                "building_or_region": row.values[3] if type(row.values[3]) is str else 0 if str(row.values[3]) == 'nan' else int(row.values[3]),
+                "floor": "" if type(row.values[2]) is float else row.values[2],
+                "area": 0 if str(row.values[0]) == 'nan' else row.values[0],
+                "project_name": row.values[5]
+            }
+        }
+        json_data.append(record)
+
+    # Convert the list to a JSON string
+    json_string = json.dumps(json_data, indent=4, ensure_ascii=False)
+    print(json_string)
+
+    # Define the path to the output JSON file
+    json_file_path = os.path.join(os.path.dirname(__file__), 'day11.json')
+
+    # Write the JSON string to the output file
+    with open(json_file_path, 'w', encoding='utf-8') as json_file:
+        json_file.write(json_string)
+
+    print(f"Data has been successfully converted to JSON and saved to {json_file_path}")
+    return Response({'message': 'Hello, World!'})
 '''
 input 
 {
