@@ -3,14 +3,16 @@ from core import models
 # Register your models here.
 
 admin.site.register([
-    models.City,
+    models.UnitType,
+    models.Proposal,
     models.Project,
-    models.ProjectType,
-    models.PCP,
-    models.Property,
-    models.PropertyRequest,
-    models.PropertyImage,
-    models.PropertyClientReview,
+    models.UnitTypeProject,
+    models.City,
+    models.Region,
+    models.Unit,
+    models.UnitRequest,
+    models.UnitImage,
+    models.ClientReview,
     models.Article,
     models.Consultation,
     models.Status,

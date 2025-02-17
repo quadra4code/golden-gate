@@ -2,60 +2,100 @@ from rest_framework import serializers
 from core import models
 # Create your serializers here.
 
-class PropertySerializer(serializers.Serializer):
+class UnitSerializer(serializers.Serializer):
+    FACADE_CHOICES = [
+        '0',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+    ]
+    FLOOR_CHOICES = [
+        '0',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        '10',
+        '11',
+        '12',
+        '13',
+        '14',
+        '15',
+    ]
+    PAYMENT_METHOD_CHOICES = [
+        'CS',
+        'IN',
+    ]
+    
     id = serializers.IntegerField(read_only=True)
-    project_id = serializers.CharField(max_length=3, write_only=True)
-    project_type_id = serializers.CharField(max_length=1, write_only=True)
-    city_id = serializers.CharField(max_length=2, write_only=True)
-    pcp_id = serializers.IntegerField(read_only=True)
-    description = serializers.CharField(max_length=1000)
+    unit_type_id = serializers.CharField(max_length=1)
+    proposal_id = serializers.CharField(max_length=3)
+    project_id = serializers.CharField(max_length=3)
+    city_id = serializers.CharField(max_length=2)
+    # pcp_id = serializers.IntegerField(read_only=True)
+    unit_number = serializers.CharField(max_length=5)
+    building_number = serializers.CharField(max_length=150, required=False, allow_null=True)
     area = serializers.IntegerField()
-    price = serializers.DecimalField(decimal_places=4, max_digits=16)
+    over_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
+    total_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
+    meter_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
     title = serializers.CharField(max_length=200)
-    property_number = serializers.CharField(max_length=5)
-    building_or_region = serializers.CharField(max_length=150)
-    floor = serializers.ChoiceField(choices=['GR', "RP", "LA"], required=False, allow_null=True, allow_blank=True)
-    payment_method = serializers.CharField(max_length=2)
-    installment_period = serializers.IntegerField()
-    first_installment_value = serializers.DecimalField(decimal_places=4, max_digits=16)
     phone_number = serializers.CharField(max_length=20)
+    description = serializers.CharField(max_length=1000, required=False, allow_blank=True, allow_null=True)
+    floor = serializers.ChoiceField(choices=FLOOR_CHOICES, required=False, allow_null=True, allow_blank=True)
+    facade = serializers.ChoiceField(choices=FACADE_CHOICES, required=False, allow_null=True, allow_blank=True)
+    payment_method = serializers.ChoiceField(choices=PAYMENT_METHOD_CHOICES, required=False, allow_blank=True, allow_null=True)
+    installment_period = serializers.IntegerField(required=False, allow_null=True)
+    first_installment_value = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
     created_by_id = serializers.IntegerField(min_value=1)
 
+    def is_valid(self, *, raise_exception=False):
+        if self.initial_data.get('unit_type_id') == "2" and not self.initial_data.get('floor'):
+            raise ValueError('الدور يجب أن يكون موجوداً للوحدات السكنية')
+        elif self.initial_data.get('unit_type_id') == "2" and not self.initial_data.get('building_number'):
+            raise ValueError('رقم العمارة يجب أن يكون موجوداً للوحدات السكنية')
+        elif self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('floor'):
+            raise ValueError('الدور لا يجب أن يكون موجوداً للأراضى')
+        elif self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('building_number'):
+            raise ValueError('رقم العمارة لا يجب أن يكون موجوداً للأراضى')
+        elif not any([self.initial_data.get('over_price') or self.initial_data.get('total_price') or self.initial_data.get('meter_price')]):
+            raise ValueError("يجب إدخال سعر الأوفر أو إجمالى السعر أو سعر المتر على الأقل")
+        elif not models.UnitTypeProject.objects.filter(unit_type_id=self.initial_data.get('unit_type_id'), project_id=self.initial_data.get('project_id')).exists():
+            raise ValueError(f'مشروع {models.Project.objects.get(id=self.initial_data.get("project_id")).name} غير متاح لل{models.UnitType.objects.get(id=self.initial_data.get("unit_type_id")).name}')
+        return super().is_valid(raise_exception=raise_exception)
     def create(self, validated_data):
-        project_id, project_type_id, city_id = validated_data.pop('project_id'), validated_data.pop('project_type_id'), validated_data.pop('city_id')
-        if project_type_id == "2" and not validated_data.get('floor'):
-            raise ValueError('Floor is required for units')
-        if project_type_id == "1" and validated_data.get('floor'):
-            validated_data.pop('floor')
-        pcp_obj, created = models.PCP.objects.get_or_create(project_id=project_id, project_type_id=project_type_id, city_id=city_id)
-        if created:
-            pcp_obj.created_by_id = validated_data.get('created_by_id')
-            pcp_obj.save()
-        validated_data['pcp'] = pcp_obj
         validated_data['status'] = models.Status.objects.filter(code=1).first()# For Sale
-        return models.Property.objects.create(**validated_data)
+        return models.Unit.objects.create(**validated_data)
 
-class PropertyRequestSerializer(serializers.Serializer):
-    property_id = serializers.IntegerField(min_value=1, write_only=True)
+class UnitRequestSerializer(serializers.Serializer):
+    unit_id = serializers.IntegerField(min_value=1, write_only=True)
     created_by_id = serializers.IntegerField(min_value=1)
 
     def create(self, validated_data):
-            property_obj = models.Property.objects.filter(id=validated_data.get('property_id')).first()
-            if property_obj:
+            unit_obj = models.Unit.objects.filter(id=validated_data.get('unit_id')).first()
+            if unit_obj:
                 requested_status = models.Status.objects.filter(code=0).first()# For Requested
-                property_obj.status = requested_status
-                property_obj.save()
-                return models.PropertyRequest.objects.create(**validated_data)
+                unit_obj.status = requested_status
+                unit_obj.save()
+                return models.UnitRequest.objects.create(**validated_data)
             else:
-                raise LookupError('Property doesn\'t exist')
+                raise LookupError('الوحدة المطلوبة غير موجودة')
 
 class ReviewSerializer(serializers.ModelSerializer):
     client_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    city_name = serializers.CharField(source='property.pcp.city.name', read_only=True)
-    
+    created_by_id = serializers.IntegerField(min_value=1, write_only=True)
     class Meta:
-        model = models.PropertyClientReview
-        fields = ['id', 'rate', 'client_name', 'review', 'city_name']
+        model = models.ClientReview
+        fields = ['id', 'rate', 'client_name', 'review', 'created_by_id']
 
 
 class ArticleSerializer(serializers.ModelSerializer):

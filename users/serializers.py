@@ -12,13 +12,27 @@ class RegisterSerializer(serializers.ModelSerializer):
     user_type = serializers.CharField(max_length=2, default=5)
     interested_city = serializers.CharField(max_length=40, required=False, allow_blank=True, allow_null=True)
     password = serializers.CharField(write_only=True)
+    referral_code = serializers.CharField(max_length=12, required=False, allow_blank=True, allow_null=True)
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'username', 'email', 'image_url', 'user_type', 'interested_city', 'password']
+        fields = ['first_name', 'last_name', 'username', 'email', 'image_url', 'user_type', 'interested_city', 'password', 'referral_code']
 
     def create(self, validated_data):
+        referral_code = validated_data.pop('referral_code', None)
         validated_data['password'] = make_password(validated_data['password'])
-        return super().create(validated_data)
+        referrer = None
+        if referral_code:  # If the user used a referral code
+            try:
+                referrer = CustomUser.objects.get(referral_code=referral_code)
+                validated_data['referred_by'] = referrer
+            except CustomUser.DoesNotExist:
+                raise serializers.ValidationError({"referral_code": "كود الدعوة غير صالح"})
+        new_user = super().create(validated_data)
+        # If the user was referred, increment referrer's count
+        if referrer:
+            referrer.referral_count += 1
+            referrer.save(update_fields=['referral_count'])
+        return new_user
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=20)

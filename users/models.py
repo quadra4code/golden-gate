@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from core.base_models import BaseEntity
@@ -24,6 +25,9 @@ class CustomUser(AbstractUser):
     is_superuser = models.BooleanField(default=False)
     user_type = models.CharField(max_length=2, default='5')
     interested_city = models.CharField(max_length=40, null=True, blank=True)
+    referral_code = models.CharField(max_length=12, unique=True, blank=True)
+    referred_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='referrals')  # Who referred this user
+    referral_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -45,8 +49,17 @@ class CustomUser(AbstractUser):
             'is_active': self.is_active,
             'user_type': self.user_type,
             'user_type_display': self.get_user_type_display(),
-            'image_url': self.image_url
+            'image_url': self.image_url,
+            'referral_code': self.referral_code,
+            'referred_by': self.referred_by.__str__(),
+            'referral_count': self.referral_count,
         }
+    
+    def save(self, *args, **kwargs):
+        # Ensure every user has a referral code upon creation
+        if not self.referral_code:
+            self.referral_code = str(uuid.uuid4().hex[:12])  # Generate a unique 12-character code
+        super().save(*args, **kwargs)
 
 class UserPhoneNumber(BaseEntity):
     phone_number = models.CharField(max_length=20, unique=True)
