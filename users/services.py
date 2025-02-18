@@ -95,13 +95,13 @@ def login_user_service(login_data):
                 user_to_auth = authenticate(username=username, password=password)
                 if user_to_auth is None:
                     logger.warning(f"Failed login attempt for username {username}.")
-                    result.msg = 'Invalid Credentials'
+                    result.msg = 'خطأ فى بيانات الحساب'
                 elif not user_to_auth.is_active:
-                    result.msg = 'Account is not active. Please contact support'
+                    result.msg = 'الحساب غير مفعل؛ برجاء التواصل مع الدعم'
                 else:
                     logger.info(f"User {user_to_auth.username} logged in successfully.")
                     token_obj = generate_jwt_token(user_to_auth)
-                    result.msg = 'Login Successful'
+                    result.msg = 'تم تسجيل الدخول بنجاح'
                     result.data = {
                         'refresh_token': token_obj.get('refresh'),
                         'access_token': token_obj.get('access'),
@@ -114,10 +114,10 @@ def login_user_service(login_data):
                     }
                     result.is_success = True
             else:
-                result.msg = f'Error happened while serializing login data'
+                result.msg = 'حدث خطأ أثناء معالجة البيانات'
                 result.data = {'errors': serialized_login_data.errors, 'error messages': serialized_login_data.error_messages}
     except Exception as e:
-        result.msg = f'Unexpected error happened while logging in user {username}.'
+        result.msg = f'حدث خطأ أثناء تسجيل الدخول للمستخدم {username}.'
         result.data = {'error': str(e)}
     finally:
         return result

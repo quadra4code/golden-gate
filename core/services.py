@@ -121,7 +121,7 @@ def all_units_service():
         units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2])
         units_data = {
             "recent": [],
-            "all": []
+            "all": [] # اعمل هنا ريتيرن للاتنين مهما كان
         }
         def add_units(units):
             if units.count() <= 0:
@@ -150,6 +150,10 @@ def all_units_service():
     except ValueError as ve:
         result.msg = str(ve)
         result.is_success = True
+        result.data = {
+            "recent": [],
+            "all": []
+        }
     except Exception as e:
         result.msg = 'Unexpected error happened while saving request'
         result.data = {'error': str(e)}
@@ -291,6 +295,9 @@ def filter_properties_service(request_data):
     except ValueError as ve:
         result.msg = str(ve)
         result.is_success = True
+        result.data = {
+            "all": []
+        }
     except Exception as e:
         result.msg = 'Unexpected error happened while filtering'
         result.data = {'error': str(e)}
@@ -343,6 +350,40 @@ def home_consultations_service():
         result.msg = "Success"
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
+        result.data = {'error': str(e)}
+    finally:
+        return result
+
+def home_featured_units_service():
+    result = ResultView()
+    try:
+        units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2], featured=True)
+        units_data = []
+        if units.count() <= 0:
+            raise ValueError('لا يوجد وحدات متاحة')
+        for unit in units:
+            price = unit.over_price if unit.over_price else unit.total_price if unit.total_price else unit.meter_price
+            units_data.append({
+                "id": unit.id,
+                "title": unit.title,
+                "city": unit.city.name,
+                "unit_type": unit.unit_type.name,
+                "project": unit.project.name,
+                "area": unit.area,
+                "price": '{:0,.2f}'.format(price)
+            })
+        result.data = units_data
+        result.is_success = True
+        result.msg = 'Success'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+        result.data = {
+            "recent": [],
+            "all": []
+        }
+    except Exception as e:
+        result.msg = 'Unexpected error happened while saving request'
         result.data = {'error': str(e)}
     finally:
         return result

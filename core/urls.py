@@ -10,6 +10,7 @@ urlpatterns = [
     path('home-reviews', CoreViews.home_top_reviews_view, name='home_reviews'),
     path('home-articles', CoreViews.home_articles_view, name='home_articles'),
     path('home-consultations', CoreViews.home_consultations_view, name='home_consultations'),
+    path('home-featured_units', CoreViews.home_featured_units_view, name='home_featured_units'),
     path('draw-results', CoreViews.draw_results_view, name='draw_results'),
     path('add-draw-result', CoreViews.add_draw_result_view, name='add_draw_result'),
     path('add-review', CoreViews.add_review_view, name='add_review'),

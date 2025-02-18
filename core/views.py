@@ -184,6 +184,14 @@ def home_consultations_view(request):
     )
     return Response(consultations_result.to_dict(), status=status_code)
 
+@api_view(["GET"])
+def home_featured_units_view(request):
+    featured_units_result = services.home_featured_units_service()
+    status_code = (
+        status.HTTP_200_OK if featured_units_result.is_success
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(featured_units_result.to_dict(), status=status_code)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
