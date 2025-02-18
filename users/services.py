@@ -56,13 +56,18 @@ def register_user_service(registration_data):
             # print(response.text)
                 client_group, created = Group.objects.get_or_create(name='Client')
                 new_user.groups.add(client_group)
+                user_to_auth = authenticate(username=phone_as_username, password=password)
+                token_obj = generate_jwt_token(user_to_auth)
                 result.data = {
+                    'refresh_token': token_obj.get('refresh'),
+                    'access_token': token_obj.get('access'),
                     'user_id': new_user.id,
                     'first_name': new_user.first_name,
                     'last_name': new_user.last_name,
                     'username': new_user.username,
                     'email': new_user.email,
-                    'role': new_user.groups.filter(name="Client").first().name
+                    'role': new_user.groups.filter(name="Client").first().name,
+                    'referral_code': new_user.referral_code
                 }
                 result.msg = f"User {new_user.first_name} created successfully"
                 result.is_success = True
@@ -103,7 +108,8 @@ def login_user_service(login_data):
                         'user': {
                             'id': user_to_auth.id,
                             'username': user_to_auth.username,
-                            'full_name': user_to_auth.first_name
+                            'full_name': user_to_auth.first_name,
+                            'referral_code': user_to_auth.referral_code,
                         }
                     }
                     result.is_success = True
