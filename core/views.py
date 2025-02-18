@@ -135,6 +135,17 @@ def all_units_view(request):
     )
     return Response(all_units_result.to_dict(), status=status_code)
 
+@api_view(["GET"])
+def unit_details_view(request, unit_id):
+    print(unit_id)
+    unit_details_result = services.unit_details_service(unit_id)
+    status_code = (
+        status.HTTP_200_OK if unit_details_result.is_success
+        else status.HTTP_401_UNAUTHORIZED if unit_details_result.msg.__contains__('unauthorized')
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(unit_details_result.to_dict(), status=status_code)
+
 @api_view(["POST"])
 # @permission_classes([IsAuthenticated])
 def filter_properties_view(request):

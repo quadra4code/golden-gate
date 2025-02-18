@@ -105,10 +105,10 @@ class ArticleSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'body', 'created_at']
 
 
-class ConsultationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Consultation
-        fields = ['id', 'title', 'body', 'type']
+# class ConsultationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = models.Consultation
+#         fields = ['id', 'title', 'body', 'type']
 
 class DrawResultSerializer(serializers.ModelSerializer):
     class Meta:

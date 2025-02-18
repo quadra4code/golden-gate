@@ -4,7 +4,7 @@ from core import models
 from core import serializers
 from core.base_models import ResultView
 from users.utils import extract_payload_from_jwt
-from django.db.models import Min, Max, F, Value, DecimalField
+from django.db.models import Min, Max, F, Value, DecimalField, QuerySet
 from django.db.models.functions import Least, Greatest, Coalesce
 # Create your services here.
 
@@ -136,9 +136,9 @@ def all_units_service():
                     # "payment_method": unit.get_payment_method_display(),
                     "unit_type": unit.unit_type.name,
                     "project": unit.project.name,
-                    "area": 'متر مربع ' + f'{unit.area}',
+                    "area": unit.area,
                     # "floor": unit.get_floor_display(),
-                    "price": 'EGP {:0,.2f}'.format(price)
+                    "price": '{:0,.2f}'.format(price)
                 }
                 if is_recent:
                     units_data["recent"].append(unit_data)
@@ -152,6 +152,42 @@ def all_units_service():
         result.is_success = True
     except Exception as e:
         result.msg = 'Unexpected error happened while saving request'
+        result.data = {'error': str(e)}
+    finally:
+        return result
+
+def unit_details_service(unit_id):
+    result = ResultView()
+    try:
+        unit = models.Unit.objects.filter(is_deleted=False, id=unit_id).first()
+        if not unit:
+            raise ValueError('الوحدة غير موجودة')
+        unit_data = {
+            "id": unit.id,
+            "unit_type": unit.unit_type.name,
+            "proposal": unit.proposal.name,
+            "project": unit.project.name,
+            "city": unit.city.name,
+            "area": unit.area,
+            "over_price": '{:0,.2f}'.format(unit.over_price),
+            "total_price": '{:0,.2f}'.format(unit.total_price),
+            "meter_price": '{:0,.2f}'.format(unit.meter_price),
+            "title": unit.title,
+            "description": unit.description,
+            "floor": unit.get_floor_display(),
+            "facade": unit.get_facade_display(),
+            "payment_method": unit.get_payment_method_display(),
+            "first_installment_value": '{:0,.2f}'.format(unit.first_installment_value),
+            "installment_period": unit.installment_period,
+        }
+        result.data = unit_data
+        result.is_success = True
+        result.msg = 'Success'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
         result.data = {'error': str(e)}
     finally:
         return result
@@ -244,9 +280,9 @@ def filter_properties_service(request_data):
                     # "payment_method": unit.get_payment_method_display(),
                     "unit_type": unit.unit_type.name,
                     "project": unit.project.name,
-                    "area": 'متر مربع ' + f'{unit.area}',
+                    "area": unit.area,
                     # "floor": unit.get_floor_display(),
-                    "price": 'EGP {:0,.2f}'.format(price)
+                    "price": '{:0,.2f}'.format(price)
                 })
         add_properties(units)
         result.data = units_data
@@ -270,7 +306,7 @@ def home_reviews_service():
         result.is_success = True
         result.msg = "Success"
     except Exception as e:
-        result.msg = 'Unexpected error happened while fetching data'
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
         result.data = {'error': str(e)}
     finally:
         return result
@@ -284,7 +320,7 @@ def home_articles_service():
         result.is_success = True
         result.msg = "Success"
     except Exception as e:
-        result.msg = 'Unexpected error happened while fetching data'
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
         result.data = {'error': str(e)}
     finally:
         return result
@@ -293,12 +329,20 @@ def home_consultations_service():
     result = ResultView()
     try:
         consults = models.Consultation.objects.filter(is_deleted=False)
-        serialized_consults = serializers.ConsultationSerializer(consults, many=True)
-        result.data = serialized_consults.data
+        consult_types = consults.values('type').distinct().values_list('type', flat=True)
+        consults_data = []
+        for consult_type in consult_types:
+            consults_data.append(
+                {
+                    "type": consult_type,
+                    "consults": list(consults.filter(type=consult_type).values('id', 'title', 'body'))
+                }
+            )
+        result.data = consults_data
         result.is_success = True
         result.msg = "Success"
     except Exception as e:
-        result.msg = 'Unexpected error happened while fetching data'
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
         result.data = {'error': str(e)}
     finally:
         return result
@@ -315,13 +359,13 @@ def draw_results_service(request_data):
                 result.is_success = True
                 result.msg = "Success"
             elif draw_results.count() > 1:
-                result.msg = "Multiple records found, please provide more specific name"
+                result.msg = "هذا الإسم مكرر؛ يرجى إدخال الإسم بالضبط كما هو فى الإستمارة"
             else:
-                result.msg = "This name was not found or didn't win"
+                result.msg = "هذا الإسم غير موجود أو لم يفز"
         else:
-            result.msg = f"Full name was not provided for search. Instead, we got: {applicant_name}"
+            result.msg = f"لم يتم إرسال الإسم المطلوب؛ بدلا عن ذلك وصل {applicant_name}"
     except Exception as e:
-        result.msg = 'Unexpected error happened while fetching data'
+        result.msg = 'حدث خطأ غير متوقع أثناء البحث'
         result.data = {'error': str(e)}
     finally:
         return result
