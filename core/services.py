@@ -14,7 +14,7 @@ def propose_unit_service(request_data, request_headers):
         token = request_headers.get('Authorization', '')
         token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
         request_data['created_by_id'] = str(token_decode_result.get('user_id'))
-        serialized_unit = serializers.unitSerializer(data=request_data)
+        serialized_unit = serializers.UnitSerializer(data=request_data)
         if serialized_unit.is_valid():
             serialized_unit.save()
             result.msg = 'Request saved successfully'
