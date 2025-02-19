@@ -136,11 +136,11 @@ class Consultation(BaseEntity):
 
 class DrawResult(BaseEntity):
     winner_name = models.CharField(max_length=150)
-    property_number = models.CharField(max_length=10, default='---')
+    property_number = models.CharField(max_length=50, default='---')
     building_or_region = models.CharField(max_length=150, default='---')
     project_name = models.CharField(max_length=150, default='---')
-    floor = models.CharField(max_length=20, default='---')
-    area = models.CharField(max_length=20, default='---')
+    floor = models.CharField(max_length=50, default='---')
+    area = models.CharField(max_length=50, default='---')
 
     def __str__(self):
         return f"{self.winner_name} - {self.building_or_region} - {self.property_number} - {self.project_name}{f' - {self.floor}' if self.floor else ''}"
