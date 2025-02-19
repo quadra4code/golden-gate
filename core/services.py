@@ -456,3 +456,20 @@ def add_draw_result_service(request_data, request_headers):
     finally:
         return result
 
+def add_contact_us_msg_service(request_data):
+    result = ResultView()
+    try:
+        serialized_contact_us_msg = serializers.ContactUsSerializer(data=request_data)
+        if serialized_contact_us_msg.is_valid():
+            serialized_contact_us_msg.save()
+            result.data = serialized_contact_us_msg.data
+            result.is_success = True
+            result.msg = "تم حفظ الرسالة بنجاح"
+        else:
+            result.msg = "حدث خطأ أثناء معالجة البيانات"
+            result.data = serialized_contact_us_msg.errors
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حفظ الرسالة'
+        result.data = {'error': str(e)}
+    finally:
+        return result

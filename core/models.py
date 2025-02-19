@@ -144,4 +144,9 @@ class DrawResult(BaseEntity):
 
     def __str__(self):
         return f"{self.winner_name} - {self.building_or_region} - {self.property_number} - {self.project_name}{f' - {self.floor}' if self.floor else ''}"
-    
+
+class ContactUs(BaseEntity):
+    name = models.CharField(max_length=100, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    phone = models.CharField(max_length=20, null=True, blank=True)
+    message = models.CharField(max_length=1000)

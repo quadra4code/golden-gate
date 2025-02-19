@@ -114,3 +114,8 @@ class DrawResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.DrawResult
         fields = ['id', 'winner_name', 'property_number', 'building_or_region', 'project_name', 'floor']
+
+class ContactUsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ContactUs
+        fields = ['id', 'name', 'email', 'phone', 'message']

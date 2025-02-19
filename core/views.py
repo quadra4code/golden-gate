@@ -224,3 +224,14 @@ def add_draw_result_view(request):
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(send_result.to_dict(), status=status_code)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def add_contact_us_msg_view(request):
+    send_result = services.add_contact_us_msg_service(request.data)
+    status_code = (
+        status.HTTP_201_CREATED if send_result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(send_result.to_dict(), status=status_code)

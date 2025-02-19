@@ -17,4 +17,5 @@ admin.site.register([
     models.Consultation,
     models.Status,
     models.DrawResult,
+    models.ContactUs,
 ])
