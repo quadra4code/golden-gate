@@ -69,9 +69,9 @@ def proposal_form_data_service():
                 output_field=DecimalField()
             ),
             max_price=Greatest(
-                Coalesce(F('over_price'), Value(float('inf'))),
-                Coalesce(F('total_price'), Value(float('inf'))),
-                Coalesce(F('meter_price'), Value(float('inf'))),
+                Coalesce(F('over_price'), Value(float('-inf'))),
+                Coalesce(F('total_price'), Value(float('-inf'))),
+                Coalesce(F('meter_price'), Value(float('-inf'))),
                 default=Value(0),
                 output_field=DecimalField()
             )
