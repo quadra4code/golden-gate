@@ -378,10 +378,6 @@ def home_featured_units_service():
     except ValueError as ve:
         result.msg = str(ve)
         result.is_success = True
-        result.data = {
-            "recent": [],
-            "all": []
-        }
     except Exception as e:
         result.msg = 'Unexpected error happened while saving request'
         result.data = {'error': str(e)}
