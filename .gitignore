@@ -5,6 +5,7 @@ functions.cpython-36.pyc
 *.pyc
 .vscode
 images/
+migrations/
 all_initial_data.json
 auth_user_data.json
 
