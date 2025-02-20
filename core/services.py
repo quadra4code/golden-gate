@@ -1,5 +1,3 @@
-from datetime import timedelta
-from django.utils import timezone
 from core import models
 from core import serializers
 from core.base_models import ResultView
@@ -14,17 +12,17 @@ def propose_unit_service(request_data, request_headers):
         token = request_headers.get('Authorization', '')
         token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
         request_data['created_by_id'] = str(token_decode_result.get('user_id'))
-        serialized_unit = serializers.UnitSerializer(data=request_data)
+        serialized_unit = serializers.CreateUnitSerializer(data=request_data)
         if serialized_unit.is_valid():
             serialized_unit.save()
-            result.msg = 'Request saved successfully'
+            result.msg = 'تم حفظ الوحدة بنجاح'
             result.is_success = True
             result.data = serialized_unit.data
         else:
-            result.msg = 'Error happened while serializing data'
+            result.msg = 'حدث خطأ أثناء معالجة البيانات'
             result.data = serialized_unit.errors
     except Exception as e:
-        result.msg = 'Unexpected error happened while saving request'
+        result.msg = 'حدث خطأ غير متوقع أثناء حفظ الوحدة'
         result.data = {'error': str(e)}
     finally:
         return result
@@ -115,47 +113,23 @@ def proposal_form_data_service():
 def all_units_service():
     result = ResultView()
     try:
-        now = timezone.now()
-        twenty_four_hours_ago = now - timedelta(hours=24)
-        # for_sale_status = models.Status.objects.filter(code__in=[0, 1, 2])
-        units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2])
-        units_data = {
+        result.data = {
             "recent": [],
-            "all": [] # اعمل هنا ريتيرن للاتنين مهما كان
+            "all": []
         }
-        def add_units(units):
-            if units.count() <= 0:
-                raise ValueError('لا يوجد وحدات متاحة')
-            for unit in units:
-                is_recent = unit.created_at >= twenty_four_hours_ago if hasattr(unit, 'created_at') else False
-                price = unit.over_price if unit.over_price else unit.total_price if unit.total_price else unit.meter_price
-                unit_data = {
-                    "id": unit.id,
-                    "title": unit.title,
-                    "city": unit.city.name,
-                    # "payment_method": unit.get_payment_method_display(),
-                    "unit_type": unit.unit_type.name,
-                    "project": unit.project.name,
-                    "area": unit.area,
-                    # "floor": unit.get_floor_display(),
-                    "price": '{:0,.2f}'.format(price)
-                }
-                if is_recent:
-                    units_data["recent"].append(unit_data)
-                units_data["all"].append(unit_data)
-        add_units(units)
-        result.data = units_data
+        units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2])
+        if units.count() <= 0:
+            raise ValueError('لا يوجد وحدات متاحة')
+        serialized_units = serializers.GetAllUnitsSerializer(units, many=True)
+        result.data["all"] = serialized_units.data
+        result.data["recent"] = [unit for unit in serialized_units.data if unit["is_recent"]]
         result.is_success = True
         result.msg = 'Success'
     except ValueError as ve:
         result.msg = str(ve)
         result.is_success = True
-        result.data = {
-            "recent": [],
-            "all": []
-        }
     except Exception as e:
-        result.msg = 'Unexpected error happened while saving request'
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
         result.data = {'error': str(e)}
     finally:
         return result
@@ -166,25 +140,26 @@ def unit_details_service(unit_id):
         unit = models.Unit.objects.filter(is_deleted=False, id=unit_id).first()
         if not unit:
             raise ValueError('الوحدة غير موجودة')
-        unit_data = {
-            "id": unit.id,
-            "unit_type": unit.unit_type.name,
-            "proposal": unit.proposal.name,
-            "project": unit.project.name,
-            "city": unit.city.name,
-            "area": unit.area,
-            "over_price": '{:0,.2f}'.format(unit.over_price) if unit.over_price else None,
-            "total_price": '{:0,.2f}'.format(unit.total_price) if unit.total_price else None,
-            "meter_price": '{:0,.2f}'.format(unit.meter_price) if unit.meter_price else None,
-            "title": unit.title,
-            "description": unit.description,
-            "floor": unit.get_floor_display(),
-            "facade": unit.get_facade_display(),
-            "payment_method": unit.get_payment_method_display(),
-            "first_installment_value": '{:0,.2f}'.format(unit.first_installment_value) if unit.first_installment_value else None,
-            "installment_period": unit.installment_period,
-        }
-        result.data = unit_data
+        # unit_data = {
+        #     "id": unit.id,
+        #     "unit_type": unit.unit_type.name,
+        #     "proposal": unit.proposal.name,
+        #     "project": unit.project.name,
+        #     "city": unit.city.name,
+        #     "area": unit.area,
+        #     "over_price": '{:0,.2f}'.format(unit.over_price) if unit.over_price else None,
+        #     "total_price": '{:0,.2f}'.format(unit.total_price) if unit.total_price else None,
+        #     "meter_price": '{:0,.2f}'.format(unit.meter_price) if unit.meter_price else None,
+        #     "title": unit.title,
+        #     "description": unit.description,
+        #     "floor": unit.get_floor_display(),
+        #     "facade": unit.get_facade_display(),
+        #     "payment_method": unit.get_payment_method_display(),
+        #     "first_installment_value": '{:0,.2f}'.format(unit.first_installment_value) if unit.first_installment_value else None,
+        #     "installment_period": unit.installment_period,
+        # }
+        serialized_unit = serializers.UnitDetailsSerializer(unit)
+        result.data = serialized_unit.data
         result.is_success = True
         result.msg = 'Success'
     except ValueError as ve:
@@ -199,20 +174,6 @@ def unit_details_service(unit_id):
 def filter_properties_service(request_data):
     result = ResultView()
     try:
-        '''
-        filter with
-        proposal_id
-        unit_type_id
-        project_id
-        city_id
-        min_price
-        max_price
-        payment_method
-        facade
-        floor
-        min_area
-        max_area
-        '''
         proposal_id = request_data.get('proposal_id')
         unit_type_id = request_data.get('unit_type_id')
         project_id = request_data.get('project_id')
@@ -224,6 +185,10 @@ def filter_properties_service(request_data):
         payment_method = request_data.get('payment_method')
         facade = request_data.get('facade')
         floor = request_data.get('payment_method')
+        filters = {
+            'is_deleted': False,
+            'status__code__in': [0, 1, 2]
+        }
         # price validation
         if min_price is not None:
             try:
@@ -250,46 +215,31 @@ def filter_properties_service(request_data):
                 raise ValueError("أقصى مساحة يجب أن يكون رقم صحيحاً")
         if min_area is not None and max_area is not None and min_area > max_area:
             raise ValueError("أقل مساحة لا يمكن أن يكون أكبر من أقصى مساحة")
-        # for_sale_status = models.Status.objects.get(code__in=[0, 1, 2])
-        units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2])
         if unit_type_id:
-            units = units.filter(unit_type__id=unit_type_id)
+            filters['unit_type__id'] = unit_type_id
         if proposal_id:
-            units = units.filter(unit_type__id=proposal_id)
+            filters['proposal__id'] = proposal_id
         if project_id:
-            units = units.filter(project__id=project_id)
+            filters['project__id'] = project_id
         if city_id:
-            units = units.filter(city__id=city_id)
+            filters['city__id'] = city_id
         if min_price and max_price:
-            units = units.filter(price__gte=min_price, price__lte=max_price)
+            filters['price__gte'] = min_price
+            filters['price__lte'] = max_price
         if min_area and max_area:
-            units = units.filter(area__gte=min_area, area__lte=max_area)
+            filters['area__gte'] = min_area
+            filters['area__lte'] = max_area
         if payment_method:
-            units = units.filter(payment_method=payment_method)
+            filters['payment_method'] = payment_method
         if facade:
-            units = units.filter(facade=facade)
+            filters['facade'] = facade
         if floor:
-            units = units.filter(floor=floor)
-        units_data = []
-        def add_properties(units):
-            if units.count() <= 0:
-                raise ValueError('لا يوجد وحدات متاحة')
-            for unit in units:
-                price = unit.over_price if unit.over_price else unit.total_price if unit.total_price else unit.meter_price
-                units_data.append({
-                    "id": unit.id,
-                    "title": unit.title,
-                    "city": unit.city.name,
-                    # "description": unit.description,
-                    # "payment_method": unit.get_payment_method_display(),
-                    "unit_type": unit.unit_type.name,
-                    "project": unit.project.name,
-                    "area": unit.area,
-                    # "floor": unit.get_floor_display(),
-                    "price": '{:0,.2f}'.format(price)
-                })
-        add_properties(units)
-        result.data = units_data
+            filters['floor'] = floor
+        units = models.Unit.objects.filter(**filters)
+        if units.count() <= 0:
+            raise ValueError('لا يوجد وحدات متاحة')
+        serialized_units = serializers.GetAllUnitsSerializer(units, many=True)
+        result.data = serialized_units.data
         result.is_success = True
         result.msg = 'Success'
     except ValueError as ve:
@@ -332,24 +282,29 @@ def home_articles_service():
     finally:
         return result
 
-def home_consultations_service():
+def home_consultation_types_service():
     result = ResultView()
     try:
-        consults = models.Consultation.objects.filter(is_deleted=False)
-        consult_types = consults.values('type').distinct().values_list('type', flat=True)
-        consults_data = []
-        for consult_type in consult_types:
-            consults_data.append(
-                {
-                    "type": consult_type,
-                    "consults": list(consults.filter(type=consult_type).values('id', 'title', 'body'))
-                }
-            )
-        result.data = consults_data
+        consult_types = models.ConsultationType.objects.filter(is_deleted=False)
+        result.data = serializers.ConsultationTypeSerializer(consult_types, many=True).data
         result.is_success = True
-        result.msg = "Success"
+        result.msg = "تم جلب أنواع الإستشارات بنجاح"
     except Exception as e:
-        result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب أنواع الإستشارات'
+        result.data = {'error': str(e)}
+    finally:
+        return result
+
+def consultations_by_type_service(consult_type_id):
+    result = ResultView()
+    try:
+        consults_by_type = models.Consultation.objects.filter(is_deleted=False, consultation_type__id=consult_type_id)
+        serialized_consults = serializers.ConsultationSerializer(consults_by_type, many=True)
+        result.data = serialized_consults.data
+        result.is_success = True
+        result.msg = "تم جلب الإستشارات بنجاح"
+    except Exception as e:
+        result.msg = "حدث خطأ غير متوقع أثناء جلب الإستشارات"
         result.data = {'error': str(e)}
     finally:
         return result

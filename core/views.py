@@ -141,7 +141,6 @@ def unit_details_view(request, unit_id):
     unit_details_result = services.unit_details_service(unit_id)
     status_code = (
         status.HTTP_200_OK if unit_details_result.is_success
-        else status.HTTP_401_UNAUTHORIZED if unit_details_result.msg.__contains__('unauthorized')
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(unit_details_result.to_dict(), status=status_code)
@@ -176,11 +175,20 @@ def home_articles_view(request):
     return Response(articles_result.to_dict(), status=status_code)
 
 @api_view(["GET"])
-def home_consultations_view(request):
-    consultations_result = services.home_consultations_service()
+def home_consultation_types_view(request):
+    consultation_types_result = services.home_consultation_types_service()
+    status_code = (
+        status.HTTP_200_OK if consultation_types_result.is_success
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(consultation_types_result.to_dict(), status=status_code)
+
+@api_view(["GET"])
+def consultations_by_type_view(request, consult_type_id):
+    consultations_result = services.consultations_by_type_service(consult_type_id)
     status_code = (
         status.HTTP_200_OK if consultations_result.is_success
-        else status.HTTP_500_INTERNAL_SERVER_ERROR
+        else status.HTTP_400_BAD_REQUEST
     )
     return Response(consultations_result.to_dict(), status=status_code)
 

@@ -1,8 +1,10 @@
+from datetime import timedelta
+from django.utils import timezone
 from rest_framework import serializers
 from core import models
 # Create your serializers here.
 
-class UnitSerializer(serializers.Serializer):
+class CreateUnitSerializer(serializers.Serializer):
     FACADE_CHOICES = [
         '0',
         '1',
@@ -41,7 +43,6 @@ class UnitSerializer(serializers.Serializer):
     proposal_id = serializers.CharField(max_length=3)
     project_id = serializers.CharField(max_length=3)
     city_id = serializers.CharField(max_length=2)
-    # pcp_id = serializers.IntegerField(read_only=True)
     unit_number = serializers.CharField(max_length=5)
     building_number = serializers.CharField(max_length=150, required=False, allow_null=True)
     area = serializers.IntegerField()
@@ -76,6 +77,61 @@ class UnitSerializer(serializers.Serializer):
         validated_data['status'] = models.Status.objects.filter(code=1).first()# For Sale
         return models.Unit.objects.create(**validated_data)
 
+class GetAllUnitsSerializer(serializers.ModelSerializer):
+    city = serializers.CharField(source="city.name")
+    unit_type = serializers.CharField(source="unit_type.name")
+    project = serializers.CharField(source="project.name")
+    price = serializers.SerializerMethodField()
+    is_recent = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Unit
+        fields = ["id", "title", "city", "unit_type", "project", "area", "price"]
+
+    def get_is_recent(self, obj):
+        twenty_four_hours_ago = timezone.now() - timedelta(hours=24)
+        return obj.created_at >= twenty_four_hours_ago if hasattr(obj, 'created_at') else False
+
+    def get_price(self, obj):
+        price = obj.over_price or obj.total_price or obj.meter_price
+        return '{:0,.2f}'.format(price) if price else None
+
+class UnitDetailsSerializer(serializers.ModelSerializer):
+    unit_type = serializers.CharField(source="unit_type.name")
+    proposal = serializers.CharField(source="proposal.name")
+    project = serializers.CharField(source="project.name")
+    city = serializers.CharField(source="city.name")
+    # status = serializers.CharField(source="status.name")
+    over_price = serializers.SerializerMethodField()
+    total_price = serializers.SerializerMethodField()
+    meter_price = serializers.SerializerMethodField()
+    first_installment_value = serializers.SerializerMethodField()
+    facade = serializers.CharField(source="get_facade_display")
+    floor = serializers.CharField(source="get_floor_display")
+    payment_method = serializers.CharField(source="get_payment_method_display")
+
+    class Meta:
+        model = models.Unit
+        fields = [
+            "id",
+            "title",
+            "unit_type",
+            "proposal",
+            "project",
+            "city",
+            "area",
+            "over_price",
+            "total_price",
+            "meter_price",
+            # "status",
+            "description",
+            "floor",
+            "facade",
+            "payment_method",
+            "first_installment_value",
+            "installment_period",
+        ]
+
 class UnitRequestSerializer(serializers.Serializer):
     unit_id = serializers.IntegerField(min_value=1, write_only=True)
     created_by_id = serializers.IntegerField(min_value=1)
@@ -97,18 +153,22 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = models.ClientReview
         fields = ['id', 'rate', 'client_name', 'review', 'created_by_id']
 
-
 class ArticleSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format='%d-%b-%Y')
     class Meta:
         model = models.Article
         fields = ['id', 'title', 'body', 'created_at']
 
+class ConsultationTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ConsultationType
+        fields = ['id', 'name', 'brief']
 
-# class ConsultationSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = models.Consultation
-#         fields = ['id', 'title', 'body', 'type']
+class ConsultationSerializer(serializers.ModelSerializer):
+    consultation_type = serializers.CharField(source='consultation_type.name')
+    class Meta:
+        model = models.Consultation
+        fields = ['id', 'title', 'body', 'consultation_type']
 
 class DrawResultSerializer(serializers.ModelSerializer):
     class Meta:
@@ -118,4 +178,4 @@ class DrawResultSerializer(serializers.ModelSerializer):
 class ContactUsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ContactUs
-        fields = ['id', 'name', 'email', 'phone', 'message']
+        fields = ['id', 'name', 'email', 'phone_number', 'message']

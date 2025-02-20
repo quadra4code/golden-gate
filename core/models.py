@@ -108,13 +108,20 @@ class Unit(BaseEntity):
 
 class UnitImage(BaseEntity):
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
-    image = models.ImageField(upload_to='units')
+    image = models.ImageField(upload_to='units_images/')
 
 class UnitRequest(BaseEntity):
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['created_by', 'unit'], name='created_by_unit_request_unique_constraint', violation_error_message='لقد طلبت هذه الوحدة من قبل ولا يمكنك طلبها مره أخرى')
+        ]
+
+class UnitFavorite(BaseEntity):
+    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['created_by', 'unit'], name='created_by_unit_favorite_unique_constraint', violation_error_message='لقد أضفت هذه الوحدة للمفضلة من قبل ولا يمكنك إضافتها مره أخرى')
         ]
 
 class ClientReview(BaseEntity):
@@ -129,10 +136,14 @@ class Article(BaseEntity):
     title = models.CharField(max_length=250)
     body = models.CharField(max_length=2000)
 
+class ConsultationType(BaseEntity):
+    name = models.CharField(max_length=100)
+    brief = models.CharField(max_length=500, null=True, blank=True)
+
 class Consultation(BaseEntity):
     title = models.CharField(max_length=250)
     body = models.CharField(max_length=2000)
-    type = models.CharField(max_length=120)
+    consultation_type = models.ForeignKey(ConsultationType, on_delete=models.CASCADE)
 
 class DrawResult(BaseEntity):
     winner_name = models.CharField(max_length=150)
@@ -148,5 +159,5 @@ class DrawResult(BaseEntity):
 class ContactUs(BaseEntity):
     name = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
-    phone = models.CharField(max_length=20, null=True, blank=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
     message = models.CharField(max_length=1000)
