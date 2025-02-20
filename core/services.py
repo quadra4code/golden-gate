@@ -2,7 +2,7 @@ from core import models
 from core import serializers
 from core.base_models import ResultView
 from users.utils import extract_payload_from_jwt
-from django.db.models import Min, Max, F, Value, DecimalField, QuerySet
+from django.db.models import Min, Max, F, Value, DecimalField
 from django.db.models.functions import Least, Greatest, Coalesce
 # Create your services here.
 
@@ -140,24 +140,6 @@ def unit_details_service(unit_id):
         unit = models.Unit.objects.filter(is_deleted=False, id=unit_id).first()
         if not unit:
             raise ValueError('الوحدة غير موجودة')
-        # unit_data = {
-        #     "id": unit.id,
-        #     "unit_type": unit.unit_type.name,
-        #     "proposal": unit.proposal.name,
-        #     "project": unit.project.name,
-        #     "city": unit.city.name,
-        #     "area": unit.area,
-        #     "over_price": '{:0,.2f}'.format(unit.over_price) if unit.over_price else None,
-        #     "total_price": '{:0,.2f}'.format(unit.total_price) if unit.total_price else None,
-        #     "meter_price": '{:0,.2f}'.format(unit.meter_price) if unit.meter_price else None,
-        #     "title": unit.title,
-        #     "description": unit.description,
-        #     "floor": unit.get_floor_display(),
-        #     "facade": unit.get_facade_display(),
-        #     "payment_method": unit.get_payment_method_display(),
-        #     "first_installment_value": '{:0,.2f}'.format(unit.first_installment_value) if unit.first_installment_value else None,
-        #     "installment_period": unit.installment_period,
-        # }
         serialized_unit = serializers.UnitDetailsSerializer(unit)
         result.data = serialized_unit.data
         result.is_success = True
@@ -383,30 +365,6 @@ def add_review_service(request_data, request_headers):
     finally:
         return result
 
-def add_draw_result_service(request_data, request_headers):
-    result = ResultView()
-    try:
-        token = request_headers.get('Authorization', '')
-        token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
-        request_data['created_by_id'] = str(token_decode_result.get('user_id'))
-        if 'Admin' not in token_decode_result.get('roles'):
-            result.msg = 'Unauthorized user, only admins can access'
-        else:
-            serialized_draw_result = serializers.DrawResultSerializer(data=request_data)
-            if serialized_draw_result.is_valid():
-                serialized_draw_result.save()
-                result.data = serialized_draw_result.data
-                result.is_success = True
-                result.msg = "Request saved successfully"
-            else:
-                result.msg = "Error occured while serializing data"
-                result.data = serialized_draw_result.errors
-    except Exception as e:
-        result.msg = 'Unexpected error happened while fetching data'
-        result.data = {'error': str(e)}
-    finally:
-        return result
-
 def add_contact_us_msg_service(request_data):
     result = ResultView()
     try:
@@ -424,3 +382,28 @@ def add_contact_us_msg_service(request_data):
         result.data = {'error': str(e)}
     finally:
         return result
+
+# def add_draw_result_service(request_data, request_headers):
+#     result = ResultView()
+#     try:
+#         token = request_headers.get('Authorization', '')
+#         token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
+#         request_data['created_by_id'] = str(token_decode_result.get('user_id'))
+#         if 'Admin' not in token_decode_result.get('roles'):
+#             result.msg = 'Unauthorized user, only admins can access'
+#         else:
+#             serialized_draw_result = serializers.DrawResultSerializer(data=request_data)
+#             if serialized_draw_result.is_valid():
+#                 serialized_draw_result.save()
+#                 result.data = serialized_draw_result.data
+#                 result.is_success = True
+#                 result.msg = "Request saved successfully"
+#             else:
+#                 result.msg = "Error occured while serializing data"
+#                 result.data = serialized_draw_result.errors
+#     except Exception as e:
+#         result.msg = 'Unexpected error happened while fetching data'
+#         result.data = {'error': str(e)}
+#     finally:
+#         return result
+
