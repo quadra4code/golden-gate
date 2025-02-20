@@ -13,8 +13,8 @@ urlpatterns = [
     path('consultations/<int:consult_type_id>', CoreViews.consultations_by_type_view, name='consultation_details'),
     path('home-featured-units', CoreViews.home_featured_units_view, name='home_featured_units'),
     path('draw-results', CoreViews.draw_results_view, name='draw_results'),
-    path('add-draw-result', CoreViews.add_draw_result_view, name='add_draw_result'),
     path('add-review', CoreViews.add_review_view, name='add_review'),
     path('add-contact-us-msg', CoreViews.add_contact_us_msg_view, name='add_contact_us_msg'),
     path('createjson', CoreViews.createjson, name='add_draw_result'),
+    # path('add-draw-result', CoreViews.add_draw_result_view, name='add_draw_result'),
 ]

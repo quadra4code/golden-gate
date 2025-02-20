@@ -63,35 +63,7 @@ def createjson(request):
 
     print(f"Data has been successfully converted to JSON and saved to {json_file_path}")
     return Response({'message': 'Hello, World!'})
-'''
-input 
-{
-    "project_type_id": "1",
-    "project_id": "2",
-    "city_id": "7",
-    "description": "thsislfj aljiaj;lf iaj fj;alej jwe jl",
-    "area": "400",
-    "payment_method": "IN",
-    "installment_period": "5",
-    "first_installment_value": "25000",
-    "phone_number": "01118069749"
-}
-output
-{
-    "is_success":true,
-    "data":{
-        "pcp_id":26,
-        "description":"thsislfj aljiaj;lf iaj fj;alej jwe jl",
-        "area":400,
-        "payment_method":"IN",
-        "installment_period":5,
-        "first_installment_value":"25000.0000",
-        "phone_number":"01118069749",
-        "created_by_id":1
-    },
-    "msg":"Request saved successfully"
-}
-'''
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def propose_unit_view(request):
@@ -125,7 +97,6 @@ def proposal_form_data_view(request):
     return Response(form_data_result.to_dict(), status=status_code)
 
 @api_view(["GET"])
-# @permission_classes([IsAuthenticated])
 def all_units_view(request):
     all_units_result = services.all_units_service()
     status_code = (
@@ -146,7 +117,6 @@ def unit_details_view(request, unit_id):
     return Response(unit_details_result.to_dict(), status=status_code)
 
 @api_view(["POST"])
-# @permission_classes([IsAuthenticated])
 def filter_properties_view(request):
     filter_units_result = services.filter_properties_service(request.data)
     status_code = (
@@ -221,19 +191,6 @@ def draw_results_view(request):
     )
     return Response(draw_results.to_dict(), status=status_code)
 
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def add_draw_result_view(request):
-    send_result = services.add_draw_result_service(request.data, request.headers)
-    status_code = (
-        status.HTTP_200_OK if send_result.is_success
-        else status.HTTP_401_UNAUTHORIZED if send_result.msg.lower().__contains__('unauthorized')
-        else status.HTTP_400_BAD_REQUEST
-    )
-    return Response(send_result.to_dict(), status=status_code)
-
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def add_contact_us_msg_view(request):
@@ -243,3 +200,16 @@ def add_contact_us_msg_view(request):
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(send_result.to_dict(), status=status_code)
+
+
+
+# @api_view(["POST"])
+# @permission_classes([IsAuthenticated])
+# def add_draw_result_view(request):
+#     send_result = services.add_draw_result_service(request.data, request.headers)
+#     status_code = (
+#         status.HTTP_200_OK if send_result.is_success
+#         else status.HTTP_401_UNAUTHORIZED if send_result.msg.lower().__contains__('unauthorized')
+#         else status.HTTP_400_BAD_REQUEST
+#     )
+#     return Response(send_result.to_dict(), status=status_code)
