@@ -452,7 +452,8 @@ def draw_results_service(request_data):
     try:
         applicant_name = request_data.get('full_name')
         if applicant_name:
-            draw_results = models.DrawResult.objects.filter(is_deleted=False, winner_name__icontains=applicant_name)
+            print(applicant_name.replace(' ', '').replace('ة', 'ه').replace('أ', 'ا').replace('إ', 'ا').replace('آ', 'ا').replace('ؤ', 'و').replace('ئ', 'ي').replace('ى', 'ي').replace('ء', 'ا'))
+            draw_results = models.DrawResult.objects.filter(is_deleted=False, winner_name__icontains=applicant_name.replace(' ', '').replace('ة', 'ه').replace('أ', 'ا').replace('إ', 'ا').replace('آ', 'ا').replace('ؤ', 'و').replace('ئ', 'ي').replace('ى', 'ي').replace('ء', 'ا'))
             if draw_results.count() == 1:
                 serialized_draw_results = serializers.DrawResultSerializer(draw_results.first())
                 result.data = serialized_draw_results.data

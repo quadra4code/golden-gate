@@ -23,11 +23,6 @@ class Region(BaseEntity):
     name = models.CharField(max_length=100)
     city = models.ForeignKey(City, on_delete=models.PROTECT)
 
-# class PCP(BaseEntity): # Project City ProjectType
-#     project_type = models.ForeignKey(ProjectType, on_delete=models.PROTECT)
-#     project = models.ForeignKey(Project, on_delete=models.PROTECT)
-#     city = models.ForeignKey(City, on_delete=models.PROTECT)
-
 class Status(BaseEntity):
     name = models.CharField(max_length=20, unique=True)
     code = models.CharField(max_length=2, unique=True)

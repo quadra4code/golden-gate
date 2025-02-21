@@ -34,7 +34,7 @@ def createjson(request):
         # print('4 => ', row.values[4])
         # print('5 => ', row.values[5])
         # print('6 => ', row.values[6])
-        print(row.values[1])
+        print(row.values[6].replace(' ', '').replace('ة', 'ه').replace('أ', 'ا').replace('إ', 'ا').replace('آ', 'ا').replace('ؤ', 'و').replace('ئ', 'ي').replace('ى', 'ي').replace('ء', 'ا'))
         prop = 0 if str(row.values[1]) == 'nan' else row.values[1]
         record = {
             "model": "core.DrawResult",
