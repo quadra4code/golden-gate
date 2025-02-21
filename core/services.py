@@ -172,7 +172,7 @@ def filter_paginated_units_service(request_data):
         facade = request_data.get('facade')
         floor = request_data.get('payment_method')
         page_number = int(request_data.get('page', 1))
-        page_size = int(request_data.get('page_size', 10))
+        page_size = int(request_data.get('page_size', 12))
         filters = {
             'is_deleted': False,
             'status__code__in': [0, 1, 2]
@@ -226,23 +226,24 @@ def filter_paginated_units_service(request_data):
         units = models.Unit.objects.filter(**filters)
         if units.count() <= 0:
             raise ValueError('لا يوجد وحدات متاحة')
+        all_units_count = units.count()
         # paginator = Paginator(units, page_size)
         # try:
         #     paginated_units = paginator.page(page_number)
         # except:
         #     raise ValueError(f'لا توجد نتائج للصفحة {page_number}')
-        if units.count() > page_size*(page_number-1):
+        if all_units_count > page_size*(page_number-1):
             units = units[page_size*(page_number-1):page_size*page_number]
         else:
-            units = units[page_size*int(units.count()/page_size) if units.count()%page_size!=0 else int(units.count()/page_size)-1:]
-            page_number = int(units.count()/page_size) if units.count()%page_size == 0 else int(units.count()/page_size)+1
+            units = units[page_size*int(all_units_count/page_size) if all_units_count%page_size!=0 else int(all_units_count/page_size)-1:]
+            page_number = int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1
         serialized_units = serializers.GetAllUnitsSerializer(units, many=True)
         result.data = {
             "all": serialized_units.data,
             "pagination": {
-                "total_pages": units.count()/int(units.count()/page_size) if units.count()%page_size == 0 else int(units.count()/page_size)+1,
+                "total_pages": all_units_count/int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1,
                 "current_page": page_number,
-                "has_next": True if units.count() > page_size*page_number else False,
+                "has_next": True if all_units_count > page_size*page_number else False,
                 "has_previous": True if page_number > 1 else False
             } 
         }
