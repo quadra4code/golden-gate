@@ -96,15 +96,45 @@ def proposal_form_data_view(request):
     )
     return Response(form_data_result.to_dict(), status=status_code)
 
+# @api_view(["GET"])
+# def all_units_view(request):
+#     all_units_result = services.all_units_service()
+#     status_code = (
+#         status.HTTP_200_OK if all_units_result.is_success
+#         else status.HTTP_401_UNAUTHORIZED if all_units_result.msg.__contains__('unauthorized')
+#         else status.HTTP_500_INTERNAL_SERVER_ERROR
+#     )
+#     return Response(all_units_result.to_dict(), status=status_code)
+
 @api_view(["GET"])
-def all_units_view(request):
-    all_units_result = services.all_units_service()
+def recent_units_view(request):
+    recent_units_result = services.recent_units_service()
     status_code = (
-        status.HTTP_200_OK if all_units_result.is_success
-        else status.HTTP_401_UNAUTHORIZED if all_units_result.msg.__contains__('unauthorized')
+        status.HTTP_200_OK if recent_units_result.is_success
+        else status.HTTP_401_UNAUTHORIZED if recent_units_result.msg.__contains__('unauthorized')
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
-    return Response(all_units_result.to_dict(), status=status_code)
+    return Response(recent_units_result.to_dict(), status=status_code)
+@api_view(["POST"])
+
+# def filter_units_view(request):
+    # filter_units_result = services.filter_units_service(request.data)
+    # status_code = (
+    #     status.HTTP_201_CREATED if filter_units_result.is_success
+    #     else status.HTTP_401_UNAUTHORIZED if filter_units_result.msg.__contains__('unauthorized')
+    #     else status.HTTP_500_INTERNAL_SERVER_ERROR
+    # )
+    # return Response(filter_units_result.to_dict(), status=status_code)
+
+@api_view(["POST"])
+def filter_paginated_units_view(request):
+    filter_paginated_units_result = services.filter_paginated_units_service(request.data)
+    status_code = (
+        status.HTTP_201_CREATED if filter_paginated_units_result.is_success
+        else status.HTTP_401_UNAUTHORIZED if filter_paginated_units_result.msg.__contains__('unauthorized')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(filter_paginated_units_result.to_dict(), status=status_code)
 
 @api_view(["GET"])
 def unit_details_view(request, unit_id):
@@ -115,16 +145,6 @@ def unit_details_view(request, unit_id):
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(unit_details_result.to_dict(), status=status_code)
-
-@api_view(["POST"])
-def filter_properties_view(request):
-    filter_units_result = services.filter_properties_service(request.data)
-    status_code = (
-        status.HTTP_201_CREATED if filter_units_result.is_success
-        else status.HTTP_401_UNAUTHORIZED if filter_units_result.msg.__contains__('unauthorized')
-        else status.HTTP_500_INTERNAL_SERVER_ERROR
-    )
-    return Response(filter_units_result.to_dict(), status=status_code)
 
 @api_view(["GET"])
 def home_top_reviews_view(request):
@@ -201,7 +221,11 @@ def add_contact_us_msg_view(request):
     )
     return Response(send_result.to_dict(), status=status_code)
 
-
+'''
+add to fav
+list fav
+remove from fav
+'''
 
 # @api_view(["POST"])
 # @permission_classes([IsAuthenticated])

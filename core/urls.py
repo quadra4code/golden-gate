@@ -3,10 +3,10 @@ from core import views as CoreViews
 urlpatterns = [
     path('propose-unit', CoreViews.propose_unit_view, name='propose_unit'),
     path('request-unit', CoreViews.request_unit_view, name='request_unit'),
-    path('get-form-data', CoreViews.proposal_form_data_view, name='get-form-data'),
-    path('all-units', CoreViews.all_units_view, name='all-units'),
+    path('get-form-data', CoreViews.proposal_form_data_view, name='get_form_data'),
+    path('recent-units', CoreViews.recent_units_view, name='recent_units'),
+    path('filter-paginated-units', CoreViews.filter_paginated_units_view, name='filter_paginated_units'),
     path('unit-details/<int:unit_id>', CoreViews.unit_details_view, name='unit_details'),
-    path('filter-properties', CoreViews.filter_properties_view, name='filter-properties'),
     path('home-reviews', CoreViews.home_top_reviews_view, name='home_reviews'),
     path('home-articles', CoreViews.home_articles_view, name='home_articles'),
     path('home-consultation-types', CoreViews.home_consultation_types_view, name='home_consultations'),

@@ -1,3 +1,6 @@
+from datetime import timedelta
+from django.utils import timezone
+from django.core.paginator import Paginator
 from core import models
 from core import serializers
 from core.base_models import ResultView
@@ -110,19 +113,39 @@ def proposal_form_data_service():
     finally:
         return result
 
-def all_units_service():
+# def all_units_service():
+    # result = ResultView()
+    # try:
+    #     result.data = {
+    #         "recent": [],
+    #         "all": []
+    #     }
+    #     units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2])
+    #     if units.count() <= 0:
+    #         raise ValueError('لا يوجد وحدات متاحة')
+    #     serialized_units = serializers.GetAllUnitsSerializer(units, many=True)
+    #     result.data["all"] = serialized_units.data
+    #     result.data["recent"] = [unit for unit in serialized_units.data if unit["is_recent"]]
+    #     result.is_success = True
+    #     result.msg = 'Success'
+    # except ValueError as ve:
+    #     result.msg = str(ve)
+    #     result.is_success = True
+    # except Exception as e:
+    #     result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
+    #     result.data = {'error': str(e)}
+    # finally:
+    #     return result
+
+def recent_units_service():
     result = ResultView()
     try:
-        result.data = {
-            "recent": [],
-            "all": []
-        }
-        units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2])
-        if units.count() <= 0:
+        twenty_four_hours_ago = timezone.now() - timedelta(hours=24)
+        recent_units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2], created_at__gte=twenty_four_hours_ago)
+        if recent_units.count() <= 0:
             raise ValueError('لا يوجد وحدات متاحة')
-        serialized_units = serializers.GetAllUnitsSerializer(units, many=True)
-        result.data["all"] = serialized_units.data
-        result.data["recent"] = [unit for unit in serialized_units.data if unit["is_recent"]]
+        serialized_recent_units = serializers.GetAllUnitsSerializer(recent_units, many=True)
+        result.data = serialized_recent_units.data
         result.is_success = True
         result.msg = 'Success'
     except ValueError as ve:
@@ -134,26 +157,7 @@ def all_units_service():
     finally:
         return result
 
-def unit_details_service(unit_id):
-    result = ResultView()
-    try:
-        unit = models.Unit.objects.filter(is_deleted=False, id=unit_id).first()
-        if not unit:
-            raise ValueError('الوحدة غير موجودة')
-        serialized_unit = serializers.UnitDetailsSerializer(unit)
-        result.data = serialized_unit.data
-        result.is_success = True
-        result.msg = 'Success'
-    except ValueError as ve:
-        result.msg = str(ve)
-        result.is_success = True
-    except Exception as e:
-        result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
-        result.data = {'error': str(e)}
-    finally:
-        return result
-
-def filter_properties_service(request_data):
+def filter_paginated_units_service(request_data):
     result = ResultView()
     try:
         proposal_id = request_data.get('proposal_id')
@@ -167,6 +171,8 @@ def filter_properties_service(request_data):
         payment_method = request_data.get('payment_method')
         facade = request_data.get('facade')
         floor = request_data.get('payment_method')
+        page_number = int(request_data.get('page', 1))
+        page_size = int(request_data.get('page_size', 10))
         filters = {
             'is_deleted': False,
             'status__code__in': [0, 1, 2]
@@ -220,8 +226,26 @@ def filter_properties_service(request_data):
         units = models.Unit.objects.filter(**filters)
         if units.count() <= 0:
             raise ValueError('لا يوجد وحدات متاحة')
+        # paginator = Paginator(units, page_size)
+        # try:
+        #     paginated_units = paginator.page(page_number)
+        # except:
+        #     raise ValueError(f'لا توجد نتائج للصفحة {page_number}')
+        if units.count() > page_size*(page_number-1):
+            units = units[page_size*(page_number-1):page_size*page_number]
+        else:
+            units = units[page_size*int(units.count()/page_size) if units.count()%page_size!=0 else int(units.count()/page_size)-1:]
+            page_number = int(units.count()/page_size) if units.count()%page_size == 0 else int(units.count()/page_size)+1
         serialized_units = serializers.GetAllUnitsSerializer(units, many=True)
-        result.data = serialized_units.data
+        result.data = {
+            "all": serialized_units.data,
+            "pagination": {
+                "total_pages": units.count()/int(units.count()/page_size) if units.count()%page_size == 0 else int(units.count()/page_size)+1,
+                "current_page": page_number,
+                "has_next": True if units.count() > page_size*page_number else False,
+                "has_previous": True if page_number > 1 else False
+            } 
+        }
         result.is_success = True
         result.msg = 'Success'
     except ValueError as ve:
@@ -235,6 +259,108 @@ def filter_properties_service(request_data):
         result.data = {'error': str(e)}
     finally:
         return result
+
+def unit_details_service(unit_id):
+    result = ResultView()
+    try:
+        unit = models.Unit.objects.filter(is_deleted=False, id=unit_id).first()
+        if not unit:
+            raise ValueError('الوحدة غير موجودة')
+        serialized_unit = serializers.UnitDetailsSerializer(unit)
+        result.data = serialized_unit.data
+        result.is_success = True
+        result.msg = 'Success'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
+        result.data = {'error': str(e)}
+    finally:
+        return result
+
+# def filter_units_service(request_data):
+#     result = ResultView()
+#     try:
+#         proposal_id = request_data.get('proposal_id')
+#         unit_type_id = request_data.get('unit_type_id')
+#         project_id = request_data.get('project_id')
+#         city_id = request_data.get('city_id')
+#         min_price = request_data.get('min_price')
+#         max_price = request_data.get('max_price')
+#         min_area = request_data.get('min_area')
+#         max_area = request_data.get('max_area')
+#         payment_method = request_data.get('payment_method')
+#         facade = request_data.get('facade')
+#         floor = request_data.get('payment_method')
+#         filters = {
+#             'is_deleted': False,
+#             'status__code__in': [0, 1, 2]
+#         }
+#         # price validation
+#         if min_price is not None:
+#             try:
+#                 min_price = float(min_price)
+#             except (TypeError, ValueError):
+#                 raise ValueError("أقل سعر يجب أن يكون رقم صحيحاً")
+#         if max_price is not None:
+#             try:
+#                 max_price = float(max_price)
+#             except (TypeError, ValueError):
+#                 raise ValueError("أقصى سعر يجب أن يكون رقم صحيحاً")
+#         if min_price is not None and max_price is not None and min_price > max_price:
+#             raise ValueError("أقل سعر لا يمكن أن يكون أكبر من أقصى سعر")
+#         # area validation
+#         if min_area is not None:
+#             try:
+#                 min_area = float(min_area)
+#             except (TypeError, ValueError):
+#                 raise ValueError("أقل مساحة يجب أن يكون رقم صحيحاً")
+#         if max_area is not None:
+#             try:
+#                 max_area = float(max_area)
+#             except (TypeError, ValueError):
+#                 raise ValueError("أقصى مساحة يجب أن يكون رقم صحيحاً")
+#         if min_area is not None and max_area is not None and min_area > max_area:
+#             raise ValueError("أقل مساحة لا يمكن أن يكون أكبر من أقصى مساحة")
+#         if unit_type_id:
+#             filters['unit_type__id'] = unit_type_id
+#         if proposal_id:
+#             filters['proposal__id'] = proposal_id
+#         if project_id:
+#             filters['project__id'] = project_id
+#         if city_id:
+#             filters['city__id'] = city_id
+#         if min_price and max_price:
+#             filters['price__gte'] = min_price
+#             filters['price__lte'] = max_price
+#         if min_area and max_area:
+#             filters['area__gte'] = min_area
+#             filters['area__lte'] = max_area
+#         if payment_method:
+#             filters['payment_method'] = payment_method
+#         if facade:
+#             filters['facade'] = facade
+#         if floor:
+#             filters['floor'] = floor
+#         units = models.Unit.objects.filter(**filters)
+#         if units.count() <= 0:
+#             raise ValueError('لا يوجد وحدات متاحة')
+#         serialized_units = serializers.GetAllUnitsSerializer(units, many=True)
+#         result.data = serialized_units.data
+#         result.is_success = True
+#         result.msg = 'Success'
+#     except ValueError as ve:
+#         result.msg = str(ve)
+#         result.is_success = True
+#         result.data = {
+#             "all": []
+#         }
+#     except Exception as e:
+#         result.msg = 'Unexpected error happened while filtering'
+#         result.data = {'error': str(e)}
+#     finally:
+#         return result
 
 def home_reviews_service():
     result = ResultView()
