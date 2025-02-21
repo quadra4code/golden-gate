@@ -67,6 +67,7 @@ def createjson(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def propose_unit_view(request):
+    print(request.data)
     propose_result = services.propose_unit_service(request.data, request.headers)
     status_code = (
         status.HTTP_201_CREATED if propose_result.is_success
