@@ -102,7 +102,7 @@ DATABASES = {
         'USER': env('DB_USER'),
         'PASSWORD': env('DB_PASSWORD'),
     },
-    # 'cloud': {
+    # 'default': {
     #     'ENGINE': env('DB_ENGINE'),
     #     'HOST': env('CLOUD_DB_HOST'),
     #     'PORT': env('CLOUD_DB_PORT'),
