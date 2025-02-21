@@ -116,8 +116,8 @@ def recent_units_view(request):
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(recent_units_result.to_dict(), status=status_code)
-@api_view(["POST"])
 
+# @api_view(["POST"])
 # def filter_units_view(request):
     # filter_units_result = services.filter_units_service(request.data)
     # status_code = (
