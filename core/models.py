@@ -142,6 +142,7 @@ class Consultation(BaseEntity):
 
 class DrawResult(BaseEntity):
     winner_name = models.CharField(max_length=150)
+    search_name = models.CharField(max_length=150, default='---')
     property_number = models.CharField(max_length=50, default='---')
     building_or_region = models.CharField(max_length=150, default='---')
     project_name = models.CharField(max_length=150, default='---')
