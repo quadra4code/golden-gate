@@ -30,7 +30,13 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'golden-gate-three.vercel.app']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'golden-gate-three.vercel.app',
+    'golden-gate-git-main-quadra-codes-projects.vercel.app',
+    'golden-gate-git-main-quadra-codes-projects.vercel.app'
+]
 
 CORS_ALLOWED_ORIGINS = [
     "https://golden-beit.vercel.app",
