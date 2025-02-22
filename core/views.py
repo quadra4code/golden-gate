@@ -215,7 +215,6 @@ def draw_results_view(request):
 @api_view(["POST"])
 # @permission_classes([IsAuthenticated])
 def add_contact_us_msg_view(request):
-    print(request.data)
     send_result = services.add_contact_us_msg_service(request.data)
     status_code = (
         status.HTTP_201_CREATED if send_result.is_success
