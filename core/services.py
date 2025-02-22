@@ -7,10 +7,14 @@ from core.base_models import ResultView
 from users.utils import extract_payload_from_jwt
 from django.db.models import Min, Max, F, Value, DecimalField
 from django.db.models.functions import Least, Greatest, Coalesce
+import logging
+
+
 # Create your services here.
 
 def propose_unit_service(request_data, request_headers):
     result = ResultView()
+    logger = logging.getLogger(__name__)
     try:
         token = request_headers.get('Authorization', '')
         token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
@@ -37,6 +41,7 @@ def propose_unit_service(request_data, request_headers):
             result.msg = 'حدث خطأ أثناء معالجة البيانات'
             result.data = serialized_unit.errors
     except Exception as e:
+        logger.error(f"Unexpected error in propose_unit_service: {e}", exc_info=True)
         result.msg = 'حدث خطأ غير متوقع أثناء حفظ الوحدة'
         result.data = {'error': str(e)}
     finally:

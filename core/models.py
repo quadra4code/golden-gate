@@ -1,7 +1,7 @@
 from django.db import models
 from django.forms import ValidationError
 from core.base_models import BaseEntity
-
+from cloudinary.models import CloudinaryField
 # Create your models here.
 class UnitType(BaseEntity):
     name = models.CharField(max_length=40, unique=True)
@@ -103,7 +103,8 @@ class Unit(BaseEntity):
 
 class UnitImage(BaseEntity):
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
-    image = models.ImageField(upload_to='units_images/')
+    image = CloudinaryField('image', folder='units_images')
+    # image = models.ImageField(upload_to='units_images/')
 
 class UnitRequest(BaseEntity):
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
