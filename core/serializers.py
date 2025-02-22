@@ -135,7 +135,7 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
         ]
 
     def get_images(self, obj):
-        return [img.image.url for img in obj.unitimage_set.order_by("id")]
+        return [{"id": idx, "src": img.image.url} for idx, img in enumerate(obj.unitimage_set.order_by("id"))]
 
     def get_status(self, obj):
         return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code} if obj.status else None
