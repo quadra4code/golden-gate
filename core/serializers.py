@@ -90,6 +90,7 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
 
     def get_first_image(self, obj):
         first_image = obj.unitimage_set.order_by("id").first()
+        print(first_image, first_image.image if first_image else 'no image', first_image.image.url if first_image else 'no url')
         return first_image.image.url if first_image else None
 
     def get_price(self, obj):
@@ -102,7 +103,6 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
     project = serializers.CharField(source="project.name")
     city = serializers.CharField(source="city.name")
     # status = serializers.CharField(source="status.name")
-    first_installment_value = serializers.SerializerMethodField()
     facade = serializers.CharField(source="get_facade_display")
     floor = serializers.CharField(source="get_floor_display")
     payment_method = serializers.CharField(source="get_payment_method_display")
