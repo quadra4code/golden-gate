@@ -82,15 +82,15 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
     unit_type = serializers.CharField(source="unit_type.name")
     project = serializers.CharField(source="project.name")
     price = serializers.SerializerMethodField()
-    # is_recent = serializers.SerializerMethodField()
+    first_image = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Unit
-        fields = ["id", "title", "city", "unit_type", "project", "area", "price"]
+        fields = ["id", "title", "city", "unit_type", "project", "area", "price", "first_image"]
 
-    # def get_is_recent(self, obj):
-    #     twenty_four_hours_ago = timezone.now() - timedelta(hours=24)
-    #     return obj.created_at >= twenty_four_hours_ago if hasattr(obj, 'created_at') else False
+    def get_first_image(self, obj):
+        first_image = obj.unitimage_set.order_by("id").first()
+        return first_image.image.url if first_image else None
 
     def get_price(self, obj):
         price = obj.over_price or obj.total_price or obj.meter_price
