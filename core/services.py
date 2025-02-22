@@ -15,7 +15,7 @@ def propose_unit_service(request_data, request_headers):
         token = request_headers.get('Authorization', '')
         token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
         request_data['created_by_id'] = str(token_decode_result.get('user_id'))
-        images = request_data.get('images', [])
+        images = request_data.pop('images')
         print(f'images count is {len(images)}\nthe images list is {images}')
         print(images[0].name if images and len(images) >= 1 else "no images")
         serialized_unit = serializers.CreateUnitSerializer(data=request_data)
