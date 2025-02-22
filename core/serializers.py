@@ -83,29 +83,33 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
     project = serializers.CharField(source="project.name")
     price = serializers.SerializerMethodField()
     first_image = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Unit
-        fields = ["id", "title", "city", "unit_type", "project", "area", "price", "first_image"]
+        fields = ["id", "title", "city", "unit_type", "project", "area", "price", "status", "first_image"]
 
     def get_first_image(self, obj):
         first_image = obj.unitimage_set.order_by("id").first()
-        print(first_image, first_image.image if first_image else 'no image', first_image.image.url if first_image else 'no url')
         return first_image.image.url if first_image else None
 
     def get_price(self, obj):
         price = obj.over_price or obj.total_price or obj.meter_price
         return '{:0,.2f}'.format(price) if price else None
 
+    def get_status(self, obj):
+        return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code} if status_obj else None
+
 class UnitDetailsSerializer(serializers.ModelSerializer):
     unit_type = serializers.CharField(source="unit_type.name")
     proposal = serializers.CharField(source="proposal.name")
     project = serializers.CharField(source="project.name")
     city = serializers.CharField(source="city.name")
-    # status = serializers.CharField(source="status.name")
     facade = serializers.CharField(source="get_facade_display")
     floor = serializers.CharField(source="get_floor_display")
     payment_method = serializers.CharField(source="get_payment_method_display")
+    images = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Unit
@@ -120,14 +124,21 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
             "over_price",
             "total_price",
             "meter_price",
-            # "status",
+            "status",
             "description",
             "floor",
             "facade",
             "payment_method",
             "first_installment_value",
             "installment_period",
+            "images"
         ]
+
+    def get_images(self, obj):
+        return [img.image.url for img in obj.unitimage_set.order_by("id")]
+
+    def get_status(self, obj):
+        return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code} if obj.status else None
 
 class UnitRequestSerializer(serializers.Serializer):
     unit_id = serializers.IntegerField(min_value=1, write_only=True)
