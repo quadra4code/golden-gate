@@ -98,7 +98,7 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
         return '{:0,.2f}'.format(price) if price else None
 
     def get_status(self, obj):
-        return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code} if status_obj else None
+        return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code} if obj.status else None
 
 class UnitDetailsSerializer(serializers.ModelSerializer):
     unit_type = serializers.CharField(source="unit_type.name")
