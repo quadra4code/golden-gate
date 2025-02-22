@@ -207,9 +207,9 @@ def filter_paginated_units_service(request_data):
         if floor:
             filters['floor'] = floor
         units = models.Unit.objects.filter(**filters)
-        if units.count() <= 0:
-            raise ValueError('لا يوجد وحدات متاحة')
         all_units_count = units.count()
+        if all_units_count <= 0:
+            raise ValueError('لا يوجد وحدات متاحة')
         if all_units_count > page_size*(page_number-1):
             units = units[page_size*(page_number-1):page_size*page_number]
         else:
@@ -349,7 +349,10 @@ def draw_results_service(request_data):
         applicant_name = request_data.get('full_name')
         if applicant_name:
             print(applicant_name.replace(' ', '').replace('ة', 'ه').replace('أ', 'ا').replace('إ', 'ا').replace('آ', 'ا').replace('ؤ', 'و').replace('ئ', 'ي').replace('ى', 'ي').replace('ء', 'ا'))
-            draw_results = models.DrawResult.objects.filter(is_deleted=False, winner_name__icontains=applicant_name.replace(' ', '').replace('ة', 'ه').replace('أ', 'ا').replace('إ', 'ا').replace('آ', 'ا').replace('ؤ', 'و').replace('ئ', 'ي').replace('ى', 'ي').replace('ء', 'ا'))
+            draw_results = models.DrawResult.objects.filter(is_deleted=False, search_name__icontains=applicant_name.replace(' ', '').replace('ة', 'ه').replace('أ', 'ا').replace('إ', 'ا').replace('آ', 'ا').replace('ؤ', 'و').replace('ئ', 'ي').replace('ى', 'ي').replace('ء', 'ا'))
+            normaldraw_results = models.DrawResult.objects.filter(is_deleted=False, winner_name__icontains=applicant_name)
+            print('search name look up => ', draw_results)
+            print('winner normal name look up => ', normaldraw_results)
             if draw_results.count() == 1:
                 serialized_draw_results = serializers.DrawResultSerializer(draw_results.first())
                 result.data = serialized_draw_results.data
@@ -402,6 +405,81 @@ def add_contact_us_msg_service(request_data):
             result.data = serialized_contact_us_msg.errors
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء حفظ الرسالة'
+        result.data = {'error': str(e)}
+    finally:
+        return result
+
+def add_favorite_service(request_data, request_headers):
+    result = ResultView()
+    try:
+        token = request_headers.get('Authorization', '')
+        token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
+        request_data['created_by_id'] = str(token_decode_result.get('user_id'))
+        serialized_favorite = serializers.UnitFavoriteSerializer(data=request_data)
+        if serialized_favorite.is_valid():
+            serialized_favorite.save()
+            result.data = serialized_favorite.data
+            result.is_success = True
+            result.msg = "تم إضافة الوحدة للمفضلة بنجاح"
+        else:
+            result.msg = "حدث خطأ أثناء معالجة البيانات"
+            result.data = serialized_favorite.errors
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إضافة الوحدة للمفضلة'
+        result.data = {'error': str(e)}
+    finally:
+        return result
+
+def list_favorites_service(request_data, request_headers):
+    result = ResultView()
+    try:
+        token = request_headers.get('Authorization', '')
+        token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
+        page_number = int(request_data.get('page_number', 1))
+        page_size = int(request_data.get('page_size', 12))
+        fav_units = models.UnitFavorite.objects.filter(is_deleted=False, created_by_id=token_decode_result.get('user_id'))
+        all_fav_units_count = fav_units.count()
+        if all_fav_units_count <= 0:
+            raise ValueError('لا يوجد وحدات مفضلة')
+        if all_fav_units_count > page_size*(page_number-1):
+            fav_units = fav_units[page_size*(page_number-1):page_size*page_number]
+        else:
+            fav_units = fav_units[page_size*int(all_fav_units_count/page_size) if all_fav_units_count%page_size!=0 else int(all_fav_units_count/page_size)-1:]
+            page_number = int(all_fav_units_count/page_size) if all_fav_units_count%page_size == 0 else int(all_fav_units_count/page_size)+1
+        serialized_units = serializers.UnitFavoriteSerializer(fav_units, many=True)
+        result.data = {
+            "all": serialized_units.data,
+            "pagination": {
+                "total_pages": all_fav_units_count/int(all_fav_units_count/page_size) if all_fav_units_count%page_size == 0 else int(all_fav_units_count/page_size)+1,
+                "current_page": page_number,
+                "has_next": True if all_fav_units_count > page_size*page_number else False,
+                "has_previous": True if page_number > 1 else False
+            }
+        }
+        result.is_success = True
+        result.msg = 'Success'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+        result.data = {
+            "all": []
+        }
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب الوحدات المفضلة'
+        result.data = {'error': str(e)}
+    finally:
+        return result
+
+def delete_favorite_service(favorite_id):
+    result = ResultView()
+    try:
+        models.UnitFavorite.objects.get(is_deleted=False, id=favorite_id).delete()
+        result.is_success = True
+        result.msg = "تم إزالة الوحدة من المفضلة بنجاح"
+    except models.UnitFavorite.DoesNotExist as e:
+        result.msg = 'لم يتم العثور على الوحدة المطلوبة'
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إزالة الوحدة من المفضلة'
         result.data = {'error': str(e)}
     finally:
         return result

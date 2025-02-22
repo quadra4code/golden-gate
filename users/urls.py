@@ -6,5 +6,5 @@ urlpatterns = [
     # path('admin/login', UserViews.login_admin, name='login_admin'),
     path('change-password', UserViews.change_password_view, name='change_password'),
     # path('logout', UserViews.test_sms, name='update_brands'),
-    # path('delete-brands/<int:brand_id>', UserViews.delete_brand, name='delete_brands'),
+    path('leaderboard', UserViews.leaderboard_view, name='leaderboard'),
 ]

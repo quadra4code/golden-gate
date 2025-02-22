@@ -1,9 +1,8 @@
-from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from users.services import change_password_service, register_user_service, login_user_service
+from users import services
 
 # Create your views here.
 
@@ -41,7 +40,7 @@ output
 '''
 @api_view(["POST"])
 def register_user_view(request):
-    registeration_result = register_user_service(request.data)
+    registeration_result = services.register_user_service(request.data)
     status_code = (
         status.HTTP_201_CREATED if registeration_result.is_success
         else status.HTTP_400_BAD_REQUEST
@@ -71,7 +70,7 @@ output
 '''
 @api_view(["POST"])
 def login_user_view(request):
-    login_result = login_user_service(request.data)
+    login_result = services.login_user_service(request.data)
     status_code = (
         status.HTTP_202_ACCEPTED if login_result.is_success
         else status.HTTP_400_BAD_REQUEST
@@ -115,9 +114,20 @@ output
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def change_password_view(request):
-    change_password_result = change_password_service(request)
+    change_password_result = services.change_password_service(request)
     status_code = (
         status.HTTP_202_ACCEPTED if change_password_result.is_success
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(change_password_result.to_dict(), status=status_code)
+
+@api_view(['GET'])
+def leaderboard_view(request):
+    leaderboard_result = services.leaderboard_service()
+    status_code = (
+        status.HTTP_200_OK if leaderboard_result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(leaderboard_result.to_dict(), status=status_code)
+
+

@@ -71,7 +71,7 @@ def propose_unit_view(request):
     propose_result = services.propose_unit_service(request.data, request.headers)
     status_code = (
         status.HTTP_201_CREATED if propose_result.is_success
-        else status.HTTP_401_UNAUTHORIZED if propose_result.msg.__contains__('unauthorized')
+        else status.HTTP_401_UNAUTHORIZED if propose_result.msg.lower().__contains__('unauthorized')
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(propose_result.to_dict(), status=status_code)
@@ -82,7 +82,7 @@ def request_unit_view(request):
     request_result = services.request_unit_service(request.data, request.headers)
     status_code = (
         status.HTTP_201_CREATED if request_result.is_success
-        else status.HTTP_401_UNAUTHORIZED if request_result.msg.__contains__('unauthorized')
+        else status.HTTP_401_UNAUTHORIZED if request_result.msg.lower().__contains__('unauthorized')
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(request_result.to_dict(), status=status_code)
@@ -92,7 +92,7 @@ def proposal_form_data_view(request):
     form_data_result = services.proposal_form_data_service()
     status_code = (
         status.HTTP_200_OK if form_data_result.is_success
-        else status.HTTP_401_UNAUTHORIZED if form_data_result.msg.__contains__('unauthorized')
+        else status.HTTP_401_UNAUTHORIZED if form_data_result.msg.lower().__contains__('unauthorized')
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(form_data_result.to_dict(), status=status_code)
@@ -102,7 +102,7 @@ def proposal_form_data_view(request):
 #     all_units_result = services.all_units_service()
 #     status_code = (
 #         status.HTTP_200_OK if all_units_result.is_success
-#         else status.HTTP_401_UNAUTHORIZED if all_units_result.msg.__contains__('unauthorized')
+#         else status.HTTP_401_UNAUTHORIZED if all_units_result.msg.lower().__contains__('unauthorized')
 #         else status.HTTP_500_INTERNAL_SERVER_ERROR
 #     )
 #     return Response(all_units_result.to_dict(), status=status_code)
@@ -112,7 +112,7 @@ def recent_units_view(request):
     recent_units_result = services.recent_units_service()
     status_code = (
         status.HTTP_200_OK if recent_units_result.is_success
-        else status.HTTP_401_UNAUTHORIZED if recent_units_result.msg.__contains__('unauthorized')
+        else status.HTTP_401_UNAUTHORIZED if recent_units_result.msg.lower().__contains__('unauthorized')
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(recent_units_result.to_dict(), status=status_code)
@@ -122,7 +122,7 @@ def recent_units_view(request):
     # filter_units_result = services.filter_units_service(request.data)
     # status_code = (
     #     status.HTTP_201_CREATED if filter_units_result.is_success
-    #     else status.HTTP_401_UNAUTHORIZED if filter_units_result.msg.__contains__('unauthorized')
+    #     else status.HTTP_401_UNAUTHORIZED if filter_units_result.msg.lower().__contains__('unauthorized')
     #     else status.HTTP_500_INTERNAL_SERVER_ERROR
     # )
     # return Response(filter_units_result.to_dict(), status=status_code)
@@ -132,7 +132,7 @@ def filter_paginated_units_view(request):
     filter_paginated_units_result = services.filter_paginated_units_service(request.data)
     status_code = (
         status.HTTP_201_CREATED if filter_paginated_units_result.is_success
-        else status.HTTP_401_UNAUTHORIZED if filter_paginated_units_result.msg.__contains__('unauthorized')
+        else status.HTTP_401_UNAUTHORIZED if filter_paginated_units_result.msg.lower().__contains__('unauthorized')
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(filter_paginated_units_result.to_dict(), status=status_code)
@@ -221,6 +221,39 @@ def add_contact_us_msg_view(request):
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(send_result.to_dict(), status=status_code)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def add_favorite_view(request):
+    add_favorite_result = services.add_favorite_service(request.data, request.headers)
+    status_code = (
+        status.HTTP_201_CREATED if add_favorite_result.is_success
+        else status.HTTP_401_UNAUTHORIZED if add_favorite_result.msg.lower().__contains__('unauthorized')
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(add_favorite_result.to_dict(), status=status_code)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def list_paginated_favorites_view(request):
+    list_favorites_result = services.list_favorites_service(request.data, request.headers)
+    status_code = (
+        status.HTTP_200_OK if list_favorites_result.is_success
+        else status.HTTP_401_UNAUTHORIZED if list_favorites_result.msg.lower().__contains__('unauthorized')
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(list_favorites_result.to_dict(), status=status_code)
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_favorite_view(request, favorite_id):
+    delete_favorite_result = services.delete_favorite_service(favorite_id)
+    status_code = (
+        status.HTTP_200_OK if delete_favorite_result.is_success
+        else status.HTTP_401_UNAUTHORIZED if delete_favorite_result.msg.lower().__contains__('unauthorized')
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(delete_favorite_result.to_dict(), status=status_code)
 
 '''
 add to fav

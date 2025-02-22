@@ -187,3 +187,39 @@ class ContactUsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ContactUs
         fields = ['id', 'name', 'email', 'phone_number', 'message']
+
+class UnitFavoriteSerializer(serializers.ModelSerializer):
+    created_by_id = serializers.IntegerField(min_value=1, write_only=True)
+    unit = serializers.IntegerField(min_value=1, write_only=True)
+    unit_id = serializers.IntegerField(source='unit.id', read_only=True)
+    title = serializers.CharField(source='unit.title', read_only=True)
+    city = serializers.CharField(source='unit.city.name', read_only=True)
+    unit_type = serializers.CharField(source='unit.unit_type.name', read_only=True)
+    project = serializers.CharField(source='unit.project.name', read_only=True)
+    area = serializers.FloatField(source='unit.area', read_only=True)
+    price = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField(read_only=True)
+    main_image = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = models.UnitFavorite
+        fields = ['id', 'unit', 'created_by_id', 'unit_id', "title", "city", "unit_type", "project", "area", "price", "status", "main_image"]
+    
+    def get_main_image(self, obj):
+        main_image = obj.unit.unitimage_set.order_by("id").first()
+        return main_image.image.url if main_image else None
+
+    def get_price(self, obj):
+        price = obj.unit.over_price or obj.unit.total_price or obj.unit.meter_price
+        return '{:0,.2f}'.format(price) if price else None
+
+    def get_status(self, obj):
+        return {'id': obj.unit.status.id, 'name': obj.unit.status.name, 'code': obj.unit.status.code} if obj.unit.status else None
+    
+    def create(self, validated_data):
+        unit_obj = models.Unit.objects.filter(id=validated_data.get('unit')).first()
+        if unit_obj:
+            validated_data['unit_id'] = validated_data.pop('unit')
+            return models.UnitFavorite.objects.create(**validated_data)
+        else:
+            raise LookupError('الوحدة المطلوبة غير موجودة')

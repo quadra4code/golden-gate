@@ -122,7 +122,6 @@ def login_user_service(login_data):
     finally:
         return result
 
-
 # def login_admin_service(username, password):
 #     result = ResultView()
 #     try:
@@ -159,11 +158,11 @@ def change_password_service(request):
             result.msg = 'Passwords Don\'t Match'
         elif not (token or old_password or new_password, confirm_new_password):
             result.msg = (
-                'Old Password is required' if token and new_password and confirm_new_password
-                else 'New Password is required' if token and confirm_new_password
-                else 'Confirm New Password is required' if token
-                else 'Unauthorized User' if new_password and confirm_new_password and old_password
-                else 'Invalid Data'
+                'كلمة السر القديمة مطلوبة' if token and new_password and confirm_new_password
+                else 'كلمة السر الجديدة مطلوبة' if token and confirm_new_password
+                else 'تأكيد كلمة السر الجديدة مطلوب' if token
+                else 'مستخدم غير مسموح به' if new_password and confirm_new_password and old_password
+                else 'بيانات غير صحيحة'
             )
         else:
             serialized_change_password_data = ChangePasswordSerializer(data={
@@ -179,7 +178,7 @@ def change_password_service(request):
                 else:
                     user_to_change_password = CustomUser.objects.filter(id=token_decode_result.get('user_id')).first()
                     if not user_to_change_password.check_password(old_password):
-                        result.msg = "Invalid old password"
+                        result.msg = "كلمة السر القديمة خاطئة"
                     else:
                         if user_to_change_password:
                             user_to_change_password.set_password(new_password)
@@ -189,14 +188,32 @@ def change_password_service(request):
                                 'username': token_decode_result.get('username'),
                                 'roles': token_decode_result.get('roles')
                             }
-                            result.msg = 'Password changed successfully'
+                            result.msg = 'تم تغيير كلمة السر بنجاح'
                             result.is_success = True
                         else:
-                            result.msg = 'Unauthorized User'
+                            result.msg = 'مستخدم غير مسموح به'
             else:
-                result.msg = 'Error happen while serializing new password data'
+                result.msg = 'حدث خطأ أثناء معالجة البيانات'
+                result.data = {'errors': serialized_change_password_data.errors, 'error messages': serialized_change_password_data.error_messages}
     except Exception as e:
-        result.msg = 'Unexpected error happened while changing password'
+        result.msg = 'حدث خطأ غير متوقع أثناء تغيير كلمة السر'
         result.data = {'error': str(e)}
     finally:
         return result
+
+def leaderboard_service():
+    result = ResultView()
+    try:
+        top_10_users = CustomUser.objects.order_by('-referral_count', 'first_name', 'last_name')[:10]
+        result.data = [
+            {'rank': idx+1, 'name': user.get_full_name(), 'referral_count': user.referral_count} 
+            for idx, user in enumerate(top_10_users)
+        ]
+        result.is_success = True
+        result.msg = 'تم جلب قائمة المتصدرين بنجاح'
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب قائمة المتصدرين'
+        result.data = {'error': str(e)}
+    finally:
+        return result
+

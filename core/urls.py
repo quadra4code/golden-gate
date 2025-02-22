@@ -15,6 +15,9 @@ urlpatterns = [
     path('draw-results', CoreViews.draw_results_view, name='draw_results'),
     path('add-review', CoreViews.add_review_view, name='add_review'),
     path('add-contact-us-msg', CoreViews.add_contact_us_msg_view, name='add_contact_us_msg'),
+    path('add-favorite', CoreViews.add_favorite_view, name='add_favorite'),
+    path('list-paginated-favorites', CoreViews.list_paginated_favorites_view, name='list_paginated_favorites'),
+    path('delete-favorite/<int:favorite_id>', CoreViews.delete_favorite_view, name='delete_favorite'),
     path('createjson', CoreViews.createjson, name='add_draw_result'),
     # path('add-draw-result', CoreViews.add_draw_result_view, name='add_draw_result'),
 ]
