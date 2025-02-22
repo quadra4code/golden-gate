@@ -15,9 +15,18 @@ def propose_unit_service(request_data, request_headers):
         token = request_headers.get('Authorization', '')
         token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
         request_data['created_by_id'] = str(token_decode_result.get('user_id'))
+        images = request_data.get('images', [])
+        print(f'images count is {len(images)}\nthe images list is {images}')
+        print(images[0].name if images and len(images) >= 1 else "no images")
         serialized_unit = serializers.CreateUnitSerializer(data=request_data)
         if serialized_unit.is_valid():
             serialized_unit.save()
+            print(f'saved the new unit {request_data.get("title")} and now going to save the images')
+            if images:
+                print(f'there is images and the count is {len(images)} images')
+                for img in images:
+                    print(f'saving image {img.name}')
+                    models.UnitImage.objects.create(unit_id=serialized_unit.data['id'], image=img)
             result.msg = 'تم حفظ الوحدة بنجاح'
             result.is_success = True
             result.data = serialized_unit.data
