@@ -213,7 +213,7 @@ def draw_results_view(request):
     return Response(draw_results.to_dict(), status=status_code)
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def add_contact_us_msg_view(request):
     send_result = services.add_contact_us_msg_service(request.data)
     status_code = (
