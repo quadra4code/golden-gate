@@ -171,7 +171,7 @@ def filter_paginated_units_service(request_data):
         payment_method = request_data.get('payment_method')
         facade = request_data.get('facade')
         floor = request_data.get('payment_method')
-        page_number = int(request_data.get('page', 1))
+        page_number = int(request_data.get('page_number', 1))
         page_size = int(request_data.get('page_size', 12))
         filters = {
             'is_deleted': False,
@@ -245,7 +245,7 @@ def filter_paginated_units_service(request_data):
                 "current_page": page_number,
                 "has_next": True if all_units_count > page_size*page_number else False,
                 "has_previous": True if page_number > 1 else False
-            } 
+            }
         }
         result.is_success = True
         result.msg = 'Success'
