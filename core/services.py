@@ -20,13 +20,16 @@ def propose_unit_service(request_data, request_headers):
         print(images[0].name if images and len(images) >= 1 else "no images")
         serialized_unit = serializers.CreateUnitSerializer(data=request_data)
         if serialized_unit.is_valid():
-            serialized_unit.save()
+            new_unit = serialized_unit.save()
             print(f'saved the new unit {request_data.get("title")} and now going to save the images')
             if images:
                 print(f'there is images and the count is {len(images)} images')
-                for img in images:
-                    print(f'saving image {img.name}')
-                    models.UnitImage.objects.create(unit_id=serialized_unit.data['id'], image=img)
+                # for img in images:
+                #     print(f'saving image {img.name}')
+                    # models.UnitImage.objects.create(unit_id=serialized_unit.data['id'], image=img)
+                unit_images = [models.UnitImage(unit=new_unit, image=img) for img in images]
+                print(f'the image objects are => {unit_images}\nnow we r bulk creating them')
+                models.UnitImage.objects.bulk_create(unit_images)
             result.msg = 'تم حفظ الوحدة بنجاح'
             result.is_success = True
             result.data = serialized_unit.data
