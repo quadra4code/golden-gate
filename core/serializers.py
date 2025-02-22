@@ -82,16 +82,16 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
     unit_type = serializers.CharField(source="unit_type.name")
     project = serializers.CharField(source="project.name")
     price = serializers.SerializerMethodField()
-    first_image = serializers.SerializerMethodField()
+    main_image = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Unit
-        fields = ["id", "title", "city", "unit_type", "project", "area", "price", "status", "first_image"]
+        fields = ["id", "title", "city", "unit_type", "project", "area", "price", "status", "main_image"]
 
-    def get_first_image(self, obj):
-        first_image = obj.unitimage_set.order_by("id").first()
-        return first_image.image.url if first_image else None
+    def get_main_image(self, obj):
+        main_image = obj.unitimage_set.order_by("id").first()
+        return main_image.image.url if main_image else None
 
     def get_price(self, obj):
         price = obj.over_price or obj.total_price or obj.meter_price
