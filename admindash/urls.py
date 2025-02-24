@@ -1,0 +1,25 @@
+from django.urls import path
+from admindash import views as AdminViews
+urlpatterns = [
+    path('paginated-staff', AdminViews.paginated_staff_view, name='paginated_staff'),
+    path('paginated-clients', AdminViews.paginated_clients_view, name='paginated_clients'),
+    # path('requested-units-with-users', AdminViews.request_unit_view, name='request_unit'),
+    # path('get-form-data', CoreViews.proposal_form_data_view, name='get_form_data'),
+    # path('recent-units', CoreViews.recent_units_view, name='recent_units'),
+    # path('filter-paginated-units', CoreViews.filter_paginated_units_view, name='filter_paginated_units'),
+    # path('unit-details/<int:unit_id>', CoreViews.unit_details_view, name='unit_details'),
+    # path('client-paginated-units', CoreViews.client_paginated_units_view, name='client_paginated_units'),
+    # path('home-reviews', CoreViews.home_top_reviews_view, name='home_reviews'),
+    # path('home-articles', CoreViews.home_articles_view, name='home_articles'),
+    # path('home-consultation-types', CoreViews.home_consultation_types_view, name='home_consultations'),
+    # path('consultations/<int:consult_type_id>', CoreViews.consultations_by_type_view, name='consultation_details'),
+    # path('home-featured-units', CoreViews.home_featured_units_view, name='home_featured_units'),
+    # path('draw-results', CoreViews.draw_results_view, name='draw_results'),
+    # path('add-review', CoreViews.add_review_view, name='add_review'),
+    # path('add-contact-us-msg', CoreViews.add_contact_us_msg_view, name='add_contact_us_msg'),
+    # path('add-favorite', CoreViews.add_favorite_view, name='add_favorite'),
+    # path('list-paginated-favorites', CoreViews.list_paginated_favorites_view, name='list_paginated_favorites'),
+    # path('delete-favorite/<int:favorite_id>', CoreViews.delete_favorite_view, name='delete_favorite'),
+    # path('createjson', CoreViews.createjson, name='add_draw_result'),
+    # path('add-draw-result', CoreViews.add_draw_result_view, name='add_draw_result'),
+]
