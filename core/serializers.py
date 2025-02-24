@@ -1,5 +1,3 @@
-from datetime import timedelta
-from django.utils import timezone
 from rest_framework import serializers
 from core import models
 # Create your serializers here.

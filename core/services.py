@@ -96,7 +96,7 @@ def proposal_form_data_service():
             "unit_types": [],
             "floors": [{"id": choice[0], "name": choice[1]} for choice in models.Unit.FLOOR_CHOICES],
             "facades": [{"id": choice[0], "name": choice[1]} for choice in models.Unit.FACADE_CHOICES],
-            "payment_methods": [{"id": choice[0], "name": choice[1]} for choice in models.Unit.PAYMENT_METHOD_CHOICES]
+            # "payment_methods": [{"id": choice[0], "name": choice[1]} for choice in models.Unit.PAYMENT_METHOD_CHOICES]
         }
         for unit_type in unit_types:
             unit_types_data = {
@@ -115,7 +115,7 @@ def proposal_form_data_service():
         result.is_success = True
         result.msg = 'Success'
     except Exception as e:
-        result.msg = 'Unexpected error happened while saving request'
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات نموذج الإضافة'
         result.data = {'error': str(e)}
     finally:
         return result
@@ -219,6 +219,7 @@ def filter_paginated_units_service(request_data):
         result.data = {
             "all": serialized_units.data,
             "pagination": {
+                "total_items": all_units_count,
                 "total_pages": all_units_count/int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1,
                 "current_page": page_number,
                 "has_next": True if all_units_count > page_size*page_number else False,
@@ -278,6 +279,7 @@ def client_paginated_units_service(request_data, request_headers):
         result.data = {
             "all": serialized_units.data,
             "pagination": {
+                "total_items": all_units_count,
                 "total_pages": all_units_count/int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1,
                 "current_page": page_number,
                 "has_next": True if all_units_count > page_size*page_number else False,
@@ -490,6 +492,7 @@ def list_favorites_service(request_data, request_headers):
         result.data = {
             "all": serialized_units.data,
             "pagination": {
+                "total_items": all_fav_units_count,
                 "total_pages": all_fav_units_count/int(all_fav_units_count/page_size) if all_fav_units_count%page_size == 0 else int(all_fav_units_count/page_size)+1,
                 "current_page": page_number,
                 "has_next": True if all_fav_units_count > page_size*page_number else False,
