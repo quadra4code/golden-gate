@@ -33,29 +33,32 @@ class CreateUnitSerializer(serializers.Serializer):
         '14',
         '15',
     ]
-    PAYMENT_METHOD_CHOICES = [
-        'CS',
-        'IN',
+    CURRENCY_CHOICES = [
+        ('EGP', 'جنيه مصرى'),
+        ('USD', 'دولار'),
     ]
     
     id = serializers.IntegerField(read_only=True)
     unit_type_id = serializers.CharField(max_length=1)
-    proposal_id = serializers.CharField(max_length=3)
+    proposal_id = serializers.CharField(max_length=3, required=False, allow_null=True)
     project_id = serializers.CharField(max_length=3)
     city_id = serializers.CharField(max_length=2)
     unit_number = serializers.CharField(max_length=5)
     building_number = serializers.CharField(max_length=150, required=False, allow_null=True)
-    area = serializers.IntegerField()
+    area = serializers.FloatField()
+    paid_amount = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
+    remaining_amount = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
     over_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
     total_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
     meter_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
-    title = serializers.CharField(max_length=200)
+    currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP')
+    title = serializers.CharField(max_length=200, required=False, allow_blank=True, allow_null=True)
     phone_number = serializers.CharField(max_length=20)
     description = serializers.CharField(max_length=1000, required=False, allow_blank=True, allow_null=True)
     floor = serializers.ChoiceField(choices=FLOOR_CHOICES, required=False, allow_null=True, allow_blank=True)
     facade = serializers.ChoiceField(choices=FACADE_CHOICES, required=False, allow_null=True, allow_blank=True)
-    payment_method = serializers.ChoiceField(choices=PAYMENT_METHOD_CHOICES, required=False, allow_blank=True, allow_null=True)
-    installment_period = serializers.IntegerField(required=False, allow_null=True)
+    payment_method = serializers.CharField(max_length=150, required=False, allow_null=True)
+    installment_period = serializers.CharField(max_length=150, required=False, allow_null=True)
     first_installment_value = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
     created_by_id = serializers.IntegerField(min_value=1)
 
@@ -107,7 +110,7 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
     city = serializers.CharField(source="city.name")
     facade = serializers.CharField(source="get_facade_display")
     floor = serializers.CharField(source="get_floor_display")
-    payment_method = serializers.CharField(source="get_payment_method_display")
+    currency = serializers.CharField(source="get_currency_display")
     images = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
 
@@ -121,9 +124,12 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
             "project",
             "city",
             "area",
+            "paid_amount",
+            "remaining_amount",
             "over_price",
             "total_price",
             "meter_price",
+            "currency",
             "status",
             "description",
             "floor",

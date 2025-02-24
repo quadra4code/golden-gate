@@ -64,27 +64,34 @@ class Unit(BaseEntity):
         ('13', 'الثالث عشر'),
         ('14', 'الرابع عشر'),
         ('15', 'الخامس عشر'),
+        ('16', 'متكرر'),
+        ('17', 'الأخير'),
     ]
-    PAYMENT_METHOD_CHOICES = [
-        ('CS', 'كاش'),
-        ('IN', 'تقسيط'),
+    CURRENCY_CHOICES = [
+        ('EGP', 'جنيه مصرى'),
+        ('USD', 'دولار'),
     ]
     unit_type = models.ForeignKey(UnitType, on_delete=models.PROTECT)
-    proposal = models.ForeignKey(Proposal, on_delete=models.PROTECT)
+    proposal = models.ForeignKey(Proposal, on_delete=models.PROTECT, null=True)
     project = models.ForeignKey(Project, on_delete=models.PROTECT)
     city = models.ForeignKey(City, on_delete=models.PROTECT)
     region = models.ForeignKey(Region, on_delete=models.PROTECT, null=True)
     unit_number = models.CharField(max_length=20)
     building_number = models.CharField(max_length=150, null=True)
     area = models.FloatField(default=0.0)
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=100, null=True, blank=True)
     description = models.CharField(max_length=600, null=True, blank=True)
-    payment_method = models.CharField(max_length=2, choices=PAYMENT_METHOD_CHOICES, null=True)
-    installment_period = models.PositiveIntegerField(null=True)
+    payment_method = models.CharField(max_length=150, null=True, blank=True)
+    installment_period = models.CharField(max_length=150, null=True, blank=True)
+    # installment_period = models.PositiveIntegerField(null=True)
     first_installment_value = models.DecimalField(decimal_places=4, max_digits=16, null=True)
+    paid_amount = models.DecimalField(decimal_places=4, max_digits=16, null=True)
+    remaining_amount = models.DecimalField(decimal_places=4, max_digits=16, null=True)
     over_price = models.DecimalField(decimal_places=4, max_digits=16, null=True)
     total_price = models.DecimalField(decimal_places=4, max_digits=16, null=True)
     meter_price = models.DecimalField(decimal_places=4, max_digits=16, null=True)
+    # meter_distinct_price = models.DecimalField(decimal_places=4, max_digits=16, null=True)
+    currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='EGP')
     status = models.ForeignKey(Status, on_delete=models.PROTECT)
     phone_number = models.CharField(max_length=20)
     facade = models.CharField(max_length=1, choices=FACADE_CHOICES, null=True)

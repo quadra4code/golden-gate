@@ -7,6 +7,7 @@ urlpatterns = [
     path('recent-units', CoreViews.recent_units_view, name='recent_units'),
     path('filter-paginated-units', CoreViews.filter_paginated_units_view, name='filter_paginated_units'),
     path('unit-details/<int:unit_id>', CoreViews.unit_details_view, name='unit_details'),
+    path('client-paginated-units', CoreViews.client_paginated_units_view, name='client_paginated_units'),
     path('home-reviews', CoreViews.home_top_reviews_view, name='home_reviews'),
     path('home-articles', CoreViews.home_articles_view, name='home_articles'),
     path('home-consultation-types', CoreViews.home_consultation_types_view, name='home_consultations'),

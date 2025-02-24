@@ -22,7 +22,7 @@ def propose_unit_service(request_data, request_headers):
         if serialized_unit.is_valid():
             new_unit = serialized_unit.save()
             if images:
-                unit_images = [models.UnitImage(unit=new_unit, image=img) for img in images]
+                unit_images = [models.UnitImage(unit=new_unit, image=img, created_by_id=request_data.get('created_by_id')) for img in images]
                 models.UnitImage.objects.bulk_create(unit_images)
             result.msg = 'تم حفظ الوحدة بنجاح'
             result.is_success = True
@@ -143,15 +143,15 @@ def recent_units_service():
 def filter_paginated_units_service(request_data):
     result = ResultView()
     try:
-        proposal_id = request_data.get('proposal_id')
         unit_type_id = request_data.get('unit_type_id')
+        proposal_id = request_data.get('proposal_id')
         project_id = request_data.get('project_id')
         city_id = request_data.get('city_id')
         min_price = request_data.get('min_price')
         max_price = request_data.get('max_price')
         min_area = request_data.get('min_area')
         max_area = request_data.get('max_area')
-        payment_method = request_data.get('payment_method')
+        # payment_method = request_data.get('payment_method')
         facade = request_data.get('facade')
         floor = request_data.get('payment_method')
         page_number = int(request_data.get('page_number', 1))
@@ -200,8 +200,8 @@ def filter_paginated_units_service(request_data):
         if min_area and max_area:
             filters['area__gte'] = min_area
             filters['area__lte'] = max_area
-        if payment_method:
-            filters['payment_method'] = payment_method
+        # if payment_method:
+        #     filters['payment_method'] = payment_method
         if facade:
             filters['facade'] = facade
         if floor:
@@ -234,7 +234,7 @@ def filter_paginated_units_service(request_data):
             "all": []
         }
     except Exception as e:
-        result.msg = 'Unexpected error happened while filtering'
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
         result.data = {'error': str(e)}
     finally:
         return result
@@ -254,6 +254,46 @@ def unit_details_service(unit_id):
         result.is_success = True
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
+        result.data = {'error': str(e)}
+    finally:
+        return result
+
+def client_paginated_units_service(request_data, request_headers):
+    result = ResultView()
+    try:
+        token = request_headers.get('Authorization', '')
+        token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
+        page_number = int(request_data.get('page_number', 1))
+        page_size = int(request_data.get('page_size', 12))
+        units = models.Unit.objects.filter(is_deleted=False, created_by_id=token_decode_result.get('user_id'))
+        all_units_count = units.count()
+        if all_units_count <= 0:
+            raise ValueError('لا يوجد وحدات متاحة')
+        if all_units_count > page_size*(page_number-1):
+            units = units[page_size*(page_number-1):page_size*page_number]
+        else:
+            units = units[page_size*int(all_units_count/page_size) if all_units_count%page_size!=0 else int(all_units_count/page_size)-1:]
+            page_number = int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1
+        serialized_units = serializers.GetAllUnitsSerializer(units, many=True)
+        result.data = {
+            "all": serialized_units.data,
+            "pagination": {
+                "total_pages": all_units_count/int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1,
+                "current_page": page_number,
+                "has_next": True if all_units_count > page_size*page_number else False,
+                "has_previous": True if page_number > 1 else False
+            }
+        }
+        result.is_success = True
+        result.msg = 'Success'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+        result.data = {
+            "all": []
+        }
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب الوحدات الخاصة بكم'
         result.data = {'error': str(e)}
     finally:
         return result

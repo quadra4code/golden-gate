@@ -213,7 +213,6 @@ def draw_results_view(request):
     return Response(draw_results.to_dict(), status=status_code)
 
 @api_view(["POST"])
-# @permission_classes([IsAuthenticated])
 def add_contact_us_msg_view(request):
     send_result = services.add_contact_us_msg_service(request.data)
     status_code = (
@@ -254,6 +253,18 @@ def delete_favorite_view(request, favorite_id):
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(delete_favorite_result.to_dict(), status=status_code)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def client_paginated_units_view(request):
+    client_paginated_units_result = services.client_paginated_units_service(request.data, request.headers)
+    status_code = (
+        status.HTTP_200_OK if client_paginated_units_result.is_success
+        else status.HTTP_401_UNAUTHORIZED if client_paginated_units_result.msg.lower().__contains__('unauthorized')
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(client_paginated_units_result.to_dict(), status=status_code)
+
 
 '''
 add to fav
