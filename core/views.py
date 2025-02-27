@@ -8,60 +8,82 @@ from core import services
 
 @api_view(["GET"])
 def createjson(request):
+    # import json
 
+    # fullpath = r"C:\Users\mahmo\Documents\GitHub\GoldenGate-RoyalEstate\core\day16.json"
+    # # Load the existing JSON file
+    # with open(fullpath, "r", encoding="utf-8") as file:
+    #     data = json.load(file)
+
+    # # Add the new field "search_name" for each object
+    # for obj in data:
+    #     obj["fields"]["search_name"] = obj["fields"]["winner_name"].replace(' ', '').replace('ة', 'ه').replace('أ', 'ا').replace('إ', 'ا').replace('آ', 'ا').replace('ؤ', 'و').replace('ئ', 'ي').replace('ى', 'ي').replace('ء', 'ا')
+
+    # # Save the updated JSON file
+    # with open(fullpath, "w", encoding="utf-8") as file:
+    #     json.dump(data, file, ensure_ascii=False, indent=4)
+    
+    # # absolute_path = os.path.abspath(filepath)
+
+    # print("Updated day26.json with search_name field.")
     import pandas as pd
     import json
     import os
-
+    filename = 'day19'
     # Define the path to the Excel file
-    excel_file_path = os.path.join(os.path.dirname(__file__), 'day11.xlsx')
-
-    # Read the Excel file
-    df = pd.read_excel(excel_file_path)
-
-    # Initialize an empty list to store the JSON data
     json_data = []
-
-    # Loop through the DataFrame and convert each row to the desired JSON format
-    for index, row in df.iterrows():
-        # print(row.values[0])
-        # print('0 => ', row.values[0])
-        # print('1 => ', row.values[1])
-        # print('2 => ', str(row.values[1]), type(row.values[2]))
-        # if str(row.values[1]) == 'nan':
-        #     print("yes truthy")
-        # print('3 => ', row.values[3])
-        # print('4 => ', row.values[4])
-        # print('5 => ', row.values[5])
-        # print('6 => ', row.values[6])
-        print(row.values[6].replace(' ', '').replace('ة', 'ه').replace('أ', 'ا').replace('إ', 'ا').replace('آ', 'ا').replace('ؤ', 'و').replace('ئ', 'ي').replace('ى', 'ي').replace('ء', 'ا'))
-        prop = 0 if str(row.values[1]) == 'nan' else row.values[1]
-        record = {
-            "model": "core.DrawResult",
-            "pk": index + 1 + 1923,
-            "fields": {
-                "winner_name": row.values[6],
-                "property_number": prop,
-                "building_or_region": row.values[3] if type(row.values[3]) is str else 0 if str(row.values[3]) == 'nan' else int(row.values[3]),
-                "floor": "" if type(row.values[2]) is float else row.values[2],
-                "area": 0 if str(row.values[0]) == 'nan' else row.values[0],
-                "project_name": row.values[5]
+    files = ['day8', 'day9', 'day10', 'day11']
+    for name in files:
+        excel_file_path = os.path.join(os.path.dirname(__file__), f'{name}.xlsx')
+        # Read the Excel file
+        df = pd.read_excel(excel_file_path)
+        # Initialize an empty list to store the JSON data
+        # Loop through the DataFrame and convert each row to the desired JSON format
+        for index, row in df.iterrows():
+            dict_names = {
+                'day8': 1,
+                # 'anas': 369,
+                'day10': 946,
+                'day16': 1923,
+                'day9': 3573,
+                'day11': 5033,
+                'day17': 5906,
+                'day18': 7296,
+                'day19': 8603,
+                'day20': 9964,
+                'day23': 12095,
+                'day24': 13502,
+                'day25': 13812,
+                'day26': 14221,
+                'coming': 15344,
             }
-        }
-        json_data.append(record)
-
+            if row.values[0] == 'المساحة':
+                continue
+            prop = 0 if str(row.values[1]) == 'nan' else row.values[1]
+            record = {
+                "model": "core.DrawResult",
+                "pk": index + 1 + dict_names[name],
+                "fields": {
+                    "winner_name": row.values[6],
+                    "search_name": row.values[6].replace(' ', '').replace('ة', 'ه').replace('أ', 'ا').replace('إ', 'ا').replace('آ', 'ا').replace('ؤ', 'و').replace('ئ', 'ي').replace('ى', 'ي').replace('ء', 'ا'),
+                    "property_number": prop,
+                    "building_or_region": row.values[3] if type(row.values[3]) is str else 0 if str(row.values[3]) == 'nan' else int(row.values[3]),
+                    "floor": "" if type(row.values[2]) is float else row.values[2],
+                    "area": 0 if str(row.values[0]) == 'nan' else row.values[0],
+                    "project_name": row.values[5]
+                }
+            }
+            print(record['pk'])
+            json_data.append(record)
     # Convert the list to a JSON string
-    json_string = json.dumps(json_data, indent=4, ensure_ascii=False)
-    print(json_string)
-
-    # Define the path to the output JSON file
-    json_file_path = os.path.join(os.path.dirname(__file__), 'day11.json')
-
-    # Write the JSON string to the output file
-    with open(json_file_path, 'w', encoding='utf-8') as json_file:
-        json_file.write(json_string)
-
-    print(f"Data has been successfully converted to JSON and saved to {json_file_path}")
+        json_string = json.dumps(json_data, indent=4, ensure_ascii=False)
+        # print(json_string)
+        # Define the path to the output JSON file
+        json_file_path = os.path.join(os.path.dirname(__file__), f'{name}.json')
+        # Write the JSON string to the output file
+        with open(json_file_path, 'w', encoding='utf-8') as json_file:
+            json_file.write(json_string)
+        print(f"Data has been successfully converted to JSON and saved to {json_file_path}")
     return Response({'message': 'Hello, World!'})
 
 @api_view(["POST"])

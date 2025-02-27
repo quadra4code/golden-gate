@@ -1,21 +1,20 @@
 from rest_framework.permissions import BasePermission
 
-class CustomBasePermission(BasePermission):
-    """
-    Allows access to superuser
-    """
-
-    def has_permission(self, request, view):
-        return bool(request.user and request.user.is_superuser)
-
-
 class IsStaffUser(BasePermission):
     """
     Allows access only to all staff users.
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_staff)
+        return bool((request.user and request.user.is_staff) or (request.user and request.user.is_superuser))
+
+class IsManagerOrAdminUser(BasePermission):
+    """
+    Allows access only to manager or admin users.
+    """
+
+    def has_permission(self, request, view):
+        return bool((request.user and request.user.groups.filter(name='Manager')) or (request.user and request.user.groups.filter(name='Admin')) or (request.user and request.user.is_superuser))
 
 class IsManagerUser(BasePermission):
     """
@@ -23,7 +22,7 @@ class IsManagerUser(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.groups.filter(name='Manager'))
+        return bool((request.user and request.user.groups.filter(name='Manager')) or (request.user and request.user.is_superuser))
     
 
 class IsAdminUser(BasePermission):
@@ -32,7 +31,7 @@ class IsAdminUser(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.groups.filter(name='Admin'))
+        return bool((request.user and request.user.groups.filter(name='Admin')) or (request.user and request.user.is_superuser))
     
 
 class IsSalesUser(BasePermission):
@@ -41,4 +40,4 @@ class IsSalesUser(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.groups.filter(name='Sales'))
+        return bool((request.user and request.user.groups.filter(name='Sales')) or (request.user and request.user.is_superuser))

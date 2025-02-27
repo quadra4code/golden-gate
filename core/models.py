@@ -121,7 +121,7 @@ class UnitRequest(BaseEntity):
         ]
 
 class UnitFavorite(BaseEntity):
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['created_by', 'unit'], name='created_by_unit_favorite_unique_constraint', violation_error_message='لقد أضفت هذه الوحدة للمفضلة من قبل ولا يمكنك إضافتها مره أخرى')

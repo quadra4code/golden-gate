@@ -23,7 +23,7 @@ class CustomUser(AbstractUser):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    user_type = models.CharField(max_length=2, default='5')
+    user_type = models.CharField(max_length=2, choices=USER_TYPE_CHOICES, default='5')
     interested_city = models.CharField(max_length=40, null=True, blank=True)
     referral_code = models.CharField(max_length=12, unique=True, blank=True)
     referred_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='referrals')  # Who referred this user
@@ -33,7 +33,8 @@ class CustomUser(AbstractUser):
         return f"{self.first_name} {self.last_name}"
     
     def to_dict(self):
-        main_phone_number = self.userphonenumber_set.filter(is_main_number=True).first()
+        main_phone_number = UserPhoneNumber.objects.filter(created_by = self, is_main_number=True).first()
+        # main_phone_number = self.userphonenumber_set.filter(is_main_number=True).first()
         return {
             'id': self.id,
             'first_name': f"{self.first_name}",
@@ -65,7 +66,6 @@ class UserPhoneNumber(BaseEntity):
     phone_number = models.CharField(max_length=20, unique=True)
     phone_number_confirmed = models.BooleanField(default=False)
     is_main_number = models.BooleanField(default=False)
-    # user = models.ForeignKey(to=CustomUser, on_delete=models.PROTECT) use created_by field instead
 
     def __str__(self):
-        return f"Phone Number: {self.phone_number} | User Full Name: {self.user.first_name} {self.user.last_name}"
+        return f"Phone Number: {self.phone_number} | User Full Name: {self.created_by.get_full_name()}"

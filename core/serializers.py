@@ -188,9 +188,15 @@ class DrawResultSerializer(serializers.ModelSerializer):
         fields = ['id', 'winner_name', 'property_number', 'building_or_region', 'project_name', 'floor']
 
 class ContactUsSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField(read_only=True)
+    created_at = serializers.DateTimeField(format='%d-%b-%Y', read_only=True)
+    updated_at = serializers.DateTimeField(format='%d-%b-%Y', read_only=True)
     class Meta:
         model = models.ContactUs
-        fields = ['id', 'name', 'email', 'phone_number', 'message']
+        fields = ['id', 'name', 'email', 'phone_number', 'message', 'created_at', 'updated_at', 'status']
+    
+    def get_status(self, obj):
+        return {'id': obj.id, 'name': 'تم الحل' if obj.is_deleted else 'قائمة', 'code': 1 if obj.is_deleted else 0}
 
 class UnitFavoriteSerializer(serializers.ModelSerializer):
     created_by_id = serializers.IntegerField(min_value=1, write_only=True)
