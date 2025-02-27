@@ -3,11 +3,12 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from admindash import services
+from admindash import utils
 
 # Create your views here.
 
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([utils.IsManagerUser, utils.IsAdminUser])
 def paginated_staff_view(request):
     result = services.paginated_staff_service(request.data, request.headers)
     status_code = (
@@ -18,7 +19,7 @@ def paginated_staff_view(request):
     return Response(result.to_dict(), status=status_code)
 
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([utils.IsManagerUser, utils.IsAdminUser])
 def paginated_clients_view(request):
     result = services.paginated_clients_service(request.data)
     status_code = (
