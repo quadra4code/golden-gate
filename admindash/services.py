@@ -73,7 +73,7 @@ def staff_roles_service():
 def add_staff_service(request_data):
     result = ResultView()
     try:
-        role_id = request_data.pop('role_id')
+        # role_id = request_data.pop('role_id')
         new_staff = AdminSerializers.AddStaffSerializer(data=request_data)
         if new_staff.is_valid():
             new_staff.save()
@@ -82,7 +82,7 @@ def add_staff_service(request_data):
                     is_main_number=True,
                     created_by=new_staff.instance
                 )
-            client_group, created = Group.objects.get_or_create(id=role_id)
+            client_group, created = Group.objects.get_or_create(name=request_data.get('role_name'))
             new_staff.instance.groups.add(client_group)
             result.is_success = True
             result.msg = 'تم إضافة الموظف بنجاح'
@@ -200,13 +200,13 @@ def paginated_unit_requests_service(request_data):
             }
         }
         result.is_success = True
-        result.msg = 'تم جلب بيانات العملاء بنجاح'
+        result.msg = 'تم جلب بيانات الطلبات بنجاح'
     except ValueError as ve:
         result.msg = str(ve)
         result.is_success = True
     except Exception as e:
         logging.error(f'Unexpected error occurred: {str(e)}')
-        result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات العملاء'
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات الطلبات'
         result.data = {'errors': str(e)}
     finally:
         return result
@@ -230,15 +230,15 @@ def update_unit_status_service(unit_id, status_id, user_id):
         return result
 
 
-def hide_unit_service(unit_id, user_id):
+def toggle_unit_deleted_service(unit_id, user_id):
     result = ResultView()
     try:
         unit_obj = CoreModels.Unit.objects.get(id=unit_id)
-        unit_obj.is_deleted = True
+        unit_obj.is_deleted = not unit_obj.is_deleted
         unit_obj.updated_by_id = user_id
         unit_obj.save()
         result.is_success = True
-        result.msg = 'تم إخفاء الوحدة بنجاح'
+        result.msg = f'تم {'إخفاء' if unit_obj.is_deleted else 'إظهار'} الوحدة بنجاح'
     except CoreModels.Unit.DoesNotExist as e:
         result.msg = 'الوحدة غير موجودة'
         result.data = {'errors': str(e)}

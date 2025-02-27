@@ -84,6 +84,28 @@ def paginated_unit_requests_view(request):
     )
     return Response(result.to_dict(), status=status_code)
 
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def update_unit_status_view(request, unit_id, status_id):
+    result = services.update_unit_status_service(unit_id, status_id, request.user.id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def toggle_unit_deleted_view(request, unit_id):
+    result = services.toggle_unit_deleted_service(unit_id, request.user.id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+
 @api_view(['POST'])
 @permission_classes([utils.IsManagerOrAdminUser])
 def paginated_contact_msgs_view(request):

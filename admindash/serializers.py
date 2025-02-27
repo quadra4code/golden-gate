@@ -63,13 +63,23 @@ class AddStaffSerializer(serializers.ModelSerializer):
         return new_user
 
 class AllUnitRequestSerializer(serializers.ModelSerializer):
-    request_count = serializers.SerializerMethodField(read_only=True)
+    requests_count = serializers.SerializerMethodField(read_only=True)
+    unit_title = serializers.CharField(source='unit.title', read_only=True)
+    price_obj = serializers.SerializerMethodField(read_only=True)
     unit_status = serializers.CharField(source='unit.status.name', read_only=True)
+    created_at = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
     class Meta:
         model = CoreModels.UnitRequest
-        fields = ['id', 'unit', 'created_at', 'requests_count', 'unit_status']
+        fields = ['id', 'unit_title', 'price_obj', 'created_at', 'requests_count', 'unit_status']
     
-    def get_request_count(self, obj):
+    def get_requests_count(self, obj):
         return CoreModels.UnitRequest.objects.filter(unit=obj.unit).count()
+    
+    def get_price_obj(self, obj):
+        return (
+            {'price_type': 'سعر الأوفر', 'price': obj.unit.over_price} if obj.unit.over_price
+            else {'price_type': 'السعر الإجمالى', 'price': obj.unit.total_price} if obj.unit.total_price
+            else {'price_type': 'سعر المتر', 'price': obj.unit.meter_price}
+        ) 
 
 
