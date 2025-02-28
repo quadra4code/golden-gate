@@ -88,7 +88,7 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Unit
-        fields = ["id", "title", "city", "unit_type", "project", "area", "price", "status", "main_image"]
+        fields = ["id", "title", "city", "unit_type", "project", "area", "price_obj", "status", "main_image"]
 
     def get_main_image(self, obj):
         main_image = obj.unitimage_set.order_by("id").first()
@@ -96,12 +96,11 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
 
     def get_price_obj(self, obj):
         price = obj.over_price or obj.total_price or obj.meter_price
-        print(f'{price:,.0f}')
         price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
         return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': obj.get_currency_display()} if price else None
 
     def get_status(self, obj):
-        return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code} if obj.status else None
+        return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code, 'color': obj.status.color} if obj.status else None
 
 class UnitDetailsSerializer(serializers.ModelSerializer):
     unit_type = serializers.CharField(source="unit_type.name")
@@ -215,7 +214,7 @@ class UnitFavoriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.UnitFavorite
-        fields = ['id', 'unit', 'created_by_id', 'unit_id', "title", "city", "unit_type", "project", "area", "price", "status", "main_image"]
+        fields = ['id', 'unit', 'created_by_id', 'unit_id', "title", "city", "unit_type", "project", "area", "price_obj", "status", "main_image"]
     
     def get_main_image(self, obj):
         main_image = obj.unit.unitimage_set.order_by("id").first()
@@ -227,7 +226,7 @@ class UnitFavoriteSerializer(serializers.ModelSerializer):
         return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': obj.unit.get_currency_display()} if price else None
 
     def get_status(self, obj):
-        return {'id': obj.unit.status.id, 'name': obj.unit.status.name, 'code': obj.unit.status.code} if obj.unit.status else None
+        return {'id': obj.unit.status.id, 'name': obj.unit.status.name, 'code': obj.unit.status.code, 'color': obj.unit.status.color} if obj.unit.status else None
     
     def create(self, validated_data):
         unit_obj = models.Unit.objects.filter(id=validated_data.get('unit')).first()

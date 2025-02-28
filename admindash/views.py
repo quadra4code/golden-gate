@@ -75,8 +75,19 @@ def paginated_clients_view(request):
 
 @api_view(['POST'])
 @permission_classes([utils.IsManagerOrAdminUser])
-def paginated_unit_requests_view(request):
-    result = services.paginated_unit_requests_service(request.data)
+def paginated_units_view(request):
+    result = services.paginated_units_service(request.data)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def unit_requests_user_view(request, unit_id):
+    result = services.unit_requests_user_service(unit_id)
     status_code = (
         status.HTTP_200_OK if result.is_success
         else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')

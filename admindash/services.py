@@ -4,7 +4,6 @@ from django.contrib.auth.models import Group
 from core import serializers as CoreSerializers
 from admindash import serializers as AdminSerializers
 from core.base_models import ResultView
-from users.utils import extract_payload_from_jwt
 from django.db.models import Value, CharField, Q
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import StringAgg
@@ -174,28 +173,73 @@ def paginated_clients_service(request_data):
 # endregion
 
 # region unit
-def paginated_unit_requests_service(request_data):
+def unit_requests_user_service(unit_id):
+    result = ResultView()
+    try:
+        # page_number = request_data.get('page_number', 1)
+        # page_size = request_data.get('page_size', 10)
+        all_unit_requests_query = CoreModels.UnitRequest.objects.filter(unit__id=unit_id).order_by('created_at')
+        all_unit_requests_count = all_unit_requests_query.count()
+        if all_unit_requests_count <= 0:
+            raise ValueError('لا يوجد طلبات لهذه الوحدة')
+        # if all_unit_requests_count > page_size*(page_number-1):
+        #     all_requests_q = all_requests_q[page_size*(page_number-1):page_size*page_number]
+        # else:
+        #     all_requests_q = all_requests_q[page_size*int(all_unit_requests_count/page_size) if all_unit_requests_count%page_size!=0 else int(all_unit_requests_count/page_size)-1:]
+            # page_number = int(all_unit_requests_count/page_size) if all_unit_requests_count%page_size == 0 else int(all_unit_requests_count/page_size)+1
+        serialized_user_requests = AdminSerializers.UnitRequestSerializer(all_unit_requests_query, many=True)
+        any_unit = all_unit_requests_query.first().unit
+        price = any_unit.over_price if any_unit.over_price else any_unit.total_price if any_unit.total_price else any_unit.meter_price
+        price_type = 'سعر الأوفر' if any_unit.over_price else 'السعر الإجمالى' if any_unit.total_price else 'سعر المتر'
+        result.data = {
+            "users": serialized_user_requests.data,
+            "unit_data": {
+                'id': unit_id,
+                'title': any_unit.title,
+                'area': any_unit.area,
+                'price_obj': {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': any_unit.get_currency_display()}
+            }
+            # "pagination": {
+            #     "total_items": all_unit_requests_count,
+            #     "total_pages": all_unit_requests_count/int(all_unit_requests_count/page_size) if all_unit_requests_count%page_size == 0 else int(all_unit_requests_count/page_size)+1,
+            #     "current_page": page_number,
+            #     "has_next": True if all_unit_requests_count > page_size*page_number else False,
+            #     "has_previous": True if page_number > 1 else False
+            # }
+        }
+        result.is_success = True
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب طلبات هذه الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def paginated_units_service(request_data):
     result = ResultView()
     try:
         page_number = request_data.get('page_number', 1)
         page_size = request_data.get('page_size', 10)
-        all_requests_q = CoreModels.UnitRequest.objects.all()
-        all_requests_count = all_requests_q.count()
-        if all_requests_count <= 0:
+        all_units_q = CoreModels.Unit.objects.order_by('created_at')
+        all_units_count = all_units_q.count()
+        if all_units_count <= 0:
             raise ValueError('لا يوجد طلبات وحدات متاحة للعرض')
-        if all_requests_count > page_size*(page_number-1):
-            all_requests_q = all_requests_q[page_size*(page_number-1):page_size*page_number]
+        if all_units_count > page_size*(page_number-1):
+            all_units_q = all_units_q[page_size*(page_number-1):page_size*page_number]
         else:
-            all_requests_q = all_requests_q[page_size*int(all_requests_count/page_size) if all_requests_count%page_size!=0 else int(all_requests_count/page_size)-1:]
-            page_number = int(all_requests_count/page_size) if all_requests_count%page_size == 0 else int(all_requests_count/page_size)+1
-        serialized_units = AdminSerializers.AllUnitRequestSerializer(all_requests_q, many=True)
+            all_units_q = all_units_q[page_size*int(all_units_count/page_size) if all_units_count%page_size!=0 else int(all_units_count/page_size)-1:]
+            page_number = int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1
+        serialized_units = AdminSerializers.AllUnitSerializer(all_units_q, many=True)
         result.data = {
             "all": serialized_units.data,
+            "statuses": CoreModels.Status.objects.values('id', 'name', 'code', 'color'),
             "pagination": {
-                "total_items": all_requests_count,
-                "total_pages": all_requests_count/int(all_requests_count/page_size) if all_requests_count%page_size == 0 else int(all_requests_count/page_size)+1,
+                "total_items": all_units_count,
+                "total_pages": all_units_count/int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1,
                 "current_page": page_number,
-                "has_next": True if all_requests_count > page_size*page_number else False,
+                "has_next": True if all_units_count > page_size*page_number else False,
                 "has_previous": True if page_number > 1 else False
             }
         }
@@ -228,7 +272,6 @@ def update_unit_status_service(unit_id, status_id, user_id):
         result.data = {'errors': str(e)}
     finally:
         return result
-
 
 def toggle_unit_deleted_service(unit_id, user_id):
     result = ResultView()

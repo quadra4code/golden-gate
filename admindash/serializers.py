@@ -62,24 +62,51 @@ class AddStaffSerializer(serializers.ModelSerializer):
         new_user = super().create(validated_data)
         return new_user
 
-class AllUnitRequestSerializer(serializers.ModelSerializer):
+class AllUnitSerializer(serializers.ModelSerializer):
     requests_count = serializers.SerializerMethodField(read_only=True)
-    unit_title = serializers.CharField(source='unit.title', read_only=True)
     price_obj = serializers.SerializerMethodField(read_only=True)
-    unit_status = serializers.CharField(source='unit.status.name', read_only=True)
-    created_at = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
+    status_obj = serializers.SerializerMethodField(read_only=True)
+    created_at = serializers.DateTimeField(format="%Y-%m-%d", read_only=True) # '%d-%b-%Y' => 01-jan-2025 | "%Y-%m-%d" => 2025-1-1
+    hidden = serializers.BooleanField(source='is_deleted', read_only=True)
     class Meta:
-        model = CoreModels.UnitRequest
-        fields = ['id', 'unit_title', 'price_obj', 'created_at', 'requests_count', 'unit_status']
+        model = CoreModels.Unit
+        fields = ['id', 'title', 'price_obj', 'created_at', 'requests_count', 'status_obj', 'hidden']
     
     def get_requests_count(self, obj):
-        return CoreModels.UnitRequest.objects.filter(unit=obj.unit).count()
+        return CoreModels.UnitRequest.objects.filter(unit=obj).count()
     
     def get_price_obj(self, obj):
-        return (
-            {'price_type': 'سعر الأوفر', 'price': obj.unit.over_price} if obj.unit.over_price
-            else {'price_type': 'السعر الإجمالى', 'price': obj.unit.total_price} if obj.unit.total_price
-            else {'price_type': 'سعر المتر', 'price': obj.unit.meter_price}
-        ) 
+        price = obj.over_price if obj.over_price else obj.total_price if obj.total_price else obj.meter_price
+        price_type = 'سعر الأوفر' if obj.over_price else 'السعر الإجمالى' if obj.total_price else 'سعر المتر'
+        return {'price_type': price_type, 'price_value': price, 'currency': obj.currency}
+    
+    def get_status_obj(self, obj):
+        return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code, 'color': obj.status.color}
+
+class UnitRequestSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
+    client_data = serializers.SerializerMethodField(read_only=True)
+    class Meta:
+        model = CoreModels.UnitRequest
+        fields = ['id', 'created_at', 'client_data']
+
+    def get_client_data(self, obj):
+        return {
+            'id': obj.created_by.id,
+            'full_name': obj.created_by.get_full_name(),
+            'phone_numbers': [
+                {
+                    'phone_number_id': pn.id,
+                    'phone_number': pn.phone_number,
+                    'is_main': pn.is_main_number,
+                    'phone_number_confirmed': pn.phone_number_confirmed
+                }
+                for pn in UsersModels.UserPhoneNumber.objects.filter(created_by=obj.created_by).order_by('created_at')
+            ],
+            'email': obj.created_by.email,
+            'date_joined': obj.created_by.date_joined.strftime('%Y-%m-%d') if obj.created_by.date_joined else None
+        }
+
+
 
 
