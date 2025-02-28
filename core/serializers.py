@@ -98,7 +98,7 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
         price = obj.over_price or obj.total_price or obj.meter_price
         print(f'{price:,.0f}')
         price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
-        return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': obj.currency} if price else None
+        return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': obj.get_currency_display()} if price else None
 
     def get_status(self, obj):
         return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code} if obj.status else None
@@ -224,7 +224,7 @@ class UnitFavoriteSerializer(serializers.ModelSerializer):
     def get_price(self, obj):
         price = obj.unit.over_price or obj.unit.total_price or obj.unit.meter_price
         price_type = 'الأوفر' if obj.unit.over_price else 'الإجمالى' if obj.unit.total_price else 'سعر المتر'
-        return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': obj.unit.currency} if price else None
+        return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': obj.unit.get_currency_display()} if price else None
 
     def get_status(self, obj):
         return {'id': obj.unit.status.id, 'name': obj.unit.status.name, 'code': obj.unit.status.code} if obj.unit.status else None

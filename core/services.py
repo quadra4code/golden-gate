@@ -372,7 +372,7 @@ def home_featured_units_service():
                 "unit_type": unit.unit_type.name,
                 "project": unit.project.name,
                 "area": unit.area,
-                "price_obj": {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': unit.currency}
+                "price_obj": {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': unit.get_currency_display()}
             })
         result.data = units_data
         result.is_success = True
