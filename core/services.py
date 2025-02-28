@@ -364,6 +364,7 @@ def home_featured_units_service():
             raise ValueError('لا يوجد وحدات متاحة')
         for unit in units:
             price = unit.over_price if unit.over_price else unit.total_price if unit.total_price else unit.meter_price
+            price_type = 'الأوفر' if unit.over_price else 'الإجمالى' if unit.total_price else 'سعر المتر'
             units_data.append({
                 "id": unit.id,
                 "title": unit.title,
@@ -371,7 +372,7 @@ def home_featured_units_service():
                 "unit_type": unit.unit_type.name,
                 "project": unit.project.name,
                 "area": unit.area,
-                "price": '{:0,.2f}'.format(price)
+                "price_obj": {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': unit.currency}
             })
         result.data = units_data
         result.is_success = True
