@@ -144,6 +144,22 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code} if obj.status else None
+    
+    def to_representation(self, instance):
+        """Format price fields as '1,234,567' (no decimal places)."""
+        data = super().to_representation(instance)
+        price_fields = [
+            "paid_amount",
+            "remaining_amount",
+            "over_price",
+            "total_price",
+            "meter_price",
+            "first_installment_value",
+        ]
+        for field in price_fields:
+            if data.get(field) is not None:
+                data[field] = f"{data[field]:,.0f}"
+        return data
 
 class UnitRequestSerializer(serializers.Serializer):
     unit_id = serializers.IntegerField(min_value=1, write_only=True)
