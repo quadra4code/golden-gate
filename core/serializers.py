@@ -82,7 +82,7 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
     city = serializers.CharField(source="city.name")
     unit_type = serializers.CharField(source="unit_type.name")
     project = serializers.CharField(source="project.name")
-    price = serializers.SerializerMethodField()
+    price_obj = serializers.SerializerMethodField()
     main_image = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
 
@@ -94,7 +94,7 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
         main_image = obj.unitimage_set.order_by("id").first()
         return main_image.image.url if main_image else None
 
-    def get_price(self, obj):
+    def get_price_obj(self, obj):
         price = obj.over_price or obj.total_price or obj.meter_price
         print(f'{price:,.0f}')
         price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
@@ -209,7 +209,7 @@ class UnitFavoriteSerializer(serializers.ModelSerializer):
     unit_type = serializers.CharField(source='unit.unit_type.name', read_only=True)
     project = serializers.CharField(source='unit.project.name', read_only=True)
     area = serializers.FloatField(source='unit.area', read_only=True)
-    price = serializers.SerializerMethodField()
+    price_obj = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField(read_only=True)
     main_image = serializers.SerializerMethodField(read_only=True)
 
@@ -221,7 +221,7 @@ class UnitFavoriteSerializer(serializers.ModelSerializer):
         main_image = obj.unit.unitimage_set.order_by("id").first()
         return main_image.image.url if main_image else None
 
-    def get_price(self, obj):
+    def get_price_obj(self, obj):
         price = obj.unit.over_price or obj.unit.total_price or obj.unit.meter_price
         price_type = 'الأوفر' if obj.unit.over_price else 'الإجمالى' if obj.unit.total_price else 'سعر المتر'
         return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': obj.unit.get_currency_display()} if price else None
