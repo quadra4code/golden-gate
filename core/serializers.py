@@ -1,3 +1,4 @@
+from decimal import Decimal
 from rest_framework import serializers
 from core import models
 # Create your serializers here.
@@ -110,6 +111,7 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
     facade = serializers.CharField(source="get_facade_display")
     floor = serializers.CharField(source="get_floor_display")
     currency = serializers.CharField(source="get_currency_display")
+    favorite_count = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
 
@@ -129,6 +131,7 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
             "total_price",
             "meter_price",
             "currency",
+            "favorite_count",
             "status",
             "description",
             "floor",
@@ -144,7 +147,10 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code} if obj.status else None
-    
+
+    def get_favorite_count(self, obj):
+        return obj.unitfavorite_set.count()
+
     def to_representation(self, instance):
         """Format price fields as '1,234,567' (no decimal places)."""
         data = super().to_representation(instance)
@@ -158,7 +164,8 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
         ]
         for field in price_fields:
             if data.get(field) is not None:
-                data[field] = f"{data[field]:,.0f}"
+                value = getattr(instance, field, None)
+                data[field] = f"{value:,.0f}"
         return data
 
 class UnitRequestSerializer(serializers.Serializer):
