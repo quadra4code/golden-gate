@@ -259,6 +259,45 @@ def unit_details_service(unit_id):
     finally:
         return result
 
+def paginated_client_units_service(request_data, client_id):
+    result = ResultView()
+    try:
+        page_number = request_data.get('page_number', 1)
+        page_size = request_data.get('page_size', 1)
+        client_units = models.Unit.objects.filter(created_by__id=client_id, is_deleted=False)
+        client_units_count = client_units.count()
+        if client_units_count <= 0:
+            raise ValueError('لا يوجد وحدات متاحة')
+        if client_units_count > page_size*(page_number-1):
+            client_units = client_units[page_size*(page_number-1):page_size*page_number]
+        else:
+            client_units = client_units[page_size*int(client_units_count/page_size) if client_units_count%page_size!=0 else int(client_units_count/page_size)-1:]
+            page_number = int(client_units_count/page_size) if client_units_count%page_size == 0 else int(client_units_count/page_size)+1
+        serialized_client_units = serializers.GetAllUnitsSerializer(client_units, many=True)
+        result.data = {
+            "all": serialized_client_units.data,
+            "pagination": {
+                "total_items": client_units_count,
+                "total_pages": client_units_count/int(client_units_count/page_size) if client_units_count%page_size == 0 else int(client_units_count/page_size)+1,
+                "current_page": page_number,
+                "has_next": True if client_units_count > page_size*page_number else False,
+                "has_previous": True if page_number > 1 else False
+            }
+        }
+        result.is_success = True
+        result.msg = 'Success'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+        result.data = {
+            "all": []
+        }
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
+        result.data = {'error': str(e)}
+    finally:
+        return result
+
 def client_paginated_units_service(request_data, request_headers):
     result = ResultView()
     try:
