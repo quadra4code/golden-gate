@@ -122,31 +122,6 @@ def login_user_service(login_data):
     finally:
         return result
 
-# def login_admin_service(username, password):
-#     result = ResultView()
-#     try:
-#         print('in try')
-#         if username and password:
-#             print('there is username and password')
-#             user = CustomUser.objects.get(username=username)
-#             print('user found and it\'s', user, sep='=>')
-#             if user.check_password(password):
-#                 print('password is correct')
-#                 result.data = user
-#                 result.msg = f'User {user.username} logged in successfully'
-#                 result.is_success = True
-#             else:
-#                 print('password is not correct')
-#                 result.msg = 'Invalid Credentials'
-#         else:
-#             print('either username or password is missing')
-#             result.msg = 'Username & Password are required' if not (username or password) else 'Username is required' if password else 'Password is required'
-#     except Exception as e:
-#         result.msg = f'Unexpected error happened while logging user {username} in.'
-#         result.data = {'error': str(e)}
-#     finally:
-#         return result
-
 def change_password_service(request):
     result = ResultView()
     try:

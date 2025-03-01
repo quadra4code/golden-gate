@@ -7,11 +7,74 @@ from core.base_models import ResultView
 from django.db.models import Value, CharField, Q
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import StringAgg
+from django.contrib.auth import authenticate
+from users.utils import generate_jwt_token
 import logging
 
 # Create your services here.
 
 # region staff
+def staff_login_service(request_data):
+    result = ResultView()
+    logger = logging.getLogger(__name__)
+    try:
+        username = request_data.get('username', '').strip()
+        password = request_data.get('password', '').strip()
+        if not username or not password:
+            result.msg = 'رقم الهاتف مطلوب' if password else 'كلمة السر مطلوبة' if username  else 'رقم الهاتف وكلمة السر مطلوبين'
+        else:
+            user_to_auth = authenticate(username=username, password=password)
+            if user_to_auth is None:
+                logger.warning(f"Failed login attempt for username {username}.")
+                result.msg = 'خطأ فى بيانات الحساب'
+            elif user_to_auth.is_staff == False:
+                result.msg = 'هذا المستخدم غير مصرح له بالدخول'
+            elif not user_to_auth.is_active:
+                result.msg = 'الحساب غير مفعل؛ برجاء التواصل مع الدعم'
+            else:
+                logger.info(f"User {user_to_auth.username} logged in successfully.")
+                token_obj = generate_jwt_token(user_to_auth)
+                result.msg = 'تم تسجيل الدخول بنجاح'
+                result.data = {
+                    'refresh_token': token_obj.get('refresh'),
+                    'access_token': token_obj.get('access'),
+                    'user': {
+                        'id': user_to_auth.id,
+                        'username': user_to_auth.username,
+                        'full_name': user_to_auth.first_name,
+                        'referral_code': user_to_auth.referral_code,
+                        'role': ' | '.join(([gr.name for gr in user_to_auth.groups.all()])).strip() if user_to_auth.groups.exists() else 'No Role'
+                    }
+                }
+                result.is_success = True
+            # serialized_login_data = LoginSerializer(data=request_data)
+            # if serialized_login_data.is_valid():
+            # else:
+                # result.msg = 'حدث خطأ أثناء معالجة البيانات'
+                # result.data = {'errors': serialized_login_data.errors, 'error messages': serialized_login_data.error_messages}
+    except Exception as e:
+        result.msg = f'حدث خطأ أثناء تسجيل الدخول للمستخدم {username}.'
+        result.data = {'error': str(e)}
+    finally:
+        return result
+    # result = ResultView()
+    # try:
+    #     if username and password:
+    #         user = UsersModels.CustomUser.objects.get(username=username)
+    #         if user.check_password(password):
+    #             result.data = user
+    #             result.msg = f'User {user.username} logged in successfully'
+    #             result.is_success = True
+    #         else:
+    #             result.msg = 'Invalid Credentials'
+    #     else:
+    #         result.msg = 'Username & Password are required' if not (username or password) else 'Username is required' if password else 'Password is required'
+    # except Exception as e:
+    #     result.msg = f'Unexpected error happened while logging user {username} in.'
+    #     result.data = {'error': str(e)}
+    # finally:
+    #     return result
+
 def paginated_staff_service(request_data):
     result = ResultView()
     try:
@@ -142,7 +205,7 @@ def paginated_clients_service(request_data):
     try:
         page_number = request_data.get('page_number', 1)
         page_size = request_data.get('page_size', 10)
-        all_clients_q = UsersModels.CustomUser.objects.filter(groups__name='Clients')
+        all_clients_q = UsersModels.CustomUser.objects.filter(groups__name='Client')
         all_clients_count = all_clients_q.count()
         if all_clients_count <= 0:
             raise ValueError('لا يوجد عملاء للعرض')
@@ -164,6 +227,10 @@ def paginated_clients_service(request_data):
         }
         result.is_success = True
         result.msg = 'تم جلب بيانات العملاء بنجاح'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+        result.data = []
     except Exception as e:
         logging.error(f'Unexpected error occurred: {str(e)}')
         result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات العملاء'

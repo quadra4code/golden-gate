@@ -8,6 +8,16 @@ from admindash import utils
 # Create your views here.
 
 @api_view(['POST'])
+def staff_login_view(request):
+    result = services.staff_login_service(request.data)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_403_FORBIDDEN if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['POST'])
 @permission_classes([utils.IsManagerOrAdminUser])
 def paginated_staff_view(request):
     result = services.paginated_staff_service(request.data)
