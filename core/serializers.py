@@ -32,10 +32,7 @@ class CreateUnitSerializer(serializers.Serializer):
         '14',
         '15',
     ]
-    CURRENCY_CHOICES = [
-        ('EGP', 'جنيه مصرى'),
-        ('USD', 'دولار'),
-    ]
+    CURRENCY_CHOICES = ['EGP', 'USD']
     
     id = serializers.IntegerField(read_only=True)
     unit_type_id = serializers.CharField(max_length=1)
@@ -46,11 +43,16 @@ class CreateUnitSerializer(serializers.Serializer):
     building_number = serializers.CharField(max_length=150, required=False, allow_null=True)
     area = serializers.FloatField()
     paid_amount = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
+    paid_amount_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP', required=False, allow_null=True)
     remaining_amount = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
+    remaining_amount_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP', required=False, allow_null=True)
     over_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
+    over_price_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP', required=False, allow_null=True)
     total_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
+    total_price_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP', required=False, allow_null=True)
     meter_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
-    currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP')
+    meter_price_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP', required=False, allow_null=True)
+    # currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP')
     title = serializers.CharField(max_length=200, required=False, allow_blank=True, allow_null=True)
     phone_number = serializers.CharField(max_length=20)
     description = serializers.CharField(max_length=1000, required=False, allow_blank=True, allow_null=True)
@@ -59,6 +61,7 @@ class CreateUnitSerializer(serializers.Serializer):
     payment_method = serializers.CharField(max_length=150, required=False, allow_null=True)
     installment_period = serializers.CharField(max_length=150, required=False, allow_null=True)
     first_installment_value = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
+    first_installment_value_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP', required=False, allow_null=True)
     created_by_id = serializers.IntegerField(min_value=1)
 
     def is_valid(self, *, raise_exception=False):
@@ -98,7 +101,8 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
     def get_price_obj(self, obj):
         price = obj.over_price or obj.total_price or obj.meter_price
         price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
-        return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': obj.get_currency_display()} if price else None
+        currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
+        return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': currency} if price else None
 
     def get_status(self, obj):
         return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code, 'color': obj.status.color} if obj.status else None
@@ -110,7 +114,7 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
     city = serializers.CharField(source="city.name")
     facade = serializers.CharField(source="get_facade_display")
     floor = serializers.CharField(source="get_floor_display")
-    currency = serializers.CharField(source="get_currency_display")
+    # currency = serializers.CharField(source="get_currency_display")
     favorite_count = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
@@ -126,11 +130,16 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
             "city",
             "area",
             "paid_amount",
+            "paid_amount_currency",
             "remaining_amount",
+            "remaining_amount_currency",
             "over_price",
+            "over_price_currency",
             "total_price",
+            "total_price_currency",
             "meter_price",
-            "currency",
+            "meter_price_currency",
+            # "currency",
             "favorite_count",
             "status",
             "description",
@@ -138,6 +147,7 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
             "facade",
             "payment_method",
             "first_installment_value",
+            "first_installment_value_currency",
             "installment_period",
             "images"
         ]
@@ -246,7 +256,8 @@ class UnitFavoriteSerializer(serializers.ModelSerializer):
     def get_price_obj(self, obj):
         price = obj.unit.over_price or obj.unit.total_price or obj.unit.meter_price
         price_type = 'الأوفر' if obj.unit.over_price else 'الإجمالى' if obj.unit.total_price else 'سعر المتر'
-        return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': obj.unit.get_currency_display()} if price else None
+        currency = obj.unit.get_over_price_currency_display() if obj.unit.over_price else obj.unit.get_total_price_currency_display() if obj.unit.total_price else obj.unit.get_meter_price_currency_display()
+        return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': currency} if price else None
 
     def get_status(self, obj):
         return {'id': obj.unit.status.id, 'name': obj.unit.status.name, 'code': obj.unit.status.code, 'color': obj.unit.status.color} if obj.unit.status else None

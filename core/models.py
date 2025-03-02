@@ -85,18 +85,25 @@ class Unit(BaseEntity):
     installment_period = models.CharField(max_length=150, null=True, blank=True)
     # installment_period = models.PositiveIntegerField(null=True)
     first_installment_value = models.DecimalField(decimal_places=4, max_digits=16, null=True)
+    first_installment_value_currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='EGP', null=True)
     paid_amount = models.DecimalField(decimal_places=4, max_digits=16, null=True)
+    paid_amount_currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='EGP', null=True)
     remaining_amount = models.DecimalField(decimal_places=4, max_digits=16, null=True)
+    remaining_amount_currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='EGP', null=True)
     over_price = models.DecimalField(decimal_places=4, max_digits=16, null=True)
+    over_price_currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='EGP', null=True)
     total_price = models.DecimalField(decimal_places=4, max_digits=16, null=True)
+    total_price_currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='EGP', null=True)
     meter_price = models.DecimalField(decimal_places=4, max_digits=16, null=True)
+    meter_price_currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='EGP', null=True)
     # meter_distinct_price = models.DecimalField(decimal_places=4, max_digits=16, null=True)
-    currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='EGP')
+    # currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='EGP')
     status = models.ForeignKey(Status, on_delete=models.PROTECT)
     phone_number = models.CharField(max_length=20)
     facade = models.CharField(max_length=1, choices=FACADE_CHOICES, null=True)
     floor = models.CharField(max_length=2, choices=FLOOR_CHOICES, null=True)
     featured = models.BooleanField(default=False)
+    view_count = models.PositiveIntegerField(default=0)
 
     def clean(self):
         """Ensure at least one price field is provided."""
@@ -106,6 +113,19 @@ class Unit(BaseEntity):
     def save(self, *args, **kwargs):
         """Call the clean method before saving."""
         self.clean()
+        price_fields = [
+            ('first_installment_value', 'first_installment_value_currency'),
+            ('paid_amount', 'paid_amount_currency'),
+            ('remaining_amount', 'remaining_amount_currency'),
+            ('over_price', 'over_price_currency'),
+            ('total_price', 'total_price_currency'),
+            ('meter_price', 'meter_price_currency'),
+        ]
+        for price_field, currency_field in price_fields:
+            if getattr(self, price_field) is None:
+                setattr(self, currency_field, None)
+            elif getattr(self, currency_field) is None:
+                setattr(self, currency_field, "EGP")
         super().save(*args, **kwargs)
 
 class UnitImage(BaseEntity):
@@ -114,7 +134,7 @@ class UnitImage(BaseEntity):
     # image = models.ImageField(upload_to='units_images/')
 
 class UnitRequest(BaseEntity):
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['created_by', 'unit'], name='created_by_unit_request_unique_constraint', violation_error_message='لقد طلبت هذه الوحدة من قبل ولا يمكنك طلبها مره أخرى')

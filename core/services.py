@@ -1,15 +1,17 @@
 from datetime import timedelta
+import cloudinary.uploader
 from django.utils import timezone
 from core import models
 from core import serializers
 from core.base_models import ResultView
 from users.utils import extract_payload_from_jwt
-from django.db.models import Min, Max, F, Value, DecimalField
+from django.db.models import Min, Max, F, Value, DecimalField, Q
 from django.db.models.functions import Least, Greatest, Coalesce
 import logging
 
 # Create your services here.
 
+# region Units
 def propose_unit_service(request_data, request_headers):
     result = ResultView()
     logger = logging.getLogger(__name__)
@@ -151,9 +153,11 @@ def filter_paginated_units_service(request_data):
         max_price = request_data.get('max_price')
         min_area = request_data.get('min_area')
         max_area = request_data.get('max_area')
-        # payment_method = request_data.get('payment_method')
+        currency = request_data.get('currency')
         facade = request_data.get('facade')
-        floor = request_data.get('payment_method')
+        floor = request_data.get('floor')
+        featured = request_data.get('featured')
+        most_viewed = request_data.get('most_viewed')
         page_number = int(request_data.get('page_number', 1))
         page_size = int(request_data.get('page_size', 12))
         filters = {
@@ -194,36 +198,90 @@ def filter_paginated_units_service(request_data):
             filters['project__id'] = project_id
         if city_id:
             filters['city__id'] = city_id
-        if min_price and max_price:
-            filters['price__gte'] = min_price
-            filters['price__lte'] = max_price
+        # if min_price and max_price:
+        #     filters['first_installment_value__gte'] = min_price
+        #     filters['paid_amount__gte'] = min_price
+        #     filters['remaining_amount__gte'] = min_price
+        #     filters['over_price__gte'] = min_price
+        #     filters['total_price__gte'] = min_price
+        #     filters['meter_price__gte'] = min_price
+        #     filters['first_installment_value__lte'] = max_price
+        #     filters['paid_amount__lte'] = max_price
+        #     filters['remaining_amount__lte'] = max_price
+        #     filters['over_price__lte'] = max_price
+        #     filters['total_price__lte'] = max_price
+        #     filters['meter_price__lte'] = max_price
         if min_area and max_area:
             filters['area__gte'] = min_area
             filters['area__lte'] = max_area
-        # if payment_method:
-        #     filters['payment_method'] = payment_method
+        # if currency:
+        #     filters['first_installment_value_currency'] = currency
+        #     filters['paid_amount_currency'] = currency
+        #     filters['remaining_amount_currency'] = currency
+        #     filters['over_price_currency'] = currency
+        #     filters['total_price_currency'] = currency
+        #     filters['meter_price_currency'] = currency
+        currency_filter = Q()
+        if currency:
+            currency_filter |= Q(first_installment_value_currency=currency)
+            currency_filter |= Q(paid_amount_currency=currency)
+            currency_filter |= Q(remaining_amount_currency=currency)
+            currency_filter |= Q(over_price_currency=currency)
+            currency_filter |= Q(total_price_currency=currency)
+            currency_filter |= Q(meter_price_currency=currency)
         if facade:
             filters['facade'] = facade
         if floor:
             filters['floor'] = floor
+        if featured:
+            filters['featured'] = featured
+        # Price filtering with OR condition
+        price_filter = Q()
+        if min_price is not None:
+            price_filter |= Q(first_installment_value__gte=min_price)
+            price_filter |= Q(paid_amount__gte=min_price)
+            price_filter |= Q(remaining_amount__gte=min_price)
+            price_filter |= Q(over_price__gte=min_price)
+            price_filter |= Q(total_price__gte=min_price)
+            price_filter |= Q(meter_price__gte=min_price)
+        if max_price is not None:
+            price_filter &= (
+                Q(first_installment_value__lte=max_price) |
+                Q(paid_amount__lte=max_price) |
+                Q(remaining_amount__lte=max_price) |
+                Q(over_price__lte=max_price) |
+                Q(total_price__lte=max_price) |
+                Q(meter_price__lte=max_price)
+            )
         units = models.Unit.objects.filter(**filters)
+        if min_price is not None or max_price is not None:
+            units = units.filter(price_filter)
+        if most_viewed:
+            units = units.order_by('-view_count')
         all_units_count = units.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد وحدات متاحة')
-        if all_units_count > page_size*(page_number-1):
-            units = units[page_size*(page_number-1):page_size*page_number]
-        else:
-            units = units[page_size*int(all_units_count/page_size) if all_units_count%page_size!=0 else int(all_units_count/page_size)-1:]
-            page_number = int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1
+        total_pages = (all_units_count + page_size - 1) // page_size
+        page_number = min(page_number, total_pages)
+        start_index = (page_number - 1) * page_size
+        end_index = start_index + page_size
+        units = units[start_index:end_index]
+        # if all_units_count > page_size*(page_number-1):
+        #     units = units[page_size*(page_number-1):page_size*page_number]
+        # else:
+        #     units = units[page_size*int(all_units_count/page_size) if all_units_count%page_size!=0 else int(all_units_count/page_size)-1:]
+        #     page_number = int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1
         serialized_units = serializers.GetAllUnitsSerializer(units, many=True)
         result.data = {
             "all": serialized_units.data,
             "pagination": {
                 "total_items": all_units_count,
-                "total_pages": all_units_count/int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1,
+                "total_pages": total_pages,
+                # "total_pages": all_units_count/int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1,
                 "current_page": page_number,
-                "has_next": True if all_units_count > page_size*page_number else False,
-                "has_previous": True if page_number > 1 else False
+                "has_next": page_number < total_pages,
+                # "has_next": True if all_units_count > page_size*page_number else False,
+                "has_previous": page_number > 1
             }
         }
         result.is_success = True
@@ -246,6 +304,8 @@ def unit_details_service(unit_id):
         unit = models.Unit.objects.filter(is_deleted=False, id=unit_id).first()
         if not unit:
             raise ValueError('الوحدة غير موجودة')
+        unit.view_count += 1
+        unit.save()
         serialized_unit = serializers.UnitDetailsSerializer(unit)
         result.data = serialized_unit.data
         result.is_success = True
@@ -262,67 +322,33 @@ def unit_details_service(unit_id):
 def paginated_client_units_service(request_data, client_id):
     result = ResultView()
     try:
+        # token = request_headers.get('Authorization', '')
+        # token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
         page_number = request_data.get('page_number', 1)
-        page_size = request_data.get('page_size', 1)
-        client_units = models.Unit.objects.filter(created_by__id=client_id, is_deleted=False)
-        client_units_count = client_units.count()
-        if client_units_count <= 0:
-            raise ValueError('لا يوجد وحدات متاحة')
-        if client_units_count > page_size*(page_number-1):
-            client_units = client_units[page_size*(page_number-1):page_size*page_number]
-        else:
-            client_units = client_units[page_size*int(client_units_count/page_size) if client_units_count%page_size!=0 else int(client_units_count/page_size)-1:]
-            page_number = int(client_units_count/page_size) if client_units_count%page_size == 0 else int(client_units_count/page_size)+1
-        serialized_client_units = serializers.GetAllUnitsSerializer(client_units, many=True)
-        result.data = {
-            "all": serialized_client_units.data,
-            "pagination": {
-                "total_items": client_units_count,
-                "total_pages": client_units_count/int(client_units_count/page_size) if client_units_count%page_size == 0 else int(client_units_count/page_size)+1,
-                "current_page": page_number,
-                "has_next": True if client_units_count > page_size*page_number else False,
-                "has_previous": True if page_number > 1 else False
-            }
-        }
-        result.is_success = True
-        result.msg = 'Success'
-    except ValueError as ve:
-        result.msg = str(ve)
-        result.is_success = True
-        result.data = {
-            "all": []
-        }
-    except Exception as e:
-        result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
-        result.data = {'error': str(e)}
-    finally:
-        return result
-
-def client_paginated_units_service(request_data, request_headers):
-    result = ResultView()
-    try:
-        token = request_headers.get('Authorization', '')
-        token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
-        page_number = int(request_data.get('page_number', 1))
-        page_size = int(request_data.get('page_size', 12))
-        units = models.Unit.objects.filter(is_deleted=False, created_by_id=token_decode_result.get('user_id'))
+        page_size = request_data.get('page_size', 12)
+        units = models.Unit.objects.filter(is_deleted=False, created_by_id=client_id)
         all_units_count = units.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد وحدات متاحة')
-        if all_units_count > page_size*(page_number-1):
-            units = units[page_size*(page_number-1):page_size*page_number]
-        else:
-            units = units[page_size*int(all_units_count/page_size) if all_units_count%page_size!=0 else int(all_units_count/page_size)-1:]
-            page_number = int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1
+        # if all_units_count > page_size*(page_number-1):
+        #     units = units[page_size*(page_number-1):page_size*page_number]
+        # else:
+        #     units = units[page_size*int(all_units_count/page_size) if all_units_count%page_size!=0 else int(all_units_count/page_size)-1:]
+        #     page_number = int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1
+        total_pages = (all_units_count + page_size - 1) // page_size
+        page_number = min(page_number, total_pages)
+        start_index = (page_number - 1) * page_size
+        end_index = start_index + page_size
+        units = units[start_index:end_index]
         serialized_units = serializers.GetAllUnitsSerializer(units, many=True)
         result.data = {
             "all": serialized_units.data,
             "pagination": {
                 "total_items": all_units_count,
-                "total_pages": all_units_count/int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1,
+                "total_pages": total_pages,
                 "current_page": page_number,
-                "has_next": True if all_units_count > page_size*page_number else False,
-                "has_previous": True if page_number > 1 else False
+                "has_next": page_number < total_pages,
+                "has_previous": page_number > 1
             }
         }
         result.is_success = True
@@ -339,6 +365,43 @@ def client_paginated_units_service(request_data, request_headers):
     finally:
         return result
 
+
+def hard_delete_unit_service(unit_id):
+    result = ResultView()
+    try:
+        unit_obj = models.Unit.objects.get(id=unit_id)
+        allimgs = unit_obj.unitimage_set.all()
+        print(allimgs)
+        counter = 0
+        for img in allimgs:
+            counter += 1
+            print(f"img number {counter} is {img}")
+            if img.image:
+                print(f'found image inside img number {counter} and here it is {img.image} and that\'s the public id => {img.image.public_id} and we r gonna destroy it')
+                api_call_res = cloudinary.uploader.destroy(img.image.public_id)
+                print('destroyed it successfully, moving to next one')
+                print(f'and here is the api call result => {api_call_res}')
+            else:
+                print(f'didn\'t find image inside img number {counter} instead it\'s {img.image} so we skip')
+        print(f'finished destroying all images in for loop now to delete all the images query from db and here it is before deleting => {allimgs}')
+        allimgs.delete()
+        print(f'deleted all imgs from db successfully and here it is after deleting => {allimgs}')
+        print(f'now to delete the unit itself => {unit_obj}')
+        unit_obj.delete()
+        print(f'deleted the unit itself successfully, after deletion => {unit_obj}')
+        result.is_success = True
+        result.msg = 'تم حذف الوحدة بنجاح'
+    except models.Unit.DoesNotExist as e:
+        result.msg = 'الوحدة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حذف الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+# endregion
+
+# region Home
 def home_reviews_service():
     result = ResultView()
     try:
@@ -398,33 +461,42 @@ def home_featured_units_service():
     result = ResultView()
     try:
         units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2], featured=True)
-        units_data = []
         if units.count() <= 0:
             raise ValueError('لا يوجد وحدات متاحة')
-        for unit in units:
-            price = unit.over_price if unit.over_price else unit.total_price if unit.total_price else unit.meter_price
-            price_type = 'الأوفر' if unit.over_price else 'الإجمالى' if unit.total_price else 'سعر المتر'
-            units_data.append({
-                "id": unit.id,
-                "title": unit.title,
-                "city": unit.city.name,
-                "unit_type": unit.unit_type.name,
-                "project": unit.project.name,
-                "area": unit.area,
-                "price_obj": {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': unit.get_currency_display()}
-            })
-        result.data = units_data
+        serialized_featured_units = serializers.GetAllUnitsSerializer(units, many=True)
+        result.data = serialized_featured_units.data
         result.is_success = True
         result.msg = 'Success'
     except ValueError as ve:
         result.msg = str(ve)
         result.is_success = True
     except Exception as e:
-        result.msg = 'Unexpected error happened while saving request'
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب الوحدات المميزة'
         result.data = {'error': str(e)}
     finally:
         return result
 
+def home_most_viewed_units_service():
+    result = ResultView()
+    try:
+        most_viewed_units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2]).order_by('-view_count')[:12]
+        if most_viewed_units.count() <= 0:
+            raise ValueError('لا يوجد وحدات متاحة')
+        serialized_most_viewed_units = serializers.GetAllUnitsSerializer(most_viewed_units, many=True)
+        result.data = serialized_most_viewed_units.data
+        result.is_success = True
+        result.msg = 'Success'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب الوحدات الأكثر عرضاً'
+        result.data = {'error': str(e)}
+    finally:
+        return result
+# endregion
+
+# region Draw Results | Reviews | Contact Us
 def draw_results_service(request_data):
     result = ResultView()
     try:
@@ -490,7 +562,9 @@ def add_contact_us_msg_service(request_data):
         result.data = {'error': str(e)}
     finally:
         return result
+# endregion
 
+# region Favorites
 def add_favorite_service(request_data, request_headers):
     result = ResultView()
     try:
@@ -528,15 +602,20 @@ def list_favorites_service(request_data, request_headers):
         else:
             fav_units = fav_units[page_size*int(all_fav_units_count/page_size) if all_fav_units_count%page_size!=0 else int(all_fav_units_count/page_size)-1:]
             page_number = int(all_fav_units_count/page_size) if all_fav_units_count%page_size == 0 else int(all_fav_units_count/page_size)+1
+        total_pages = (all_fav_units_count + page_size - 1) // page_size
+        page_number = min(page_number, total_pages)
+        start_index = (page_number - 1) * page_size
+        end_index = start_index + page_size
+        fav_units = fav_units[start_index:end_index]
         serialized_units = serializers.UnitFavoriteSerializer(fav_units, many=True)
         result.data = {
             "all": serialized_units.data,
             "pagination": {
                 "total_items": all_fav_units_count,
-                "total_pages": all_fav_units_count/int(all_fav_units_count/page_size) if all_fav_units_count%page_size == 0 else int(all_fav_units_count/page_size)+1,
+                "total_pages": total_pages,
                 "current_page": page_number,
-                "has_next": True if all_fav_units_count > page_size*page_number else False,
-                "has_previous": True if page_number > 1 else False
+                "has_next": page_number < total_pages,
+                "has_previous": page_number > 1
             }
         }
         result.is_success = True
@@ -566,28 +645,7 @@ def delete_favorite_service(favorite_id):
         result.data = {'error': str(e)}
     finally:
         return result
+# endregion
 
-# def add_draw_result_service(request_data, request_headers):
-#     result = ResultView()
-#     try:
-#         token = request_headers.get('Authorization', '')
-#         token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
-#         request_data['created_by_id'] = str(token_decode_result.get('user_id'))
-#         if 'Admin' not in token_decode_result.get('roles'):
-#             result.msg = 'Unauthorized user, only admins can access'
-#         else:
-#             serialized_draw_result = serializers.DrawResultSerializer(data=request_data)
-#             if serialized_draw_result.is_valid():
-#                 serialized_draw_result.save()
-#                 result.data = serialized_draw_result.data
-#                 result.is_success = True
-#                 result.msg = "Request saved successfully"
-#             else:
-#                 result.msg = "Error occured while serializing data"
-#                 result.data = serialized_draw_result.errors
-#     except Exception as e:
-#         result.msg = 'Unexpected error happened while fetching data'
-#         result.data = {'error': str(e)}
-#     finally:
-#         return result
+
 

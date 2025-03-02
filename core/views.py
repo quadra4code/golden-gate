@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from core import services
 
 # Create your views here.
@@ -91,6 +91,7 @@ def createjson(request):
     print(f"Data has been successfully converted to JSON and saved to {json_file_path}")
     return Response({'message': 'Hello, World!'})
 
+# region Units
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def propose_unit_view(request):
@@ -124,16 +125,6 @@ def proposal_form_data_view(request):
     )
     return Response(form_data_result.to_dict(), status=status_code)
 
-# @api_view(["GET"])
-# def all_units_view(request):
-#     all_units_result = services.all_units_service()
-#     status_code = (
-#         status.HTTP_200_OK if all_units_result.is_success
-#         else status.HTTP_401_UNAUTHORIZED if all_units_result.msg.lower().__contains__('unauthorized')
-#         else status.HTTP_500_INTERNAL_SERVER_ERROR
-#     )
-#     return Response(all_units_result.to_dict(), status=status_code)
-
 @api_view(["GET"])
 def recent_units_view(request):
     recent_units_result = services.recent_units_service()
@@ -143,16 +134,6 @@ def recent_units_view(request):
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(recent_units_result.to_dict(), status=status_code)
-
-# @api_view(["POST"])
-# def filter_units_view(request):
-    # filter_units_result = services.filter_units_service(request.data)
-    # status_code = (
-    #     status.HTTP_201_CREATED if filter_units_result.is_success
-    #     else status.HTTP_401_UNAUTHORIZED if filter_units_result.msg.lower().__contains__('unauthorized')
-    #     else status.HTTP_500_INTERNAL_SERVER_ERROR
-    # )
-    # return Response(filter_units_result.to_dict(), status=status_code)
 
 @api_view(["POST"])
 def filter_paginated_units_view(request):
@@ -174,14 +155,29 @@ def unit_details_view(request, unit_id):
     return Response(unit_details_result.to_dict(), status=status_code)
 
 @api_view(["POST"])
-def paginated_client_units_view(request, client_id):
-    paginated_client_units_result = services.paginated_client_units_service(client_id)
+@permission_classes([IsAuthenticated])
+def paginated_client_units_view(request):
+    print(request.user)
+    paginated_client_units_result = services.paginated_client_units_service(request.data, request.user.id if request.user else None)
     status_code = (
         status.HTTP_200_OK if paginated_client_units_result.is_success
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(paginated_client_units_result.to_dict(), status=status_code)
 
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def hard_delete_unit_view(request, unit_id):
+    result = services.hard_delete_unit_service(unit_id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+# endregion
+
+# region Home
 @api_view(["GET"])
 def home_top_reviews_view(request):
     reviews_result = services.home_reviews_service()
@@ -227,6 +223,17 @@ def home_featured_units_view(request):
     )
     return Response(featured_units_result.to_dict(), status=status_code)
 
+@api_view(["GET"])
+def home_most_viewed_units_view(request):
+    most_viewed_units_result = services.home_most_viewed_units_service()
+    status_code = (
+        status.HTTP_200_OK if most_viewed_units_result.is_success
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(most_viewed_units_result.to_dict(), status=status_code)
+# endregion
+
+# region Reviews
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def add_review_view(request):
@@ -237,7 +244,9 @@ def add_review_view(request):
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(send_result.to_dict(), status=status_code)
+# endregion
 
+# region Draw Results
 @api_view(["POST"])
 def draw_results_view(request):
     draw_results = services.draw_results_service(request.data)
@@ -246,7 +255,9 @@ def draw_results_view(request):
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(draw_results.to_dict(), status=status_code)
+# endregion
 
+# region Contact Us
 @api_view(["POST"])
 def add_contact_us_msg_view(request):
     send_result = services.add_contact_us_msg_service(request.data)
@@ -255,7 +266,9 @@ def add_contact_us_msg_view(request):
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(send_result.to_dict(), status=status_code)
+# endregion
 
+# region Favorites
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def add_favorite_view(request):
@@ -288,32 +301,7 @@ def delete_favorite_view(request, favorite_id):
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(delete_favorite_result.to_dict(), status=status_code)
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def client_paginated_units_view(request):
-    client_paginated_units_result = services.client_paginated_units_service(request.data, request.headers)
-    status_code = (
-        status.HTTP_200_OK if client_paginated_units_result.is_success
-        else status.HTTP_401_UNAUTHORIZED if client_paginated_units_result.msg.lower().__contains__('unauthorized')
-        else status.HTTP_400_BAD_REQUEST
-    )
-    return Response(client_paginated_units_result.to_dict(), status=status_code)
+# endregion
 
 
-'''
-add to fav
-list fav
-remove from fav
-'''
 
-# @api_view(["POST"])
-# @permission_classes([IsAuthenticated])
-# def add_draw_result_view(request):
-#     send_result = services.add_draw_result_service(request.data, request.headers)
-#     status_code = (
-#         status.HTTP_200_OK if send_result.is_success
-#         else status.HTTP_401_UNAUTHORIZED if send_result.msg.lower().__contains__('unauthorized')
-#         else status.HTTP_400_BAD_REQUEST
-#     )
-#     return Response(send_result.to_dict(), status=status_code)
