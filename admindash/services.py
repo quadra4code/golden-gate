@@ -206,7 +206,7 @@ def paginated_clients_service(request_data):
         # else:
         #     all_clients_q = all_clients_q[page_size*int(all_clients_count/page_size) if all_clients_count%page_size!=0 else int(all_clients_count/page_size)-1:]
         #     page_number = int(all_clients_count/page_size) if all_clients_count%page_size == 0 else int(all_clients_count/page_size)+1
-        total_pages = (all_clients_q + page_size - 1) // page_size
+        total_pages = (all_clients_count + page_size - 1) // page_size
         page_number = min(page_number, total_pages)
         start_index = (page_number - 1) * page_size
         end_index = start_index + page_size
@@ -292,7 +292,7 @@ def paginated_units_service(request_data):
     try:
         page_number = request_data.get('page_number', 1)
         page_size = request_data.get('page_size', 10)
-        all_units_q = CoreModels.Unit.objects.order_by('created_at')
+        all_units_q = CoreModels.Unit.objects.order_by('')
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد طلبات وحدات متاحة للعرض')
