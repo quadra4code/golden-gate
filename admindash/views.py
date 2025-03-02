@@ -1,12 +1,12 @@
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
-# from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework.decorators import api_view, permission_classes
 from admindash import services
 from admindash import utils
 
 # Create your views here.
 
+# region Staff | Users
 @api_view(['POST'])
 def staff_login_view(request):
     result = services.staff_login_service(request.data)
@@ -82,7 +82,9 @@ def paginated_clients_view(request):
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(result.to_dict(), status=status_code)
+# endregion
 
+# region Units
 @api_view(['POST'])
 @permission_classes([utils.IsManagerOrAdminUser])
 def paginated_units_view(request):
@@ -127,6 +129,19 @@ def toggle_unit_deleted_view(request, unit_id):
     )
     return Response(result.to_dict(), status=status_code)
 
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def toggle_unit_featured_view(request, unit_id):
+    result = services.toggle_unit_featured_service(unit_id, request.user.id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+# endregion
+
+# region Contact Us
 @api_view(['POST'])
 @permission_classes([utils.IsManagerOrAdminUser])
 def paginated_contact_msgs_view(request):
@@ -148,6 +163,6 @@ def solve_contact_msg_view(request, msg_id):
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(result.to_dict(), status=status_code)
-
+# endregion
 
 
