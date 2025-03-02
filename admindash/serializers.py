@@ -63,7 +63,7 @@ class AddStaffSerializer(serializers.ModelSerializer):
         return new_user
 
 class AllUnitSerializer(serializers.ModelSerializer):
-    requests_count = serializers.SerializerMethodField(read_only=True)
+    requests_count = serializers.IntegerField(read_only=True)
     price_obj = serializers.SerializerMethodField(read_only=True)
     status_obj = serializers.SerializerMethodField(read_only=True)
     created_at = serializers.DateTimeField(format="%Y-%m-%d", read_only=True) # '%d-%b-%Y' => 01-jan-2025 | "%Y-%m-%d" => 2025-1-1
@@ -72,9 +72,6 @@ class AllUnitSerializer(serializers.ModelSerializer):
         model = CoreModels.Unit
         fields = ['id', 'title', 'price_obj', 'created_at', 'requests_count', 'status_obj', 'hidden']
 
-    def get_requests_count(self, obj):
-        return CoreModels.UnitRequest.objects.filter(unit=obj).count()
-    
     def get_price_obj(self, obj):
         price = obj.over_price if obj.over_price else obj.total_price if obj.total_price else obj.meter_price
         price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'

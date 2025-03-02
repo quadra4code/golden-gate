@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 from core import serializers as CoreSerializers
 from admindash import serializers as AdminSerializers
 from core.base_models import ResultView
-from django.db.models import Value, CharField, Q
+from django.db.models import Value, CharField, Q, Count
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import StringAgg
 from django.contrib.auth import authenticate
@@ -195,8 +195,8 @@ def delete_staff_service(staff_id):
 def paginated_clients_service(request_data):
     result = ResultView()
     try:
-        page_number = request_data.get('page_number', 1)
-        page_size = request_data.get('page_size', 10)
+        page_number = int(request_data.get('page_number', 1))
+        page_size = int(request_data.get('page_size', 10))
         all_clients_q = UsersModels.CustomUser.objects.filter(groups__name='Client')
         all_clients_count = all_clients_q.count()
         if all_clients_count <= 0:
@@ -290,9 +290,11 @@ def unit_requests_user_service(unit_id):
 def paginated_units_service(request_data):
     result = ResultView()
     try:
-        page_number = request_data.get('page_number', 1)
-        page_size = request_data.get('page_size', 10)
-        all_units_q = CoreModels.Unit.objects.order_by('')
+        page_number = int(request_data.get('page_number', 1))
+        page_size = int(request_data.get('page_size', 10))
+        all_units_q = CoreModels.Unit.objects.annotate(
+            requests_count=Count('unitrequest')  # Assuming 'unitrequest' is the related name
+        ).order_by('-requests_count')
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد طلبات وحدات متاحة للعرض')
