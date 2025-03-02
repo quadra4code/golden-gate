@@ -41,39 +41,17 @@ def staff_login_service(request_data):
                     'user': {
                         'id': user_to_auth.id,
                         'username': user_to_auth.username,
-                        'full_name': user_to_auth.first_name,
+                        'full_name': user_to_auth.get_full_name(),
                         'referral_code': user_to_auth.referral_code,
                         'role': ' | '.join(([gr.name for gr in user_to_auth.groups.all()])).strip() if user_to_auth.groups.exists() else 'No Role'
                     }
                 }
                 result.is_success = True
-            # serialized_login_data = LoginSerializer(data=request_data)
-            # if serialized_login_data.is_valid():
-            # else:
-                # result.msg = 'حدث خطأ أثناء معالجة البيانات'
-                # result.data = {'errors': serialized_login_data.errors, 'error messages': serialized_login_data.error_messages}
     except Exception as e:
         result.msg = f'حدث خطأ أثناء تسجيل الدخول للمستخدم {username}.'
         result.data = {'error': str(e)}
     finally:
         return result
-    # result = ResultView()
-    # try:
-    #     if username and password:
-    #         user = UsersModels.CustomUser.objects.get(username=username)
-    #         if user.check_password(password):
-    #             result.data = user
-    #             result.msg = f'User {user.username} logged in successfully'
-    #             result.is_success = True
-    #         else:
-    #             result.msg = 'Invalid Credentials'
-    #     else:
-    #         result.msg = 'Username & Password are required' if not (username or password) else 'Username is required' if password else 'Password is required'
-    # except Exception as e:
-    #     result.msg = f'Unexpected error happened while logging user {username} in.'
-    #     result.data = {'error': str(e)}
-    # finally:
-    #     return result
 
 def paginated_staff_service(request_data):
     result = ResultView()
@@ -146,22 +124,31 @@ def add_staff_service(request_data):
                 )
             client_group, created = Group.objects.get_or_create(name=request_data.get('role_name'))
             new_staff.instance.groups.add(client_group)
-            result.is_success = True
-            result.msg = 'تم إضافة الموظف بنجاح'
-            result.data = {
-                "id": new_staff.instance.id,
-                "first_name": new_staff.instance.first_name,
-                "last_name": new_staff.instance.last_name,
-                "username": new_staff.instance.username,
-                "email": new_staff.instance.email,
-                "date_joined": new_staff.instance.date_joined,
-                "role": client_group.name,
-                "referral_code": new_staff.instance.referral_code,
-                "referral_count": new_staff.instance.referral_count
-            }
+            all_staff_result = paginated_staff_service({})
+            if all_staff_result.is_success:
+                result.data = all_staff_result.data
+                result.is_success = True
+                result.msg = 'تم إضافة الموظف بنجاح'
+            else:
+                print(all_staff_result.data, all_staff_result.msg)
+                raise ValueError('تم إضافة الموظف بنجاح ولكن حدث خطأ أثناء جلب بيانات جميع الموظفين')
+            # result.data = {
+            #     "id": new_staff.instance.id,
+            #     "first_name": new_staff.instance.first_name,
+            #     "last_name": new_staff.instance.last_name,
+            #     "username": new_staff.instance.username,
+            #     "email": new_staff.instance.email,
+            #     "date_joined": new_staff.instance.date_joined,
+            #     "role": client_group.name,
+            #     "referral_code": new_staff.instance.referral_code,
+            #     "referral_count": new_staff.instance.referral_count
+            # }
         else:
             result.msg = 'حدث خطأ أثناء معالجة بيانات الموظف'
             result.data = new_staff.errors
+    except ValueError as ve:
+        result.msg = str(ve)
+
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء إضافة الموظف'
         result.data = {'errors': str(e)}
@@ -387,6 +374,12 @@ def paginated_contact_msgs_service(request_data):
         }
         result.is_success = True
         result.msg = 'تم جلب بيانات الرسائل بنجاح'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+        result.data = {
+            "all": []
+        }
     except Exception as e:
         logging.error(f'Unexpected error occurred: {str(e)}')
         result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات الرسائل'

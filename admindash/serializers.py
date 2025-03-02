@@ -43,7 +43,7 @@ class AddStaffSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(max_length=60, min_length=3)
     last_name = serializers.CharField(max_length=60, min_length=3, required=False, allow_blank=True, allow_null=True)
     username = serializers.CharField(max_length=20, min_length=8)
-    email = serializers.EmailField(max_length=60, min_length=8, required=False, allow_blank=True, allow_null=True)
+    email = serializers.EmailField(max_length=60, min_length=8, required=False, allow_null=True)
     role_name = serializers.CharField(max_length=20, write_only=True)
     class Meta:
         model = UsersModels.CustomUser
