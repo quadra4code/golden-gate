@@ -340,6 +340,9 @@ def update_unit_status_service(unit_id, status_id, user_id):
         unit_obj.status_id = status_id
         unit_obj.updated_by_id = user_id
         unit_obj.save()
+        result.data = {
+            unit_obj.status
+        }
         result.is_success = True
         result.msg = 'تم تحديث حالة الوحدة بنجاح'
     except CoreModels.Unit.DoesNotExist as e:
