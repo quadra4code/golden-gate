@@ -309,9 +309,10 @@ def paginated_units_service(request_data):
         end_index = start_index + page_size
         all_units_q = all_units_q[start_index:end_index]
         serialized_units = AdminSerializers.AllUnitSerializer(all_units_q, many=True)
+        statuses = CoreSerializers.StatusSerializer(CoreModels.Status.objects.all(), many=True)
         result.data = {
             "all": serialized_units.data,
-            "statuses": CoreModels.Status.objects.values('id', 'name', 'code', 'color'),
+            "statuses": statuses.data,
             "pagination": {
                 "total_items": all_units_count,
                 "total_pages": total_pages,
@@ -321,13 +322,13 @@ def paginated_units_service(request_data):
             }
         }
         result.is_success = True
-        result.msg = 'تم جلب بيانات الطلبات بنجاح'
+        result.msg = 'تم جلب بيانات الوحدات بنجاح'
     except ValueError as ve:
         result.msg = str(ve)
         result.is_success = True
     except Exception as e:
         logging.error(f'Unexpected error occurred: {str(e)}')
-        result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات الطلبات'
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات الوحدات'
         result.data = {'errors': str(e)}
     finally:
         return result

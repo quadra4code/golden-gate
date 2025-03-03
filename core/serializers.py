@@ -269,3 +269,12 @@ class UnitFavoriteSerializer(serializers.ModelSerializer):
             return models.UnitFavorite.objects.create(**validated_data)
         else:
             raise LookupError('الوحدة المطلوبة غير موجودة')
+
+
+class StatusSerializer(serializers.ModelSerializer):
+    label = serializers.CharField(source="name")
+    value = serializers.CharField(source="code")
+
+    class Meta:
+        model = models.Status
+        fields = ['id', 'label', 'value', 'color']
