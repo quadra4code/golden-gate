@@ -193,11 +193,11 @@ class UnitRequestSerializer(serializers.Serializer):
                 raise LookupError('الوحدة المطلوبة غير موجودة')
 
 class GetAllRequestsSerializer(serializers.ModelSerializer):
-    unit_id = serializers.CharField(source='unit.title', read_only=True)
+    unit_id = serializers.CharField(source='unit.id', read_only=True)
     unit_title = serializers.CharField(source='unit.title', read_only=True)
-    unit_proposal = serializers.CharField(source='unit.proposal', read_only=True)
-    unit_project = serializers.CharField(source='unit.project', read_only=True)
-    unit_city = serializers.CharField(source='unit.city', read_only=True)
+    unit_proposal = serializers.CharField(source='unit.proposal.name', read_only=True)
+    unit_project = serializers.CharField(source='unit.project.name', read_only=True)
+    unit_city = serializers.CharField(source='unit.city.name', read_only=True)
     unit_area = serializers.CharField(source='unit.area', read_only=True)
     price_obj = serializers.SerializerMethodField(read_only=True)
 
