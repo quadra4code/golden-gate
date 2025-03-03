@@ -192,6 +192,25 @@ class UnitRequestSerializer(serializers.Serializer):
             else:
                 raise LookupError('الوحدة المطلوبة غير موجودة')
 
+class GetAllRequestsSerializer(serializers.ModelSerializer):
+    unit_id = serializers.CharField(source='unit.title', read_only=True)
+    unit_title = serializers.CharField(source='unit.title', read_only=True)
+    unit_proposal = serializers.CharField(source='unit.proposal', read_only=True)
+    unit_project = serializers.CharField(source='unit.project', read_only=True)
+    unit_city = serializers.CharField(source='unit.city', read_only=True)
+    unit_area = serializers.CharField(source='unit.area', read_only=True)
+    price_obj = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = models.UnitRequest
+        fields = ['id', 'unit_id', 'unit_title', 'unit_proposal', 'unit_project', 'unit_city', 'unit_area', 'price_obj', 'created_at']#'status',
+    
+    def get_price_obj(self, obj):
+        price = obj.unit.over_price or obj.unit.total_price or obj.unit.meter_price
+        price_type = 'الأوفر' if obj.unit.over_price else 'الإجمالى' if obj.unit.total_price else 'سعر المتر'
+        currency = obj.unit.get_over_price_currency_display() if obj.unit.over_price else obj.unit.get_total_price_currency_display() if obj.unit.total_price else obj.unit.get_meter_price_currency_display()
+        return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': currency} if price else None
+
 class ReviewSerializer(serializers.ModelSerializer):
     client_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
     created_by_id = serializers.IntegerField(min_value=1, write_only=True)

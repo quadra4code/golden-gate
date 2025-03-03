@@ -115,6 +115,28 @@ def request_unit_view(request):
     )
     return Response(request_result.to_dict(), status=status_code)
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def paginated_client_requests_view(request):
+    requests_result = services.paginated_client_requests_service(request.data, request.user.id)
+    status_code = (
+        status.HTTP_200_OK if requests_result.is_success
+        else status.HTTP_401_UNAUTHORIZED if requests_result.msg.lower().__contains__('unauthorized')
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(requests_result.to_dict(), status=status_code)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def cancel_request_view(request, request_id):
+    cancel_request_result = services.cancel_request_service(request_id)
+    status_code = (
+        status.HTTP_200_OK if cancel_request_result.is_success
+        else status.HTTP_401_UNAUTHORIZED if cancel_request_result.msg.lower().__contains__('unauthorized')
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(cancel_request_result.to_dict(), status=status_code)
+
 @api_view(["GET"])
 def proposal_form_data_view(request):
     form_data_result = services.proposal_form_data_service()

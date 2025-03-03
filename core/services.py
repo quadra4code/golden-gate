@@ -63,6 +63,50 @@ def request_unit_service(request_data, request_headers):
     finally:
         return result
 
+def paginated_client_requests_service(request_data, client_id):
+    result = ResultView()
+    try:
+        page_number = int(request_data.get('page_number', 1))
+        page_size = int(request_data.get('page_size', 10))
+        client_requests = models.UnitRequest.objects.filter(is_deleted=False, created_by_id=client_id).order_by('created_at')
+        client_requests_count = client_requests.count()
+        if client_requests_count <= 0:
+            raise ValueError('لا يوجد طلبات متاحة')
+        total_pages = (client_requests_count + page_size - 1) // page_size
+        page_number = min(page_number, total_pages)
+        start_index = (page_number - 1) * page_size
+        end_index = start_index + page_size
+        client_requests = client_requests[start_index:end_index]
+        serialized_client_requests = serializers.GetAllRequestsSerializer(client_requests, many=True)
+        result.data = serialized_client_requests.data
+        result.is_success = True
+        result.msg = 'تم جلب بيانات طلباتكم بنجاح'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+        result.data = []
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
+        result.data = {'error': str(e)}
+    finally:
+        return result
+
+def cancel_request_service(request_id):
+    result = ResultView()
+    try:
+        request = models.UnitRequest.objects.get(id=request_id)
+        request.delete()
+        result.is_success = True
+        result.msg = 'تم إلغاء الطلب بنجاح'
+    except models.UnitRequest.DoesNotExist as e:
+        result.msg = 'الطلب غير موجود'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إلغاء الطلب'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
 def proposal_form_data_service():
     result = ResultView()
     try:

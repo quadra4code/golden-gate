@@ -3,6 +3,8 @@ from core import views as CoreViews
 urlpatterns = [
     path('propose-unit', CoreViews.propose_unit_view, name='propose_unit'),
     path('request-unit', CoreViews.request_unit_view, name='request_unit'),
+    path('paginated-client-requests', CoreViews.paginated_client_requests_view, name='paginated_client_requests'),
+    path('cancel-request/<int:request_id>', CoreViews.cancel_request_view, name='cancel_request'),
     path('get-form-data', CoreViews.proposal_form_data_view, name='get_form_data'),
     path('recent-units', CoreViews.recent_units_view, name='recent_units'),
     path('filter-paginated-units', CoreViews.filter_paginated_units_view, name='filter_paginated_units'),
