@@ -261,14 +261,15 @@ def unit_requests_user_service(unit_id):
         price = any_unit.over_price if any_unit.over_price else any_unit.total_price if any_unit.total_price else any_unit.meter_price
         price_type = 'الأوفر' if any_unit.over_price else 'الإجمالى' if any_unit.total_price else 'سعر المتر'
         currency = any_unit.get_over_price_currency_display() if any_unit.over_price else any_unit.get_total_price_currency_display() if any_unit.total_price else any_unit.get_meter_price_currency_display()
-        result.data = {
-            "users": serialized_user_requests.data,
-            "unit_data": {
-                'id': unit_id,
-                'title': any_unit.title,
-                'area': any_unit.area,
-                'price_obj': {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': currency}
-            }
+        result.data = serialized_user_requests.data
+        # result.data = {
+        #     "users": serialized_user_requests.data,
+        #     "unit_data": {
+        #         'id': unit_id,
+        #         'title': any_unit.title,
+        #         'area': any_unit.area,
+        #         'price_obj': {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': currency}
+        #     }
             # "pagination": {
             #     "total_items": all_unit_requests_count,
             #     "total_pages": total_pages,
@@ -276,7 +277,7 @@ def unit_requests_user_service(unit_id):
             #     "has_next": page_number < total_pages,
             #     "has_previous": page_number > 1
             # }
-        }
+        # }
         result.is_success = True
     except ValueError as ve:
         result.msg = str(ve)

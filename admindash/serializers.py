@@ -84,9 +84,47 @@ class AllUnitSerializer(serializers.ModelSerializer):
 class UnitRequestSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
     client_data = serializers.SerializerMethodField(read_only=True)
+    user_id = serializers.CharField(source='created_by.id', read_only=True)
+    first_name = serializers.CharField(source='created_by.first_name', read_only=True)
+    last_name = serializers.CharField(source='created_by.last_name', read_only=True)
+    username = serializers.CharField(source='created_by.username', read_only=True)
+    email = serializers.CharField(source='created_by.email', read_only=True)
+    email_confirmed = serializers.BooleanField(source='created_by.email_confirmed', read_only=True)
+    is_active = serializers.BooleanField(source='created_by.is_active', read_only=True)
+    last_login = serializers.DateTimeField(format="%Y-%m-%d", source='created_by.last_login', read_only=True)
+    date_joined = serializers.DateTimeField(format="%Y-%m-%d", source='created_by.date_joined', read_only=True)
+    referral_code = serializers.CharField(source='created_by.referral_code', read_only=True)
+    referral_count = serializers.CharField(source='created_by.referral_count', read_only=True)
+    phone_numbers_list = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = CoreModels.UnitRequest
-        fields = ['id', 'created_at', 'client_data']
+        fields = [
+            'id',
+            'created_at',
+            'user_id',
+            'first_name',
+            'last_name',
+            'username',
+            'email',
+            'email_confirmed',
+            'is_active',
+            'last_login',
+            'date_joined',
+            'referral_code',
+            'referral_count',
+            'phone_numbers_list'
+        ]
+    
+    def get_phone_numbers_list(self, obj):
+        return [
+                {
+                    'phone_number_id': pn.id,
+                    'phone_number': pn.phone_number,
+                    'is_main': pn.is_main_number,
+                    'phone_number_confirmed': pn.phone_number_confirmed
+                }
+                for pn in UsersModels.UserPhoneNumber.objects.filter(created_by=obj.created_by).order_by('created_at')
+            ]
 
     def get_client_data(self, obj):
         return {
