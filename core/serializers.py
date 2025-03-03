@@ -273,7 +273,7 @@ class UnitFavoriteSerializer(serializers.ModelSerializer):
 
 class StatusSerializer(serializers.ModelSerializer):
     label = serializers.CharField(source="name")
-    value = serializers.CharField(source="code")
+    value = serializers.CharField(source="id")
 
     class Meta:
         model = models.Status
