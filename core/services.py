@@ -346,12 +346,24 @@ def unit_details_service(unit_id):
     result = ResultView()
     try:
         unit = models.Unit.objects.filter(is_deleted=False, id=unit_id).first()
+        same_city_units = (
+            models.Unit.objects.filter(is_deleted=False, city=unit.city)
+                .exclude(id=unit_id).order_by('-updated_at')
+            or models.Unit.objects.filter(is_deleted=False, project=unit.project)
+                .exclude(id=unit_id).order_by('-updated_at')
+            or models.Unit.objects.filter(is_deleted=False, proposal=unit.proposal)
+                .exclude(id=unit_id).order_by('-updated_at')
+        )
         if not unit:
             raise ValueError('الوحدة غير موجودة')
         unit.view_count += 1
         unit.save()
         serialized_unit = serializers.UnitDetailsSerializer(unit)
-        result.data = serialized_unit.data
+        serialized_same_city_units = serializers.GetAllUnitsSerializer(same_city_units[:12], many=True)
+        result.data = {
+            'unit_details': serialized_unit.data,
+            'discover_more': serialized_same_city_units.data
+        }
         result.is_success = True
         result.msg = 'Success'
     except ValueError as ve:

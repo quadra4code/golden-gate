@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.utils import timezone
 from rest_framework import serializers
 from core import models
 # Create your serializers here.
@@ -114,7 +115,7 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
     city = serializers.CharField(source="city.name")
     facade = serializers.CharField(source="get_facade_display")
     floor = serializers.CharField(source="get_floor_display")
-    # currency = serializers.CharField(source="get_currency_display")
+    latest_date = serializers.SerializerMethodField(read_only=True)
     favorite_count = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
@@ -139,7 +140,7 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
             "total_price_currency",
             "meter_price",
             "meter_price_currency",
-            # "currency",
+            "latest_date",
             "favorite_count",
             "status",
             "description",
@@ -160,6 +161,9 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
 
     def get_favorite_count(self, obj):
         return obj.unitfavorite_set.count()
+
+    def get_latest_date(self, obj):
+        return timezone.localdate(obj.updated_at) if obj.updated_at and (obj.updated_at >= obj.created_at) else timezone.localdate(obj.created_at) if obj.created_at else None
 
     def to_representation(self, instance):
         """Format price fields as '1,234,567' (no decimal places)."""
