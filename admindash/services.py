@@ -341,7 +341,10 @@ def update_unit_status_service(unit_id, status_id, user_id):
         unit_obj.updated_by_id = user_id
         unit_obj.save()
         result.data = {
-            unit_obj.status
+            'id': unit_obj.status.id,
+            'name': unit_obj.status.name,
+            'code': unit_obj.status.code,
+            'color': unit_obj.status.color
         }
         result.is_success = True
         result.msg = 'تم تحديث حالة الوحدة بنجاح'
