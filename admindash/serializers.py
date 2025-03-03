@@ -83,7 +83,7 @@ class AllUnitSerializer(serializers.ModelSerializer):
 
 class UnitRequestSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
-    client_data = serializers.SerializerMethodField(read_only=True)
+    # client_data = serializers.SerializerMethodField(read_only=True)
     user_id = serializers.CharField(source='created_by.id', read_only=True)
     first_name = serializers.CharField(source='created_by.first_name', read_only=True)
     last_name = serializers.CharField(source='created_by.last_name', read_only=True)
