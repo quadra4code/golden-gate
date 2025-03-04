@@ -81,8 +81,8 @@ class CreateUnitSerializer(serializers.Serializer):
             self.initial_data.pop('floor')
             # raise ValueError('الدور لا يجب أن يكون موجوداً للأراضى')
         elif self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('building_number'):
-            
-            raise ValueError('رقم العمارة لا يجب أن يكون موجوداً للأراضى')
+            self.initial_data.pop('building_number')
+            # raise ValueError('رقم العمارة لا يجب أن يكون موجوداً للأراضى')
         elif not any([self.initial_data.get('over_price') or self.initial_data.get('total_price') or self.initial_data.get('meter_price')]):
             raise ValueError("يجب إدخال سعر الأوفر أو إجمالى السعر أو سعر المتر على الأقل")
         elif not models.UnitTypeProject.objects.filter(unit_type_id=self.initial_data.get('unit_type_id'), project_id=self.initial_data.get('project_id')).exists():
@@ -90,28 +90,60 @@ class CreateUnitSerializer(serializers.Serializer):
         return super().is_valid(raise_exception=raise_exception)
 
     def create(self, validated_data):
-        if not validated_data['update']:
-            validated_data['status'] = models.Status.objects.filter(code=1).first()# For Sale
-        else:
-            print('updating')
-            old_images = validated_data.pop('old_images')
-            if old_images:
-                for old_img in models.UnitImage.objects.filter(unit_id=validated_data['id']):
-                    print(f'old => {old_img.image.url} vs {old_images}')
-                    if old_img.image.url in old_images:
-                        print('it exists in both so no deletion')
-                    else:
-                        print('oops! in db not in old list so we delete it from db and server')
-                        api_call_res = cloudinary.uploader.destroy(old_img.image.public_id)
-                        print(f'api delete call result => {api_call_res}')
+        images = validated_data.pop('images', None)
+        is_update = validated_data.pop('update', False)
+        
+        if not is_update:  # Create new unit
+            validated_data['status'] = models.Status.objects.filter(code=1).first()  # For Sale
+            unit = models.Unit.objects.create(**validated_data)
+        else:  # Update existing unit
+            unit_id = validated_data.pop('id', None)
+            if not unit_id:
+                raise serializers.ValidationError({"id": "ID is required for updating a unit."})
+
+            unit = models.Unit.objects.get(id=unit_id)  # Retrieve existing object
+            for key, value in validated_data.items():
+                setattr(unit, key, value)  # Update fields
+            unit.save()  # Save changes
+
+            # Handle image updates
+            old_images = validated_data.pop('old_images', None)
+            if old_images is not None:
+                for old_img in models.UnitImage.objects.filter(unit_id=unit.id):
+                    if old_img.image.url not in old_images:
+                        cloudinary.uploader.destroy(old_img.image.public_id)
                         old_img.delete()
 
-            pass
-        images = validated_data.pop('images')
-        unit = models.Unit.objects.update_or_create(**validated_data)
+        # Handle new images
         if images:
-                unit_images = [models.UnitImage(unit=unit, image=img, created_by_id=validated_data['created_by_id']) for img in images]
-                models.UnitImage.objects.bulk_create(unit_images)
+            unit_images = [models.UnitImage(unit=unit, image=img, created_by_id=validated_data['created_by_id']) for img in images]
+            models.UnitImage.objects.bulk_create(unit_images)
+
+        return unit
+    # def create(self, validated_data):
+    #     images = validated_data.pop('images') if validated_data.get('images') else None
+    #     if not validated_data['update']:
+    #         validated_data['status'] = models.Status.objects.filter(code=1).first()# For Sale
+    #         unit = models.Unit.objects.create(**validated_data)
+    #     else:
+    #         validated_data['status'] = models.Status.objects.filter(id=models.Unit.objects.get(id=validated_data.get('id')).status.id).first()# For Sale
+    #         print('updating')
+    #         old_images = validated_data.pop('old_images') if validated_data.get('old_images') else None
+    #         if old_images:
+    #             for old_img in models.UnitImage.objects.filter(unit_id=validated_data['id']):
+    #                 print(f'old => {old_img.image.url} vs {old_images}')
+    #                 if old_img.image.url in old_images:
+    #                     print('it exists in both so no deletion')
+    #                 else:
+    #                     print('oops! in db not in old list so we delete it from db and server')
+    #                     api_call_res = cloudinary.uploader.destroy(old_img.image.public_id)
+    #                     print(f'api delete call result => {api_call_res}')
+    #                     old_img.delete()
+    #         validated_data.pop('update')
+    #         unit = models.Unit.objects.update(**validated_data)
+    #     if images:
+    #             unit_images = [models.UnitImage(unit=unit, image=img, created_by_id=validated_data['created_by_id']) for img in images]
+    #             models.UnitImage.objects.bulk_create(unit_images)
 
 
 class GetAllUnitsSerializer(serializers.ModelSerializer):
