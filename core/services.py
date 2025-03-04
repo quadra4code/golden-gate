@@ -19,13 +19,13 @@ def propose_unit_service(request_data, client_id):
         # token = request_headers.get('Authorization', '')
         # token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
         request_data['created_by_id'] = client_id
-        images = request_data.pop('images')
+        # images = request_data.pop('images')
         serialized_unit = serializers.CreateUnitSerializer(data=request_data)
         if serialized_unit.is_valid():
             new_unit = serialized_unit.save()
-            if images:
-                unit_images = [models.UnitImage(unit=new_unit, image=img, created_by_id=request_data.get('created_by_id')) for img in images]
-                models.UnitImage.objects.bulk_create(unit_images)
+            # if images:
+            #     unit_images = [models.UnitImage(unit=new_unit, image=img, created_by_id=request_data.get('created_by_id')) for img in images]
+            #     models.UnitImage.objects.bulk_create(unit_images)
             result.msg = 'تم حفظ الوحدة بنجاح'
             result.is_success = True
             result.data = serialized_unit.data
@@ -431,7 +431,25 @@ def get_update_unit_service(unit_id):
     finally:
         return result
 
-
+def update_unit_service(request_data, client_id):
+    result = ResultView()
+    try:
+        request_data['update'] = True
+        request_data['created_by_id'] = client_id
+        print(request_data)
+        serialized_updated_unit = serializers.CreateUnitSerializer(data=request_data)
+        if serialized_updated_unit.is_valid():
+            serialized_updated_unit.save()
+            result.msg = 'تم تحديث الوحدة بنجاح'
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات الوحدة'
+            result.data = serialized_updated_unit.errors
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تعديل الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
 
 def hard_delete_unit_service(unit_id):
     result = ResultView()

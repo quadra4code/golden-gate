@@ -1,4 +1,4 @@
-from decimal import Decimal
+import cloudinary.uploader
 from django.utils import timezone
 from rest_framework import serializers
 from core import models
@@ -35,7 +35,7 @@ class CreateUnitSerializer(serializers.Serializer):
     ]
     CURRENCY_CHOICES = ['EGP', 'USD']
     
-    id = serializers.IntegerField(read_only=True)
+    id = serializers.IntegerField(required=False, allow_null=True)
     unit_type_id = serializers.CharField(max_length=1)
     proposal_id = serializers.CharField(max_length=3, required=False, allow_null=True)
     project_id = serializers.CharField(max_length=3)
@@ -63,8 +63,13 @@ class CreateUnitSerializer(serializers.Serializer):
     first_installment_value = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
     first_installment_value_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP', required=False, allow_null=True)
     created_by_id = serializers.IntegerField(min_value=1)
+    update = serializers.BooleanField(default=False)
+    images = serializers.ListField(required=False, allow_null=True)
+    old_images = serializers.ListField(required=False, allow_null=True)
 
     def is_valid(self, *, raise_exception=False):
+        print(self.initial_data.get('old_images'))
+        print(self.initial_data.get('images'))
         if self.initial_data.get('unit_type_id') == "2" and not self.initial_data.get('floor'):
             raise ValueError('الدور يجب أن يكون موجوداً للوحدات السكنية')
         elif self.initial_data.get('unit_type_id') == "2" and not self.initial_data.get('building_number'):
@@ -78,9 +83,31 @@ class CreateUnitSerializer(serializers.Serializer):
         elif not models.UnitTypeProject.objects.filter(unit_type_id=self.initial_data.get('unit_type_id'), project_id=self.initial_data.get('project_id')).exists():
             raise ValueError(f'مشروع {models.Project.objects.get(id=self.initial_data.get("project_id")).name} غير متاح لل{models.UnitType.objects.get(id=self.initial_data.get("unit_type_id")).name}')
         return super().is_valid(raise_exception=raise_exception)
+
     def create(self, validated_data):
-        validated_data['status'] = models.Status.objects.filter(code=1).first()# For Sale
-        return models.Unit.objects.create(**validated_data)
+        if not validated_data['update']:
+            validated_data['status'] = models.Status.objects.filter(code=1).first()# For Sale
+        else:
+            print('updating')
+            old_images = validated_data.pop('old_images')
+            if old_images:
+                for old_img in models.UnitImage.objects.filter(unit_id=validated_data['id']):
+                    print(f'old => {old_img.image.url} vs {old_images}')
+                    if old_img.image.url in old_images:
+                        print('it exists in both so no deletion')
+                    else:
+                        print('oops! in db not in old list so we delete it from db and server')
+                        api_call_res = cloudinary.uploader.destroy(old_img.image.public_id)
+                        print(f'api delete call result => {api_call_res}')
+                        old_img.delete()
+
+            pass
+        images = validated_data.pop('images')
+        unit = models.Unit.objects.update_or_create(**validated_data)
+        if images:
+                unit_images = [models.UnitImage(unit=unit, image=img, created_by_id=validated_data['created_by_id']) for img in images]
+                models.UnitImage.objects.bulk_create(unit_images)
+
 
 class GetAllUnitsSerializer(serializers.ModelSerializer):
     city = serializers.CharField(source="city.name")
