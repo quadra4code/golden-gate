@@ -82,10 +82,10 @@ class CreateUnitSerializer(serializers.Serializer):
             print(self.initial_data.get('floor'))
             print('condition ', (self.initial_data.get('unit_type_id') == "1") and self.initial_data.get('floor'))
             self.initial_data.pop('floor')
-            # raise ValueError('الدور لا يجب أن يكون موجوداً للأراضى')
+            raise ValueError('الدور لا يجب أن يكون موجوداً للأراضى')
         elif self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('building_number'):
             self.initial_data.pop('building_number')
-            # raise ValueError('رقم العمارة لا يجب أن يكون موجوداً للأراضى')
+            raise ValueError('رقم العمارة لا يجب أن يكون موجوداً للأراضى')
         elif not any([self.initial_data.get('over_price') or self.initial_data.get('total_price') or self.initial_data.get('meter_price')]):
             raise ValueError("يجب إدخال سعر الأوفر أو إجمالى السعر أو سعر المتر على الأقل")
         elif not models.UnitTypeProject.objects.filter(unit_type_id=self.initial_data.get('unit_type_id'), project_id=self.initial_data.get('project_id')).exists():
@@ -105,6 +105,7 @@ class CreateUnitSerializer(serializers.Serializer):
                 raise serializers.ValidationError({"id": "ID is required for updating a unit."})
 
             unit = models.Unit.objects.get(id=unit_id)  # Retrieve existing object
+            print('updating')
             for key, value in validated_data.items():
                 setattr(unit, key, value)  # Update fields
             unit.save()  # Save changes
@@ -113,13 +114,19 @@ class CreateUnitSerializer(serializers.Serializer):
             old_images = validated_data.pop('old_images', None)
             if old_images is not None:
                 for old_img in models.UnitImage.objects.filter(unit_id=unit.id):
+                    print(f'old => {old_img.image.url} vs {old_images}')
                     if old_img.image.url not in old_images:
-                        cloudinary.uploader.destroy(old_img.image.public_id)
+                        api_call_res = cloudinary.uploader.destroy(old_img.image.public_id)
+                        print(f'api delete call result => {api_call_res}')
                         old_img.delete()
+                    else:
+                        print('it exists in both so no deletion')
 
         # Handle new images
         if images:
+            print('there r images and we bulk create them')
             unit_images = [models.UnitImage(unit=unit, image=img, created_by_id=validated_data['created_by_id']) for img in images]
+            print(unit_images, unit_images.count())
             models.UnitImage.objects.bulk_create(unit_images)
 
         return unit
