@@ -75,6 +75,9 @@ class CreateUnitSerializer(serializers.Serializer):
         elif self.initial_data.get('unit_type_id') == "2" and not self.initial_data.get('building_number'):
             raise ValueError('رقم العمارة يجب أن يكون موجوداً للوحدات السكنية')
         elif self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('floor'):
+            print(self.initial_data.get('unit_type_id'))
+            print(self.initial_data.get('floor'))
+            print(self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('floor'))
             raise ValueError('الدور لا يجب أن يكون موجوداً للأراضى')
         elif self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('building_number'):
             raise ValueError('رقم العمارة لا يجب أن يكون موجوداً للأراضى')

@@ -436,7 +436,7 @@ def update_unit_service(request_data, client_id):
     try:
         request_data['update'] = True
         request_data['created_by_id'] = client_id
-        print(request_data)
+        print(f'this request data => {request_data}')
         serialized_updated_unit = serializers.CreateUnitSerializer(data=request_data)
         if serialized_updated_unit.is_valid():
             serialized_updated_unit.save()
