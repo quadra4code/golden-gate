@@ -74,12 +74,14 @@ class CreateUnitSerializer(serializers.Serializer):
             raise ValueError('الدور يجب أن يكون موجوداً للوحدات السكنية')
         elif self.initial_data.get('unit_type_id') == "2" and not self.initial_data.get('building_number'):
             raise ValueError('رقم العمارة يجب أن يكون موجوداً للوحدات السكنية')
-        elif self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('floor') is not None:
+        elif self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('floor'):
             print(self.initial_data.get('unit_type_id'))
             print(self.initial_data.get('floor'))
-            print(self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('floor'))
-            raise ValueError('الدور لا يجب أن يكون موجوداً للأراضى')
-        elif self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('building_number') is not None:
+            print('condition ', (self.initial_data.get('unit_type_id') == "1") and self.initial_data.get('floor'))
+            self.initial_data.pop('floor')
+            # raise ValueError('الدور لا يجب أن يكون موجوداً للأراضى')
+        elif self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('building_number'):
+            
             raise ValueError('رقم العمارة لا يجب أن يكون موجوداً للأراضى')
         elif not any([self.initial_data.get('over_price') or self.initial_data.get('total_price') or self.initial_data.get('meter_price')]):
             raise ValueError("يجب إدخال سعر الأوفر أو إجمالى السعر أو سعر المتر على الأقل")
