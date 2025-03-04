@@ -12,13 +12,13 @@ import logging
 # Create your services here.
 
 # region Units
-def propose_unit_service(request_data, request_headers):
+def propose_unit_service(request_data, client_id):
     result = ResultView()
     logger = logging.getLogger(__name__)
     try:
-        token = request_headers.get('Authorization', '')
-        token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
-        request_data['created_by_id'] = str(token_decode_result.get('user_id'))
+        # token = request_headers.get('Authorization', '')
+        # token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
+        request_data['created_by_id'] = client_id
         images = request_data.pop('images')
         serialized_unit = serializers.CreateUnitSerializer(data=request_data)
         if serialized_unit.is_valid():
@@ -365,12 +365,12 @@ def unit_details_service(unit_id):
             'discover_more': serialized_same_city_units.data
         }
         result.is_success = True
-        result.msg = 'Success'
+        result.msg = 'تم جلب تفاصيل الوحدة بنجاح'
     except ValueError as ve:
         result.msg = str(ve)
         result.is_success = True
     except Exception as e:
-        result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب تفاصيل الوحدة'
         result.data = {'error': str(e)}
     finally:
         return result
@@ -378,19 +378,12 @@ def unit_details_service(unit_id):
 def paginated_client_units_service(request_data, client_id):
     result = ResultView()
     try:
-        # token = request_headers.get('Authorization', '')
-        # token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
         page_number = request_data.get('page_number', 1)
         page_size = request_data.get('page_size', 12)
         units = models.Unit.objects.filter(is_deleted=False, created_by_id=client_id)
         all_units_count = units.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد وحدات متاحة')
-        # if all_units_count > page_size*(page_number-1):
-        #     units = units[page_size*(page_number-1):page_size*page_number]
-        # else:
-        #     units = units[page_size*int(all_units_count/page_size) if all_units_count%page_size!=0 else int(all_units_count/page_size)-1:]
-        #     page_number = int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1
         total_pages = (all_units_count + page_size - 1) // page_size
         page_number = min(page_number, total_pages)
         start_index = (page_number - 1) * page_size
@@ -420,6 +413,24 @@ def paginated_client_units_service(request_data, client_id):
         result.data = {'error': str(e)}
     finally:
         return result
+
+def get_update_unit_service(unit_id):
+    result = ResultView()
+    try:
+        unit_data = models.Unit.objects.get(id=unit_id)
+        serialized_unit_data = serializers.UpdateUnitSerializer(unit_data)
+        result.data = serialized_unit_data.data
+        result.is_success = True
+        result.msg = 'تم جلب بيانات الوحدة بنجاح'
+    except models.Unit.DoesNotExist as e:
+        result.msg = 'الوحدة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
 
 
 def hard_delete_unit_service(unit_id):

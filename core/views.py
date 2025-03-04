@@ -96,7 +96,7 @@ def createjson(request):
 @permission_classes([IsAuthenticated])
 def propose_unit_view(request):
     print(request.data)
-    propose_result = services.propose_unit_service(request.data, request.headers)
+    propose_result = services.propose_unit_service(request.data, request.user.id if request.user else None)
     status_code = (
         status.HTTP_201_CREATED if propose_result.is_success
         else status.HTTP_401_UNAUTHORIZED if propose_result.msg.lower().__contains__('unauthorized')
@@ -186,6 +186,17 @@ def paginated_client_units_view(request):
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(paginated_client_units_result.to_dict(), status=status_code)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_update_unit_view(request, unit_id):
+    result = services.get_update_unit_service(unit_id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])

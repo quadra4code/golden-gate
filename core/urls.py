@@ -10,6 +10,7 @@ urlpatterns = [
     path('filter-paginated-units', CoreViews.filter_paginated_units_view, name='filter_paginated_units'),
     path('unit-details/<int:unit_id>', CoreViews.unit_details_view, name='unit_details'),
     path('paginated-client-units', CoreViews.paginated_client_units_view, name='paginated_client_units'),
+    path('get-update-unit/<int:unit_id>', CoreViews.get_update_unit_view, name='get_update_unit'),
     path('delete-unit/<int:unit_id>', CoreViews.hard_delete_unit_view, name='delete_unit'),
     path('home-reviews', CoreViews.home_top_reviews_view, name='home_reviews'),
     path('home-articles', CoreViews.home_articles_view, name='home_articles'),

@@ -53,7 +53,6 @@ class CreateUnitSerializer(serializers.Serializer):
     total_price_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP', required=False, allow_null=True)
     meter_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
     meter_price_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP', required=False, allow_null=True)
-    # currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP')
     title = serializers.CharField(max_length=200, required=False, allow_blank=True, allow_null=True)
     phone_number = serializers.CharField(max_length=20)
     description = serializers.CharField(max_length=1000, required=False, allow_blank=True, allow_null=True)
@@ -181,6 +180,67 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
                 value = getattr(instance, field, None)
                 data[field] = f"{value:,.0f}"
         return data
+
+class UpdateUnitSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    unit_type_id = serializers.CharField(max_length=1)
+    proposal_id = serializers.CharField(source='proposal.id')
+    project_id = serializers.CharField(source='project.id')
+    city_id = serializers.CharField(source='city.id')
+    # unit_number = serializers.CharField(max_length=5)
+    # building_number = serializers.CharField(max_length=150, required=False, allow_null=True)
+    # area = serializers.FloatField()
+    # paid_amount = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
+    # paid_amount_currency = serializers.CharField(source='paid_amount_currency')
+    # remaining_amount = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
+    # remaining_amount_currency = serializers.CharField(source='remaining_amount_currency')
+    # over_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
+    # over_price_currency = serializers.CharField(source='over_price_currency')
+    # total_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
+    # total_price_currency = serializers.CharField(source='total_price_currency')
+    # meter_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
+    # meter_price_currency = serializers.CharField(source='meter_price_currency')
+    # title = serializers.CharField(max_length=200, required=False, allow_blank=True, allow_null=True)
+    # phone_number = serializers.CharField(max_length=20)
+    # description = serializers.CharField(max_length=1000, required=False, allow_blank=True, allow_null=True)
+    # floor = serializers.CharField(source='floor')
+    # facade = serializers.CharField(source='facade')
+    # payment_method = serializers.CharField(max_length=150, required=False, allow_null=True)
+    # installment_period = serializers.CharField(max_length=150, required=False, allow_null=True)
+    # first_installment_value = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
+    # first_installment_value_currency = serializers.CharField(source='first_installment_value_currency')
+    # created_by_id = serializers.IntegerField(min_value=1)
+    class Meta:
+        model = models.Unit
+        fields = [
+            'id',
+            'unit_type_id',
+            'proposal_id',
+            'project_id',
+            'city_id',
+            'unit_number',
+            'building_number',
+            'area',
+            'paid_amount',
+            'paid_amount_currency',
+            'remaining_amount',
+            'remaining_amount_currency',
+            'over_price',
+            'over_price_currency',
+            'total_price',
+            'total_price_currency',
+            'meter_price',
+            'meter_price_currency',
+            'title',
+            'phone_number',
+            'description',
+            'floor',
+            'facade',
+            'payment_method',
+            'installment_period',
+            'first_installment_value',
+            'first_installment_value_currency',
+        ]
 
 class UnitRequestSerializer(serializers.Serializer):
     unit_id = serializers.IntegerField(min_value=1, write_only=True)
