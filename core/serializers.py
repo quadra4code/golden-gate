@@ -126,7 +126,7 @@ class CreateUnitSerializer(serializers.Serializer):
         if images:
             print('there r images and we bulk create them')
             unit_images = [models.UnitImage(unit=unit, image=img, created_by_id=validated_data['created_by_id']) for img in images]
-            print(unit_images, unit_images.count())
+            print(unit_images, len(unit_images))
             models.UnitImage.objects.bulk_create(unit_images)
 
         return unit
