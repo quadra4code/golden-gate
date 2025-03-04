@@ -18,7 +18,7 @@ def propose_unit_service(request_data, client_id):
     try:
         # token = request_headers.get('Authorization', '')
         # token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
-        request_data['created_by_id'] = client_id
+        data['created_by_id'] = client_id
         # images = request_data.pop('images')
         print(f'this request data => {request_data}')
         serialized_unit = serializers.CreateUnitSerializer(data=request_data)
@@ -435,11 +435,26 @@ def get_update_unit_service(unit_id):
 def update_unit_service(request_data, client_id):
     result = ResultView()
     try:
-        request_data['update'] = True
-        request_data['created_by_id'] = client_id
+        data = request_data.copy()
+
+        # Convert single-element lists to values
+        for key, value in data.lists():
+            if len(value) == 1:
+                data[key] = value[0]  # Extract single values from lists
+
+        # Replace "null" strings with None
+        for key, value in data.items():
+            if value == "null":
+                data[key] = None
+
+        # Now, data is properly formatted and can be used safely
+        print(data)
+        data['update'] = True
+        data['created_by_id'] = client_id
         print(f'this request data => {request_data}')
+        print(f'this request data after manipulation => {data}')
         logger = logging.getLogger(__name__)
-        logger.log(1, request_data)
+        logger.log(1, data)
         serialized_updated_unit = serializers.CreateUnitSerializer(data=request_data)
         if serialized_updated_unit.is_valid():
             serialized_updated_unit.save()
