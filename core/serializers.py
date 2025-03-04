@@ -187,6 +187,7 @@ class UpdateUnitSerializer(serializers.ModelSerializer):
     proposal_id = serializers.CharField(source='proposal.id')
     project_id = serializers.CharField(source='project.id')
     city_id = serializers.CharField(source='city.id')
+    images = serializers.SerializerMethodField(read_only=True)
     # unit_number = serializers.CharField(max_length=5)
     # building_number = serializers.CharField(max_length=150, required=False, allow_null=True)
     # area = serializers.FloatField()
@@ -240,7 +241,11 @@ class UpdateUnitSerializer(serializers.ModelSerializer):
             'installment_period',
             'first_installment_value',
             'first_installment_value_currency',
+            'images'
         ]
+
+    def get_images(self, obj):
+        return [img.image.url for img in obj.unitimage_set.order_by("id")]
 
 class UnitRequestSerializer(serializers.Serializer):
     unit_id = serializers.IntegerField(min_value=1, write_only=True)
