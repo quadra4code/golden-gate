@@ -68,34 +68,25 @@ class CreateUnitSerializer(serializers.Serializer):
     old_images = serializers.ListField(required=False, allow_null=True)
 
     def is_valid(self, *, raise_exception=False):
-        import logging
-        print(self.initial_data.get('old_images'))
-        print(self.initial_data.get('images'))
-        logger = logging.getLogger(__name__)
-        logger.log(2, f'condition, {(self.initial_data.get('unit_type_id') == "1") and self.initial_data.get('floor')}')
         if self.initial_data.get('unit_type_id') == "2" and not self.initial_data.get('floor'):
             raise ValueError('الدور يجب أن يكون موجوداً للوحدات السكنية')
         elif self.initial_data.get('unit_type_id') == "2" and not self.initial_data.get('building_number'):
             raise ValueError('رقم العمارة يجب أن يكون موجوداً للوحدات السكنية')
         elif self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('floor'):
-            print(self.initial_data.get('unit_type_id'))
-            print(self.initial_data.get('floor'))
-            print('condition ', (self.initial_data.get('unit_type_id') == "1") and self.initial_data.get('floor'))
-            self.initial_data.pop('floor')
             raise ValueError('الدور لا يجب أن يكون موجوداً للأراضى')
         elif self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('building_number'):
-            self.initial_data.pop('building_number')
             raise ValueError('رقم العمارة لا يجب أن يكون موجوداً للأراضى')
         elif not any([self.initial_data.get('over_price') or self.initial_data.get('total_price') or self.initial_data.get('meter_price')]):
             raise ValueError("يجب إدخال سعر الأوفر أو إجمالى السعر أو سعر المتر على الأقل")
         elif not models.UnitTypeProject.objects.filter(unit_type_id=self.initial_data.get('unit_type_id'), project_id=self.initial_data.get('project_id')).exists():
             raise ValueError(f'مشروع {models.Project.objects.get(id=self.initial_data.get("project_id")).name} غير متاح لل{models.UnitType.objects.get(id=self.initial_data.get("unit_type_id")).name}')
+        elif not (self.initial_data.get('images') or self.initial_data.get('update')):
+            raise ValueError('يجب إضافة صورة واحدة على الأقل عند إضافة وحدة جديدة')
         return super().is_valid(raise_exception=raise_exception)
 
     def create(self, validated_data):
         images = validated_data.pop('images', None)
         is_update = validated_data.pop('update', False)
-        
         if not is_update:  # Create new unit
             validated_data['status'] = models.Status.objects.filter(code=1).first()  # For Sale
             unit = models.Unit.objects.create(**validated_data)
@@ -104,29 +95,21 @@ class CreateUnitSerializer(serializers.Serializer):
             if not unit_id:
                 raise serializers.ValidationError({"id": "ID is required for updating a unit."})
 
-            unit = models.Unit.objects.get(id=unit_id)  # Retrieve existing object
-            print('updating')
+            unit = models.Unit.objects.get(id=unit_id)
             for key, value in validated_data.items():
-                setattr(unit, key, value)  # Update fields
-            unit.save()  # Save changes
-
+                setattr(unit, key, value)
+            unit.save()
             # Handle image updates
             old_images = validated_data.pop('old_images', None)
             if old_images is not None:
                 for old_img in models.UnitImage.objects.filter(unit_id=unit.id):
-                    print(f'old => {old_img.image.url} vs {old_images}')
                     if old_img.image.url not in old_images:
-                        api_call_res = cloudinary.uploader.destroy(old_img.image.public_id)
-                        print(f'api delete call result => {api_call_res}')
+                        cloudinary.uploader.destroy(old_img.image.public_id)
                         old_img.delete()
-                    else:
-                        print('it exists in both so no deletion')
 
         # Handle new images
         if images:
-            print('there r images and we bulk create them')
             unit_images = [models.UnitImage(unit=unit, image=img, created_by_id=validated_data['created_by_id']) for img in images]
-            print(unit_images, len(unit_images))
             models.UnitImage.objects.bulk_create(unit_images)
 
         return unit

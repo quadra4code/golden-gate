@@ -1,5 +1,6 @@
 from datetime import timedelta
 import cloudinary.uploader
+from django.http import QueryDict
 from django.utils import timezone
 from core import models
 from core import serializers
@@ -16,17 +17,12 @@ def propose_unit_service(request_data, client_id):
     result = ResultView()
     logger = logging.getLogger(__name__)
     try:
-        # token = request_headers.get('Authorization', '')
-        # token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
+        if isinstance(request_data, QueryDict):
+            request_data = request_data.copy()
         request_data['created_by_id'] = client_id
-        # images = request_data.pop('images')
-        print(f'this request data => {request_data}')
         serialized_unit = serializers.CreateUnitSerializer(data=request_data)
         if serialized_unit.is_valid():
-            new_unit = serialized_unit.save()
-            # if images:
-            #     unit_images = [models.UnitImage(unit=new_unit, image=img, created_by_id=request_data.get('created_by_id')) for img in images]
-            #     models.UnitImage.objects.bulk_create(unit_images)
+            serialized_unit.save()
             result.msg = 'تم حفظ الوحدة بنجاح'
             result.is_success = True
             result.data = serialized_unit.data
@@ -435,11 +431,11 @@ def get_update_unit_service(unit_id):
 def update_unit_service(request_data, client_id):
     result = ResultView()
     try:
+        if isinstance(request_data, QueryDict):
+            request_data = request_data.copy()
         request_data['update'] = True
         request_data['created_by_id'] = client_id
-        print(f'this request data => {request_data}')
         logger = logging.getLogger(__name__)
-        logger.log(1, request_data)
         serialized_updated_unit = serializers.CreateUnitSerializer(data=request_data)
         if serialized_updated_unit.is_valid():
             serialized_updated_unit.save()

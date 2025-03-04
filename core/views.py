@@ -95,7 +95,6 @@ def createjson(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def propose_unit_view(request):
-    print(request.data)
     propose_result = services.propose_unit_service(request.data, request.user.id if request.user else None)
     status_code = (
         status.HTTP_201_CREATED if propose_result.is_success
@@ -201,8 +200,6 @@ def get_update_unit_view(request, unit_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_unit_view(request):
-    print('in view')
-    print(request.data)
     result = services.update_unit_service(request.data, request.user.id if request.user else None)
     status_code = (
         status.HTTP_200_OK if result.is_success
