@@ -20,6 +20,7 @@ def propose_unit_service(request_data, client_id):
         # token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
         request_data['created_by_id'] = client_id
         # images = request_data.pop('images')
+        print(f'this request data => {request_data}')
         serialized_unit = serializers.CreateUnitSerializer(data=request_data)
         if serialized_unit.is_valid():
             new_unit = serialized_unit.save()
