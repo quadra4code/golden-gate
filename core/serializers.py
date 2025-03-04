@@ -68,8 +68,11 @@ class CreateUnitSerializer(serializers.Serializer):
     old_images = serializers.ListField(required=False, allow_null=True)
 
     def is_valid(self, *, raise_exception=False):
+        import logging
         print(self.initial_data.get('old_images'))
         print(self.initial_data.get('images'))
+        logger = logging.getLogger(__name__)
+        logger.log(2, f'condition, {(self.initial_data.get('unit_type_id') == "1") and self.initial_data.get('floor')}')
         if self.initial_data.get('unit_type_id') == "2" and not self.initial_data.get('floor'):
             raise ValueError('الدور يجب أن يكون موجوداً للوحدات السكنية')
         elif self.initial_data.get('unit_type_id') == "2" and not self.initial_data.get('building_number'):

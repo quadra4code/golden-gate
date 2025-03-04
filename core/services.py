@@ -437,6 +437,8 @@ def update_unit_service(request_data, client_id):
         request_data['update'] = True
         request_data['created_by_id'] = client_id
         print(f'this request data => {request_data}')
+        logger = logging.getLogger(__name__)
+        logger.log(1, request_data)
         serialized_updated_unit = serializers.CreateUnitSerializer(data=request_data)
         if serialized_updated_unit.is_valid():
             serialized_updated_unit.save()
@@ -448,6 +450,7 @@ def update_unit_service(request_data, client_id):
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء تعديل الوحدة'
         result.data = {'errors': str(e)}
+        logger.error(str(e))
     finally:
         return result
 
