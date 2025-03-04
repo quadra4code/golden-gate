@@ -201,6 +201,8 @@ def get_update_unit_view(request, unit_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_unit_view(request):
+    print('in view')
+    print(request.data)
     result = services.update_unit_service(request.data, request.user.id if request.user else None)
     status_code = (
         status.HTTP_200_OK if result.is_success
