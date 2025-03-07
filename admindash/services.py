@@ -461,7 +461,103 @@ def solve_contact_msg_service(msg_id, user_id):
 
 # endregion
 
+# region Article
+def create_article_service(request_data, admin_id):
+    result = ResultView()
+    try:
+        request_data['created_by_id'] = admin_id
+        serialized_new_article = CoreSerializers.ArticleSerializer(data=request_data)
+        if serialized_new_article.is_valid():
+            serialized_new_article.save()
+            result.msg = 'تم إضافة المقالة بنجاح'
+            result.data = serialized_new_article.data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات المقالة'
+            result.data = serialized_new_article.errors
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حفظ المقالة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
 
+def read_articles_service():
+    result = ResultView()
+    try:
+        all_articles = CoreModels.Article.objects.order_by('-created_at')
+        serialized_all_articles = CoreSerializers.ArticleSerializer(all_articles, many=True)
+        result.data = serialized_all_articles.data
+        result.msg = 'تم جلب المقالات بنجاح'
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب المقالات'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def update_article_service(request_data, admin_id, article_id):
+    result = ResultView()
+    try:
+        request_data['updated_by_id'] = admin_id
+        old_article = CoreModels.Article.objects.get(id=article_id)
+        serialized_update_article = CoreSerializers.ArticleSerializer(old_article, data=request_data, partial=True)
+        if serialized_update_article.is_valid():
+            serialized_update_article.save()
+            result.msg = 'تم تحديث المقالة بنجاح'
+            result.data = serialized_update_article.data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات المقالة'
+            result.data = serialized_update_article.errors
+    except CoreModels.Article.DoesNotExist as e:
+        result.msg = 'المقالة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تحديث المقالة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def delete_article_service(article_id):
+    result = ResultView()
+    try:
+        delete_count, _ = CoreModels.Article.objects.filter(id=article_id).delete()
+        if delete_count == 0:
+            raise CoreModels.Article.DoesNotExist()
+        result.msg = 'تم حذف المقالة بنجاح'
+        result.is_success = True
+    except CoreModels.Article.DoesNotExist as e:
+        result.msg = 'المقالة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حذف المقالة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def toggle_hidden_article_service(article_id, admin_obj):
+    result = ResultView()
+    try:
+        article = CoreModels.Article.objects.get(id=article_id)
+        article.is_deleted = not article.is_deleted
+        article.updated_by = admin_obj
+        article.save()
+        result.msg = f'تم {'إخفاء' if article.is_deleted else 'إظهار'} المقالة بنجاح'
+        result.data = CoreSerializers.ArticleSerializer(article).data
+        result.is_success = True
+    except CoreModels.Article.DoesNotExist as e:
+        result.msg = 'المقالة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إخفاء / إظهار المقالة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+# endregion
+
+# region Consultation
+
+# endregion
 
 
 

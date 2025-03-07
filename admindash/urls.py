@@ -14,4 +14,9 @@ urlpatterns = [
     path('toggle-unit-hide/<int:unit_id>', AdminViews.toggle_unit_deleted_view, name='toggle_unit_hide'),
     path('paginated-contact-us', AdminViews.paginated_contact_msgs_view, name='paginated_contact_us'),
     path('solve-contact-us/<int:msg_id>', AdminViews.solve_contact_msg_view, name='solve_contact_us'),
+    path('create-article', AdminViews.create_article_view, name='create_article'),
+    path('all-articles', AdminViews.read_articles_view, name='all_articles'),
+    path('update-article/<int:article_id>', AdminViews.update_article_view, name='update_article'),
+    path('delete-article/<int:article_id>', AdminViews.delete_article_view, name='delete_article'),
+    path('toggle-hidden-article/<int:article_id>', AdminViews.toggle_hidden_article_view, name='toggle_hidden_article'),
 ]

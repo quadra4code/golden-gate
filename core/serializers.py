@@ -352,10 +352,12 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ['id', 'rate', 'client_name', 'review', 'created_by_id']
 
 class ArticleSerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(format='%d-%b-%Y')
+    created_at = serializers.DateTimeField(format='%d-%b-%Y', read_only=True)
+    created_by_id = serializers.CharField(write_only=True, required=False, allow_null=True)
+    updated_by_id = serializers.CharField(write_only=True, required=False, allow_null=True)
     class Meta:
         model = models.Article
-        fields = ['id', 'title', 'body', 'created_at']
+        fields = ['id', 'title', 'body', 'created_by_id', 'created_at', 'updated_by_id']
 
 class ConsultationTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -363,7 +365,7 @@ class ConsultationTypeSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'brief']
 
 class ConsultationSerializer(serializers.ModelSerializer):
-    consultation_type = serializers.CharField(source='consultation_type.name')
+    consultation_type = serializers.CharField(source='consultation_type.name', read_only=True)
     class Meta:
         model = models.Consultation
         fields = ['id', 'title', 'body', 'consultation_type']

@@ -165,4 +165,63 @@ def solve_contact_msg_view(request, msg_id):
     return Response(result.to_dict(), status=status_code)
 # endregion
 
+# region Article
+@api_view(['POST'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def create_article_view(request):
+    result = services.create_article_service(request.data, request.user.id if request.user else None)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def read_articles_view(request):
+    result = services.read_articles_service()
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PUT'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def update_article_view(request, article_id):
+    result = services.update_article_service(request.data, request.user.id if request.user else None, article_id)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['DELETE'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def delete_article_view(request, article_id):
+    result = services.delete_article_service(article_id)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def toggle_hidden_article_view(request, article_id):
+    result = services.toggle_hidden_article_service(article_id, request.user if request.user else None)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+# endregion
+
+# region Consultation
+
+# endregion
+
+
+
+
 
