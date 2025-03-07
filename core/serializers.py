@@ -2,6 +2,8 @@ import cloudinary.uploader
 from django.utils import timezone
 from rest_framework import serializers
 from core import models
+import cloudinary.uploader
+
 # Create your serializers here.
 
 class CreateUnitSerializer(serializers.Serializer):
@@ -138,7 +140,6 @@ class CreateUnitSerializer(serializers.Serializer):
     #             unit_images = [models.UnitImage(unit=unit, image=img, created_by_id=validated_data['created_by_id']) for img in images]
     #             models.UnitImage.objects.bulk_create(unit_images)
 
-
 class GetAllUnitsSerializer(serializers.ModelSerializer):
     city = serializers.CharField(source="city.name")
     unit_type = serializers.CharField(source="unit_type.name")
@@ -172,6 +173,12 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
     facade = serializers.CharField(source="get_facade_display")
     floor = serializers.CharField(source="get_floor_display")
     latest_date = serializers.SerializerMethodField(read_only=True)
+    paid_amount_currency = serializers.CharField(source="get_paid_amount_currency_display", read_only=True)
+    remaining_amount_currency = serializers.CharField(source="get_remaining_amount_currency_display", read_only=True)
+    over_price_currency = serializers.CharField(source="get_over_price_currency_display", read_only=True)
+    total_price_currency = serializers.CharField(source="get_total_price_currency_display", read_only=True)
+    meter_price_currency = serializers.CharField(source="get_meter_price_currency_display", read_only=True)
+    first_installment_value_currency = serializers.CharField(source="get_first_installment_value_currency_display", read_only=True)
     favorite_count = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
@@ -415,7 +422,6 @@ class UnitFavoriteSerializer(serializers.ModelSerializer):
         else:
             raise LookupError('الوحدة المطلوبة غير موجودة')
 
-
 class StatusSerializer(serializers.ModelSerializer):
     label = serializers.CharField(source="name")
     value = serializers.CharField(source="id")
@@ -423,3 +429,10 @@ class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Status
         fields = ['id', 'label', 'value', 'color']
+
+
+
+
+
+
+

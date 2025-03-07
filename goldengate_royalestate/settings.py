@@ -117,6 +117,14 @@ DATABASES = {
     #     'USER': env('CLOUD_DB_USER'),
     #     'PASSWORD': env('CLOUD_DB_PASSWORD'),
     # },
+    # 'default': {
+    #     'ENGINE': env('DB_ENGINE'),
+    #     'HOST': env('NEON_DB_HOST'),
+    #     'PORT': env('NEON_DB_PORT'),
+    #     'NAME': env('NEON_DB_NAME'),
+    #     'USER': env('NEON_DB_USER'),
+    #     'PASSWORD': env('NEON_DB_PASSWORD'),
+    # },
 }
 
 
@@ -184,8 +192,8 @@ REST_FRAMEWORK = {
 
 # Simple JWT settings
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=3),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=21),
 }
 
 # Fixutre Directories for initial data seedings

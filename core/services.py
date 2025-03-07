@@ -139,7 +139,7 @@ def proposal_form_data_service():
             "unit_types": [],
             "floors": [{"id": choice[0], "name": choice[1]} for choice in models.Unit.FLOOR_CHOICES],
             "facades": [{"id": choice[0], "name": choice[1]} for choice in models.Unit.FACADE_CHOICES],
-            # "payment_methods": [{"id": choice[0], "name": choice[1]} for choice in models.Unit.PAYMENT_METHOD_CHOICES]
+            "currencies": [{"id": choice[0], "name": choice[1]} for choice in models.Unit.CURRENCY_CHOICES]
         }
         for unit_type in unit_types:
             unit_types_data = {

@@ -122,6 +122,26 @@ def change_password_view(request):
     return Response(change_password_result.to_dict(), status=status_code)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def account_view(request):
+    account_result = services.account_service(request.user if request.user else None)
+    status_code = (
+        status.HTTP_200_OK if account_result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(account_result.to_dict(), status=status_code)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_account_view(request):
+    update_account_result = services.update_account_service(request.data, request.user if request.user else None)
+    status_code = (
+        status.HTTP_200_OK if update_account_result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(update_account_result.to_dict(), status=status_code)
+
+@api_view(['GET'])
 def leaderboard_view(request):
     leaderboard_result = services.leaderboard_service()
     status_code = (

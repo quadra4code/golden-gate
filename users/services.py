@@ -1,7 +1,8 @@
+from django.http import QueryDict
 from users.models import CustomUser, UserPhoneNumber
 from django.contrib.auth.models import Group
 from core.base_models import ResultView
-from users.serializers import ChangePasswordSerializer, LoginSerializer, RegisterSerializer
+from users.serializers import ChangePasswordSerializer, LoginSerializer, RegisterSerializer, AccountViewSerializer, UpdateAccountSerializer
 from django.contrib.auth import authenticate
 from users.utils import extract_payload_from_jwt, generate_jwt_token
 import logging
@@ -79,7 +80,6 @@ def register_user_service(registration_data):
         result.data = {'error': str(e)}
     finally:
         return result
-
 
 def login_user_service(login_data):
     result = ResultView()
@@ -173,6 +173,45 @@ def change_password_service(request):
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء تغيير كلمة السر'
         result.data = {'error': str(e)}
+    finally:
+        return result
+
+def account_service(user_obj):
+    result = ResultView()
+    try:
+        if not user_obj:
+            result.msg = 'هذا المستخدم غير موجود'
+        else:
+            serialized_user_data = AccountViewSerializer(user_obj)
+            result.data = serialized_user_data.data
+            result.msg = 'تم جلب بيانات الحساب بنجاح'
+            result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات الحساب'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def update_account_service(request_data, user_obj):
+    result = ResultView()
+    try:
+        if not user_obj:
+            result.msg = 'هذا المستخدم غير موجود'
+        else:
+            if isinstance(request_data, QueryDict):
+                request_data = request_data.copy()
+            serialized_user_to_update = UpdateAccountSerializer(user_obj, data=request_data, partial=True)
+            if serialized_user_to_update.is_valid():
+                serialized_user_to_update.save()
+                result.data = serialized_user_to_update.data
+                result.msg = 'تم تحديث الحساب بنجاح'
+                result.is_success = True
+            else:
+                result.msg = 'حدث خطأ أثناء معالجة بيانات الحساب'
+                result.data = serialized_user_to_update.errors
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تحديث الحساب'
+        result.data = {'errors': str(e)}
     finally:
         return result
 
