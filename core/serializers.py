@@ -49,10 +49,10 @@ class CreateUnitSerializer(serializers.Serializer):
     paid_amount_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP', required=False, allow_null=True)
     remaining_amount = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
     remaining_amount_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP', required=False, allow_null=True)
-    over_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
-    over_price_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP', required=False, allow_null=True)
-    total_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
-    total_price_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP', required=False, allow_null=True)
+    over_price = serializers.DecimalField(decimal_places=4, max_digits=16)
+    over_price_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP')
+    total_price = serializers.DecimalField(decimal_places=4, max_digits=16)
+    total_price_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP')
     meter_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
     meter_price_currency = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='EGP', required=False, allow_null=True)
     title = serializers.CharField(max_length=200, required=False, allow_blank=True, allow_null=True)
@@ -78,8 +78,8 @@ class CreateUnitSerializer(serializers.Serializer):
             raise ValueError('الدور لا يجب أن يكون موجوداً للأراضى')
         elif self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('building_number'):
             raise ValueError('رقم العمارة لا يجب أن يكون موجوداً للأراضى')
-        elif not any([self.initial_data.get('over_price') or self.initial_data.get('total_price') or self.initial_data.get('meter_price')]):
-            raise ValueError("يجب إدخال سعر الأوفر أو إجمالى السعر أو سعر المتر على الأقل")
+        # elif not any([self.initial_data.get('over_price') or self.initial_data.get('total_price') or self.initial_data.get('meter_price')]):
+        #     raise ValueError("يجب إدخال سعر الأوفر أو إجمالى السعر أو سعر المتر على الأقل")
         elif not models.UnitTypeProject.objects.filter(unit_type_id=self.initial_data.get('unit_type_id'), project_id=self.initial_data.get('project_id')).exists():
             raise ValueError(f'مشروع {models.Project.objects.get(id=self.initial_data.get("project_id")).name} غير متاح لل{models.UnitType.objects.get(id=self.initial_data.get("unit_type_id")).name}')
         elif not (self.initial_data.get('images') or self.initial_data.get('update')):
@@ -144,23 +144,30 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
     city = serializers.CharField(source="city.name")
     unit_type = serializers.CharField(source="unit_type.name")
     project = serializers.CharField(source="project.name")
-    price_obj = serializers.SerializerMethodField()
+    over_price_obj = serializers.SerializerMethodField()
+    total_price_obj = serializers.SerializerMethodField()
     main_image = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Unit
-        fields = ["id", "title", "city", "unit_type", "project", "area", "price_obj", "status", "main_image"]
+        fields = ["id", "title", "city", "unit_type", "project", "area", "over_price_obj", "total_price_obj", "status", "main_image"]
 
     def get_main_image(self, obj):
         main_image = obj.unitimage_set.order_by("id").first()
         return main_image.image.url if main_image else None
 
-    def get_price_obj(self, obj):
-        price = obj.over_price or obj.total_price or obj.meter_price
-        price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
-        currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
-        return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': currency} if price else None
+    def get_over_price_obj(self, obj):
+        # price = obj.over_price or obj.total_price or obj.meter_price
+        # price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
+        # currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
+        return {'price_type': 'الأوفر', 'price_value': f'{obj.over_price:,.0f}', 'currency': obj.get_over_price_currency_display()} if obj.over_price else None
+    
+    def get_total_price_obj(self, obj):
+        # price = obj.over_price or obj.total_price or obj.meter_price
+        # price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
+        # currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
+        return {'price_type': 'الإجمالى', 'price_value': f'{obj.total_price:,.0f}', 'currency': obj.get_total_price_display()} if obj.total_price else None
 
     def get_status(self, obj):
         return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code, 'color': obj.status.color} if obj.status else None
@@ -332,17 +339,24 @@ class GetAllRequestsSerializer(serializers.ModelSerializer):
     unit_project = serializers.CharField(source='unit.project.name', read_only=True)
     unit_city = serializers.CharField(source='unit.city.name', read_only=True)
     unit_area = serializers.CharField(source='unit.area', read_only=True)
-    price_obj = serializers.SerializerMethodField(read_only=True)
+    over_price_obj = serializers.SerializerMethodField(read_only=True)
+    total_price_obj = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = models.UnitRequest
-        fields = ['id', 'unit_id', 'unit_title', 'unit_proposal', 'unit_project', 'unit_city', 'unit_area', 'price_obj', 'created_at']#'status',
+        fields = ['id', 'unit_id', 'unit_title', 'unit_proposal', 'unit_project', 'unit_city', 'unit_area', 'over_price_obj', 'total_price_obj', 'created_at']#'status',
     
-    def get_price_obj(self, obj):
-        price = obj.unit.over_price or obj.unit.total_price or obj.unit.meter_price
-        price_type = 'الأوفر' if obj.unit.over_price else 'الإجمالى' if obj.unit.total_price else 'سعر المتر'
-        currency = obj.unit.get_over_price_currency_display() if obj.unit.over_price else obj.unit.get_total_price_currency_display() if obj.unit.total_price else obj.unit.get_meter_price_currency_display()
-        return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': currency} if price else None
+    def get_over_price_obj(self, obj):
+        # price = obj.over_price or obj.total_price or obj.meter_price
+        # price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
+        # currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
+        return {'price_type': 'الأوفر', 'price_value': f'{obj.unit.over_price:,.0f}', 'currency': obj.unit.get_over_price_currency_display()} if obj.unit.over_price else None
+    
+    def get_total_price_obj(self, obj):
+        # price = obj.over_price or obj.total_price or obj.meter_price
+        # price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
+        # currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
+        return {'price_type': 'الإجمالى', 'price_value': f'{obj.unit.total_price:,.0f}', 'currency': obj.unit.get_total_price_display()} if obj.unit.total_price else None
 
 class ReviewSerializer(serializers.ModelSerializer):
     client_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
@@ -395,23 +409,30 @@ class UnitFavoriteSerializer(serializers.ModelSerializer):
     unit_type = serializers.CharField(source='unit.unit_type.name', read_only=True)
     project = serializers.CharField(source='unit.project.name', read_only=True)
     area = serializers.FloatField(source='unit.area', read_only=True)
-    price_obj = serializers.SerializerMethodField()
+    over_price_obj = serializers.SerializerMethodField(read_only=True)
+    total_price_obj = serializers.SerializerMethodField(read_only=True)
     status = serializers.SerializerMethodField(read_only=True)
     main_image = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = models.UnitFavorite
-        fields = ['id', 'unit', 'created_by_id', 'unit_id', "title", "city", "unit_type", "project", "area", "price_obj", "status", "main_image"]
+        fields = ['id', 'unit', 'created_by_id', 'unit_id', "title", "city", "unit_type", "project", "area", "over_price_obj", "total_price_obj", "status", "main_image"]
     
     def get_main_image(self, obj):
         main_image = obj.unit.unitimage_set.order_by("id").first()
         return main_image.image.url if main_image else None
 
-    def get_price_obj(self, obj):
-        price = obj.unit.over_price or obj.unit.total_price or obj.unit.meter_price
-        price_type = 'الأوفر' if obj.unit.over_price else 'الإجمالى' if obj.unit.total_price else 'سعر المتر'
-        currency = obj.unit.get_over_price_currency_display() if obj.unit.over_price else obj.unit.get_total_price_currency_display() if obj.unit.total_price else obj.unit.get_meter_price_currency_display()
-        return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': currency} if price else None
+    def get_over_price_obj(self, obj):
+        # price = obj.over_price or obj.total_price or obj.meter_price
+        # price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
+        # currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
+        return {'price_type': 'الأوفر', 'price_value': f'{obj.unit.over_price:,.0f}', 'currency': obj.unit.get_over_price_currency_display()} if obj.unit.over_price else None
+    
+    def get_total_price_obj(self, obj):
+        # price = obj.over_price or obj.total_price or obj.meter_price
+        # price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
+        # currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
+        return {'price_type': 'الإجمالى', 'price_value': f'{obj.unit.total_price:,.0f}', 'currency': obj.unit.get_total_price_display()} if obj.unit.total_price else None
 
     def get_status(self, obj):
         return {'id': obj.unit.status.id, 'name': obj.unit.status.name, 'code': obj.unit.status.code, 'color': obj.unit.status.color} if obj.unit.status else None

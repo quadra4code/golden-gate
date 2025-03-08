@@ -64,19 +64,26 @@ class AddStaffSerializer(serializers.ModelSerializer):
 
 class AllUnitSerializer(serializers.ModelSerializer):
     requests_count = serializers.IntegerField(read_only=True)
-    price_obj = serializers.SerializerMethodField(read_only=True)
+    over_price_obj = serializers.SerializerMethodField(read_only=True)
+    total_price_obj = serializers.SerializerMethodField(read_only=True)
     status_obj = serializers.SerializerMethodField(read_only=True)
     created_at = serializers.DateTimeField(format="%Y-%m-%d", read_only=True) # '%d-%b-%Y' => 01-jan-2025 | "%Y-%m-%d" => 2025-1-1
     hidden = serializers.BooleanField(source='is_deleted', read_only=True)
     class Meta:
         model = CoreModels.Unit
-        fields = ['id', 'title', 'price_obj', 'created_at', 'requests_count', 'status_obj', 'hidden']
+        fields = ['id', 'title', 'over_price_obj', 'total_price_obj', 'created_at', 'requests_count', 'status_obj', 'hidden']
 
-    def get_price_obj(self, obj):
-        price = obj.over_price if obj.over_price else obj.total_price if obj.total_price else obj.meter_price
-        price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
-        currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
-        return {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': currency} if price else None    
+    def get_over_price_obj(self, obj):
+        # price = obj.over_price or obj.total_price or obj.meter_price
+        # price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
+        # currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
+        return {'price_type': 'الأوفر', 'price_value': f'{obj.over_price:,.0f}', 'currency': obj.get_over_price_currency_display()} if obj.over_price else None
+    
+    def get_total_price_obj(self, obj):
+        # price = obj.over_price or obj.total_price or obj.meter_price
+        # price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
+        # currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
+        return {'price_type': 'الإجمالى', 'price_value': f'{obj.total_price:,.0f}', 'currency': obj.get_total_price_display()} if obj.total_price else None
 
     def get_status_obj(self, obj):
         return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code, 'color': obj.status.color}
