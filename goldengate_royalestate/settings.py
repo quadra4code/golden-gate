@@ -43,7 +43,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://goldenbeit.com",
     "http://localhost:3000"
 ]
-# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True
 # CORS_ALLOW_CREDENTIALS = True
 # Application definition
 
