@@ -72,6 +72,17 @@ def delete_staff_view(request, staff_id):
     )
     return Response(result.to_dict(), status=status_code)
 
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def change_staff_permissions_view(request):
+    result = services.change_staff_permissions_service(request.data)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+
 @api_view(['POST'])
 @permission_classes([utils.IsManagerOrAdminUser])
 def paginated_clients_view(request):

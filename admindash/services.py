@@ -135,25 +135,13 @@ def add_staff_service(request_data):
                 result.is_success = True
                 result.msg = 'تم إضافة الموظف بنجاح'
             else:
-                print(all_staff_result.data, all_staff_result.msg)
                 raise ValueError('تم إضافة الموظف بنجاح ولكن حدث خطأ أثناء جلب بيانات جميع الموظفين')
-            # result.data = {
-            #     "id": new_staff.instance.id,
-            #     "first_name": new_staff.instance.first_name,
-            #     "last_name": new_staff.instance.last_name,
-            #     "username": new_staff.instance.username,
-            #     "email": new_staff.instance.email,
-            #     "date_joined": new_staff.instance.date_joined,
-            #     "role": client_group.name,
-            #     "referral_code": new_staff.instance.referral_code,
-            #     "referral_count": new_staff.instance.referral_count
-            # }
         else:
             result.msg = 'حدث خطأ أثناء معالجة بيانات الموظف'
             result.data = new_staff.errors
     except ValueError as ve:
         result.msg = str(ve)
-
+        result.data = {'errors': str(e)}
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء إضافة الموظف'
         result.data = {'errors': str(e)}
@@ -186,6 +174,26 @@ def delete_staff_service(staff_id):
         result.msg = 'تم حذف الموظف بنجاح'
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء حذف الموظف'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def change_staff_permissions_service(request_data):
+    result = ResultView()
+    try:
+        staff_obj = UsersModels.CustomUser.objects.prefetch_related("groups").get(id=request_data.get('staff_id', 0), is_staff=True)
+        current_group_names = set(staff_obj.groups.values_list("name", flat=True))
+        new_group_names = set(request_data.get("perms_list", []))
+        if current_group_names != new_group_names:
+            staff_obj.groups.clear()
+            staff_obj.groups.add(*Group.objects.filter(name__in=new_group_names))
+        result.msg = f'تم تغيير صلاحيات {staff_obj.get_full_name()} بنجاح'
+        result.is_success = True
+    except UsersModels.CustomUser.DoesNotExist as e:
+        result.msg = 'الموظف غير موجود'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تغيير صلاحيات الموظف'
         result.data = {'errors': str(e)}
     finally:
         return result
