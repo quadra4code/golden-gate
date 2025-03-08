@@ -83,7 +83,6 @@ class Unit(BaseEntity):
     description = models.CharField(max_length=600, null=True, blank=True)
     payment_method = models.CharField(max_length=150, null=True, blank=True)
     installment_period = models.CharField(max_length=150, null=True, blank=True)
-    # installment_period = models.PositiveIntegerField(null=True)
     first_installment_value = models.DecimalField(decimal_places=4, max_digits=16, null=True)
     first_installment_value_currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='EGP', null=True)
     paid_amount = models.DecimalField(decimal_places=4, max_digits=16, null=True)
@@ -96,8 +95,6 @@ class Unit(BaseEntity):
     total_price_currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='EGP')
     meter_price = models.DecimalField(decimal_places=4, max_digits=16, null=True)
     meter_price_currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='EGP', null=True)
-    # meter_distinct_price = models.DecimalField(decimal_places=4, max_digits=16, null=True)
-    # currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='EGP')
     status = models.ForeignKey(Status, on_delete=models.PROTECT)
     phone_number = models.CharField(max_length=20)
     facade = models.CharField(max_length=1, choices=FACADE_CHOICES, null=True)
@@ -135,6 +132,8 @@ class UnitImage(BaseEntity):
 
 class UnitRequest(BaseEntity):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
+    status = models.CharField(max_length=1, default='0')
+    status_msg = models.CharField(max_length=400, blank=True, null=True)
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['created_by', 'unit'], name='created_by_unit_request_unique_constraint', violation_error_message='لقد طلبت هذه الوحدة من قبل ولا يمكنك طلبها مره أخرى')

@@ -72,11 +72,6 @@ def paginated_staff_service(request_data):
         all_staff_count = all_staff_q.count()
         if all_staff_count <= 0:
             raise ValueError('لا يوجد موظفين للعرض')
-        # if all_staff_count > page_size*(page_number-1):
-        #     all_staff_q = all_staff_q[page_size*(page_number-1):page_size*page_number]
-        # else:
-        #     all_staff_q = all_staff_q[page_size*int(all_staff_count/page_size) if all_staff_count%page_size!=0 else int(all_staff_count/page_size)-1:]
-        #     page_number = int(all_staff_count/page_size) if all_staff_count%page_size == 0 else int(all_staff_count/page_size)+1
         total_pages = (all_staff_count + page_size - 1) // page_size
         page_number = min(page_number, total_pages)
         start_index = (page_number - 1) * page_size
@@ -118,7 +113,6 @@ def staff_roles_service():
 def add_staff_service(request_data):
     result = ResultView()
     try:
-        # role_id = request_data.pop('role_id')
         new_staff = AdminSerializers.AddStaffSerializer(data=request_data)
         if new_staff.is_valid():
             new_staff.save()
