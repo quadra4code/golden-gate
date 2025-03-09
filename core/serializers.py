@@ -368,9 +368,10 @@ class ArticleSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format='%d-%b-%Y', read_only=True)
     created_by_id = serializers.CharField(write_only=True, required=False, allow_null=True)
     updated_by_id = serializers.CharField(write_only=True, required=False, allow_null=True)
+    hidden = serializers.BooleanField(source='is_deleted', read_only=True)
     class Meta:
         model = models.Article
-        fields = ['id', 'title', 'body', 'created_by_id', 'created_at', 'updated_by_id']
+        fields = ['id', 'title', 'body', 'created_by_id', 'created_at', 'updated_by_id', 'hidden']
 
 class ConsultationTypeSerializer(serializers.ModelSerializer):
     class Meta:

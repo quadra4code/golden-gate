@@ -113,19 +113,19 @@ DATABASES = {
     },
     # 'default': {
     #     'ENGINE': env('DB_ENGINE'),
-    #     'HOST': env('CLOUD_DB_HOST'),
-    #     'PORT': env('CLOUD_DB_PORT'),
-    #     'NAME': env('CLOUD_DB_NAME'),
-    #     'USER': env('CLOUD_DB_USER'),
-    #     'PASSWORD': env('CLOUD_DB_PASSWORD'),
-    # },
-    # 'default': {
-    #     'ENGINE': env('DB_ENGINE'),
     #     'HOST': env('NEON_DB_HOST'),
     #     'PORT': env('NEON_DB_PORT'),
     #     'NAME': env('NEON_DB_NAME'),
     #     'USER': env('NEON_DB_USER'),
     #     'PASSWORD': env('NEON_DB_PASSWORD'),
+    # },
+    # 'default': {
+    #     'ENGINE': env('DB_ENGINE'),
+    #     'HOST': env('CLOUD_DB_HOST'),
+    #     'PORT': env('CLOUD_DB_PORT'),
+    #     'NAME': env('CLOUD_DB_NAME'),
+    #     'USER': env('CLOUD_DB_USER'),
+    #     'PASSWORD': env('CLOUD_DB_PASSWORD'),
     # },
 }
 
