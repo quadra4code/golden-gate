@@ -69,6 +69,7 @@ def paginated_staff_service(request_data):
             )
             .exclude(role='No Group')
         )
+        roles = Group.objects.all().exclude(name__in=["Client", "Superuser"]).values('id', 'name')
         all_staff_count = all_staff_q.count()
         if all_staff_count <= 0:
             raise ValueError('لا يوجد موظفين للعرض')
@@ -80,6 +81,7 @@ def paginated_staff_service(request_data):
         serialized_staff = AdminSerializers.GetAllUserSerializer(all_staff_q, many=True)
         result.data = {
             "all": serialized_staff.data,
+            "permissions": roles,
             "pagination": {
                 "total_items": all_staff_count,
                 "total_pages": total_pages,
@@ -483,6 +485,20 @@ def solve_contact_msg_service(msg_id, user_id):
     finally:
         return result
 
+def delete_contact_msg_service(msg_id):
+    result = ResultView()
+    try:
+        msg_obj = CoreModels.ContactUs.objects.filter(id=msg_id).delete()
+        result.msg = 'تم حذف المشكلة بنجاح'
+        result.is_success = True
+    except CoreModels.ContactUs.DoesNotExist as e:
+        result.msg = 'الرسالة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حذف المشكلة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
 # endregion
 
 # region Article

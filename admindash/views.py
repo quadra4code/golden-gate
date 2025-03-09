@@ -187,6 +187,17 @@ def solve_contact_msg_view(request, msg_id):
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(result.to_dict(), status=status_code)
+
+@api_view(['DELETE'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def delete_contact_msg_view(request, msg_id):
+    result = services.delete_contact_msg_service(msg_id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
 # endregion
 
 # region Article
