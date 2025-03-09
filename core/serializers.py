@@ -2,7 +2,7 @@ import cloudinary.uploader
 from django.utils import timezone
 from rest_framework import serializers
 from core import models
-import cloudinary.uploader
+from core.constants import REQUEST_STATUS_CHOICES
 
 # Create your serializers here.
 
@@ -341,22 +341,21 @@ class GetAllRequestsSerializer(serializers.ModelSerializer):
     unit_area = serializers.CharField(source='unit.area', read_only=True)
     over_price_obj = serializers.SerializerMethodField(read_only=True)
     total_price_obj = serializers.SerializerMethodField(read_only=True)
+    request_status_obj = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = models.UnitRequest
-        fields = ['id', 'unit_id', 'unit_title', 'unit_proposal', 'unit_project', 'unit_city', 'unit_area', 'over_price_obj', 'total_price_obj', 'created_at']#'status',
+        fields = ['id', 'unit_id', 'unit_title', 'unit_proposal', 'unit_project', 'unit_city', 'unit_area', 'over_price_obj', 'total_price_obj', 'request_status_obj', 'created_at']
     
     def get_over_price_obj(self, obj):
-        # price = obj.over_price or obj.total_price or obj.meter_price
-        # price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
-        # currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
         return {'price_type': 'الأوفر', 'price_value': f'{obj.unit.over_price:,.0f}', 'currency': obj.unit.get_over_price_currency_display()} if obj.unit.over_price else None
     
     def get_total_price_obj(self, obj):
-        # price = obj.over_price or obj.total_price or obj.meter_price
-        # price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
-        # currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
         return {'price_type': 'الإجمالى', 'price_value': f'{obj.unit.total_price:,.0f}', 'currency': obj.unit.get_total_price_currency_display()} if obj.unit.total_price else None
+
+    def get_request_status_obj(self, obj):
+        status_obj = REQUEST_STATUS_CHOICES.get(obj.status)
+        return {'name': status_obj.get('name'), 'color': status_obj.get('color')}
 
 class ReviewSerializer(serializers.ModelSerializer):
     client_name = serializers.CharField(source='created_by.get_full_name', read_only=True)

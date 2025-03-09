@@ -8,6 +8,7 @@ from core.base_models import ResultView
 from users.utils import extract_payload_from_jwt
 from django.db.models import Min, Max, F, Value, DecimalField, Q
 from django.db.models.functions import Least, Greatest, Coalesce
+from django.core.paginator import Paginator
 import logging
 
 # Create your services here.
@@ -36,12 +37,12 @@ def propose_unit_service(request_data, client_id):
     finally:
         return result
 
-def request_unit_service(request_data, request_headers):
+def request_unit_service(request_data, client_id):
     result = ResultView()
     try:
-        token = request_headers.get('Authorization', '')
-        token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
-        request_data['created_by_id'] = str(token_decode_result.get('user_id'))
+        # token = request_headers.get('Authorization', '')
+        # token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
+        request_data['created_by_id'] = client_id
         serialized_land_request = serializers.UnitRequestSerializer(data=request_data)
         if serialized_land_request.is_valid():
             serialized_land_request.save()
@@ -65,7 +66,7 @@ def paginated_client_requests_service(request_data, client_id):
     try:
         page_number = int(request_data.get('page_number', 1))
         page_size = int(request_data.get('page_size', 10))
-        client_requests = models.UnitRequest.objects.filter(is_deleted=False, created_by_id=client_id).order_by('created_at')
+        client_requests = models.UnitRequest.objects.filter(is_deleted=False, created_by_id=client_id).order_by('-created_at')
         client_requests_count = client_requests.count()
         if client_requests_count <= 0:
             raise ValueError('لا يوجد طلبات متاحة')
@@ -173,7 +174,7 @@ def recent_units_service():
         serialized_recent_units = serializers.GetAllUnitsSerializer(recent_units, many=True)
         result.data = serialized_recent_units.data
         result.is_success = True
-        result.msg = 'Success'
+        result.msg = 'تم جلب أحدث الوحدات بنجاح'
     except ValueError as ve:
         result.msg = str(ve)
         result.is_success = True
@@ -186,158 +187,206 @@ def recent_units_service():
 def filter_paginated_units_service(request_data):
     result = ResultView()
     try:
-        unit_type_id = request_data.get('unit_type_id')
-        proposal_id = request_data.get('proposal_id')
-        project_id = request_data.get('project_id')
-        city_id = request_data.get('city_id')
-        min_price = request_data.get('min_price')
-        max_price = request_data.get('max_price')
-        min_area = request_data.get('min_area')
-        max_area = request_data.get('max_area')
-        currency = request_data.get('currency')
-        facade = request_data.get('facade')
-        floor = request_data.get('floor')
-        featured = request_data.get('featured')
-        most_viewed = request_data.get('most_viewed')
-        page_number = int(request_data.get('page_number', 1))
-        page_size = int(request_data.get('page_size', 12))
-        filters = {
-            'is_deleted': False,
-            # 'status__code__in': [0, 1, 2]
-        }
-        # price validation
-        if min_price is not None:
+        filters = Q(is_deleted=False)
+        # Numeric Validations
+        def validate_numeric(value, error_message):
             try:
-                min_price = float(min_price)
+                return float(value) if value is not None else None
             except (TypeError, ValueError):
-                raise ValueError("أقل سعر يجب أن يكون رقم صحيحاً")
-        if max_price is not None:
-            try:
-                max_price = float(max_price)
-            except (TypeError, ValueError):
-                raise ValueError("أقصى سعر يجب أن يكون رقم صحيحاً")
-        if min_price is not None and max_price is not None and min_price > max_price:
+                raise ValueError(error_message)
+        min_price = validate_numeric(request_data.get('min_price'), "أقل سعر يجب أن يكون رقم صحيحاً")
+        max_price = validate_numeric(request_data.get('max_price'), "أقصى سعر يجب أن يكون رقم صحيحاً")
+        min_area = validate_numeric(request_data.get('min_area'), "أقل مساحة يجب أن يكون رقم صحيحاً")
+        max_area = validate_numeric(request_data.get('max_area'), "أقصى مساحة يجب أن يكون رقم صحيحاً")
+        if min_price and max_price and min_price > max_price:
             raise ValueError("أقل سعر لا يمكن أن يكون أكبر من أقصى سعر")
-        # area validation
-        if min_area is not None:
-            try:
-                min_area = float(min_area)
-            except (TypeError, ValueError):
-                raise ValueError("أقل مساحة يجب أن يكون رقم صحيحاً")
-        if max_area is not None:
-            try:
-                max_area = float(max_area)
-            except (TypeError, ValueError):
-                raise ValueError("أقصى مساحة يجب أن يكون رقم صحيحاً")
-        if min_area is not None and max_area is not None and min_area > max_area:
+        if min_area and max_area and min_area > max_area:
             raise ValueError("أقل مساحة لا يمكن أن يكون أكبر من أقصى مساحة")
-        if unit_type_id:
-            filters['unit_type__id'] = unit_type_id
-        if proposal_id:
-            filters['proposal__id'] = proposal_id
-        if project_id:
-            filters['project__id'] = project_id
-        if city_id:
-            filters['city__id'] = city_id
-        # if min_price and max_price:
-        #     filters['first_installment_value__gte'] = min_price
-        #     filters['paid_amount__gte'] = min_price
-        #     filters['remaining_amount__gte'] = min_price
-        #     filters['over_price__gte'] = min_price
-        #     filters['total_price__gte'] = min_price
-        #     filters['meter_price__gte'] = min_price
-        #     filters['first_installment_value__lte'] = max_price
-        #     filters['paid_amount__lte'] = max_price
-        #     filters['remaining_amount__lte'] = max_price
-        #     filters['over_price__lte'] = max_price
-        #     filters['total_price__lte'] = max_price
-        #     filters['meter_price__lte'] = max_price
-        if min_area and max_area:
-            filters['area__gte'] = min_area
-            filters['area__lte'] = max_area
-        # if currency:
-        #     filters['first_installment_value_currency'] = currency
-        #     filters['paid_amount_currency'] = currency
-        #     filters['remaining_amount_currency'] = currency
-        #     filters['over_price_currency'] = currency
-        #     filters['total_price_currency'] = currency
-        #     filters['meter_price_currency'] = currency
-        currency_filter = Q()
-        if currency:
-            currency_filter |= Q(first_installment_value_currency=currency)
-            currency_filter |= Q(paid_amount_currency=currency)
-            currency_filter |= Q(remaining_amount_currency=currency)
-            currency_filter |= Q(over_price_currency=currency)
-            currency_filter |= Q(total_price_currency=currency)
-            currency_filter |= Q(meter_price_currency=currency)
-        if facade:
-            filters['facade'] = facade
-        if floor:
-            filters['floor'] = floor
-        if featured:
-            filters['featured'] = featured
-        # Price filtering with OR condition
-        price_filter = Q()
-        if min_price is not None:
-            price_filter |= Q(first_installment_value__gte=min_price)
-            price_filter |= Q(paid_amount__gte=min_price)
-            price_filter |= Q(remaining_amount__gte=min_price)
-            price_filter |= Q(over_price__gte=min_price)
-            price_filter |= Q(total_price__gte=min_price)
-            price_filter |= Q(meter_price__gte=min_price)
-        if max_price is not None:
-            price_filter &= (
-                Q(first_installment_value__lte=max_price) |
-                Q(paid_amount__lte=max_price) |
-                Q(remaining_amount__lte=max_price) |
-                Q(over_price__lte=max_price) |
-                Q(total_price__lte=max_price) |
-                Q(meter_price__lte=max_price)
-            )
-        units = models.Unit.objects.filter(**filters)
-        if min_price is not None or max_price is not None:
-            units = units.filter(price_filter)
-        if most_viewed:
-            units = units.order_by('-view_count')
-        all_units_count = units.count()
-        if all_units_count <= 0:
+        # Add Filters Conditionally
+        if request_data.get('unit_type_id'):
+            filters &= Q(unit_type__id=request_data['unit_type_id'])
+        if request_data.get('proposal_id'):
+            filters &= Q(proposal__id=request_data['proposal_id'])
+        if request_data.get('project_id'):
+            filters &= Q(project__id=request_data['project_id'])
+        if request_data.get('city_id'):
+            filters &= Q(city__id=request_data['city_id'])
+        if min_area:
+            filters &= Q(area__gte=min_area)
+        if max_area:
+            filters &= Q(area__lte=max_area)
+        if min_price:
+            filters &= Q(total_price__gte=min_price)
+        if max_price:
+            filters &= Q(total_price__lte=max_price)
+        if request_data.get('facade'):
+            filters &= Q(facade=request_data['facade'])
+        if request_data.get('floor'):
+            filters &= Q(floor=request_data['floor'])
+        if request_data.get('featured'):
+            filters &= Q(featured=request_data['featured'])
+        # Fetch Filtered Units
+        units = models.Unit.objects.filter(filters)
+        if not units.exists():
             raise ValueError('لا يوجد وحدات متاحة')
-        total_pages = (all_units_count + page_size - 1) // page_size
-        page_number = min(page_number, total_pages)
-        start_index = (page_number - 1) * page_size
-        end_index = start_index + page_size
-        units = units[start_index:end_index]
-        # if all_units_count > page_size*(page_number-1):
-        #     units = units[page_size*(page_number-1):page_size*page_number]
-        # else:
-        #     units = units[page_size*int(all_units_count/page_size) if all_units_count%page_size!=0 else int(all_units_count/page_size)-1:]
-        #     page_number = int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1
-        serialized_units = serializers.GetAllUnitsSerializer(units, many=True)
+        # Sorting
+        sort_fields = {
+            'date': 'created_at',
+            'price': 'total_price',
+            'area': 'area',
+            'most_viewed': 'view_count'
+        }
+        sorting_key = next((sort_fields[key] for key in sort_fields if request_data.get(key)), None)
+        if sorting_key:
+            ordering = sorting_key if request_data.get('asc', True) else f'-{sorting_key}'
+            units = units.order_by(ordering)
+        # Pagination
+        paginator = Paginator(units, int(request_data.get('page_size', 12)))
+        page_number = int(request_data.get('page_number', 1))
+        page = paginator.get_page(page_number)
+        # Serialize Data
+        serialized_units = serializers.GetAllUnitsSerializer(page.object_list, many=True)
         result.data = {
             "all": serialized_units.data,
             "pagination": {
-                "total_items": all_units_count,
-                "total_pages": total_pages,
-                # "total_pages": all_units_count/int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1,
-                "current_page": page_number,
-                "has_next": page_number < total_pages,
-                # "has_next": True if all_units_count > page_size*page_number else False,
-                "has_previous": page_number > 1
+                "total_items": paginator.count,
+                "total_pages": paginator.num_pages,
+                "current_page": page.number,
+                "has_next": page.has_next(),
+                "has_previous": page.has_previous()
             }
         }
         result.is_success = True
-        result.msg = 'Success'
+        result.msg = 'تم تحديث الوحدات بنجاح'
     except ValueError as ve:
         result.msg = str(ve)
         result.is_success = True
-        result.data = {
-            "all": []
-        }
+        result.data = {"all": []}
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
         result.data = {'error': str(e)}
     finally:
         return result
+
+# def filter_paginated_units_service(request_data):
+#     result = ResultView()
+#     try:
+#         # Extract filters
+#         unit_type_id = request_data.get('unit_type_id')
+#         proposal_id = request_data.get('proposal_id')
+#         project_id = request_data.get('project_id')
+#         city_id = request_data.get('city_id')
+#         min_price = request_data.get('min_price')
+#         max_price = request_data.get('max_price')
+#         min_area = request_data.get('min_area')
+#         max_area = request_data.get('max_area')
+#         currency = request_data.get('currency')
+#         facade = request_data.get('facade')
+#         floor = request_data.get('floor')
+#         featured = request_data.get('featured')
+#         sorting = request_data.get('sorting', False)
+#         asc = request_data.get('asc', True)
+#         price = request_data.get('price')
+#         date = request_data.get('date')
+#         area = request_data.get('area')
+#         most_viewed = request_data.get('most_viewed')
+#         page_number = int(request_data.get('page_number', 1))
+#         page_size = int(request_data.get('page_size', 12))
+#         filters = {
+#             'is_deleted': False,
+#             # 'status__code__in': [0, 1, 2]
+#         }
+#         # price validation
+#         if min_price is not None:
+#             try:
+#                 min_price = float(min_price)
+#             except (TypeError, ValueError):
+#                 raise ValueError("أقل سعر يجب أن يكون رقم صحيحاً")
+#         if max_price is not None:
+#             try:
+#                 max_price = float(max_price)
+#             except (TypeError, ValueError):
+#                 raise ValueError("أقصى سعر يجب أن يكون رقم صحيحاً")
+#         if min_price is not None and max_price is not None and min_price > max_price:
+#             raise ValueError("أقل سعر لا يمكن أن يكون أكبر من أقصى سعر")
+#         # area validation
+#         if min_area is not None:
+#             try:
+#                 min_area = float(min_area)
+#             except (TypeError, ValueError):
+#                 raise ValueError("أقل مساحة يجب أن يكون رقم صحيحاً")
+#         if max_area is not None:
+#             try:
+#                 max_area = float(max_area)
+#             except (TypeError, ValueError):
+#                 raise ValueError("أقصى مساحة يجب أن يكون رقم صحيحاً")
+#         if min_area is not None and max_area is not None and min_area > max_area:
+#             raise ValueError("أقل مساحة لا يمكن أن يكون أكبر من أقصى مساحة")
+#         if unit_type_id:
+#             filters['unit_type__id'] = unit_type_id
+#         if proposal_id:
+#             filters['proposal__id'] = proposal_id
+#         if project_id:
+#             filters['project__id'] = project_id
+#         if city_id:
+#             filters['city__id'] = city_id
+#         if min_area and max_area:
+#             filters['area__gte'] = min_area
+#             filters['area__lte'] = max_area
+#         if min_price:
+#             filters['total_price__gte'] = min_price
+#         if max_price:
+#             filters['total_price__lte'] = max_price
+#         if currency:
+#             filters['total_price_currency'] = currency
+#         if facade:
+#             filters['facade'] = facade
+#         if floor:
+#             filters['floor'] = floor
+#         if featured:
+#             filters['featured'] = featured
+#         units = models.Unit.objects.filter(**filters)
+#         if sorting:
+#             if date:
+#                 units = units.order_by('created_at') if asc else units.order_by('-created_at')
+#             if price:
+#                 units = units.order_by('total_price') if asc else units.order_by('-total_price')
+#             if area:
+#                 units = units.order_by('area') if asc else units.order_by('-area')
+#             if most_viewed:
+#                 units = units.order_by('view_count') if asc else units.order_by('-view_count')
+#         all_units_count = units.count()
+#         if all_units_count <= 0:
+#             raise ValueError('لا يوجد وحدات متاحة')
+#         total_pages = (all_units_count + page_size - 1) // page_size
+#         page_number = min(page_number, total_pages)
+#         start_index = (page_number - 1) * page_size
+#         end_index = start_index + page_size
+#         units = units[start_index:end_index]
+#         serialized_units = serializers.GetAllUnitsSerializer(units, many=True)
+#         result.data = {
+#             "all": serialized_units.data,
+#             "pagination": {
+#                 "total_items": all_units_count,
+#                 "total_pages": total_pages,
+#                 "current_page": page_number,
+#                 "has_next": page_number < total_pages,
+#                 "has_previous": page_number > 1
+#             }
+#         }
+#         result.is_success = True
+#         result.msg = 'Success'
+#     except ValueError as ve:
+#         result.msg = str(ve)
+#         result.is_success = True
+#         result.data = {
+#             "all": []
+#         }
+#     except Exception as e:
+#         result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
+#         result.data = {'error': str(e)}
+#     finally:
+#         return result
 
 def unit_details_service(unit_id):
     result = ResultView()

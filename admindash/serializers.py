@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from core import models as CoreModels
+from core.constants import REQUEST_STATUS_CHOICES
 from users import models as UsersModels
 from django.contrib.auth.hashers import make_password
 
@@ -90,6 +91,7 @@ class AllUnitSerializer(serializers.ModelSerializer):
 
 class UnitRequestSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
+    status_obj = serializers.SerializerMethodField(read_only=True)
     # client_data = serializers.SerializerMethodField(read_only=True)
     user_id = serializers.CharField(source='created_by.id', read_only=True)
     first_name = serializers.CharField(source='created_by.first_name', read_only=True)
@@ -108,6 +110,8 @@ class UnitRequestSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'created_at',
+            'status_obj',
+            'status_msg',
             'user_id',
             'first_name',
             'last_name',
@@ -132,6 +136,10 @@ class UnitRequestSerializer(serializers.ModelSerializer):
                 }
                 for pn in UsersModels.UserPhoneNumber.objects.filter(created_by=obj.created_by).order_by('created_at')
             ]
+
+    def get_status_obj(self, obj):
+        status_obj = REQUEST_STATUS_CHOICES.get(obj.status)
+        return {'name': status_obj.get('name'), 'color': status_obj.get('color')}
 
     def get_client_data(self, obj):
         return {

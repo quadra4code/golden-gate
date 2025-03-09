@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from core.base_models import BaseEntity
 from cloudinary.models import CloudinaryField
+from core.models import City
 
 # Create your models here.
 
@@ -26,7 +27,7 @@ class CustomUser(AbstractUser):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     user_type = models.CharField(max_length=2, choices=USER_TYPE_CHOICES, default='5')
-    interested_city = models.CharField(max_length=40, null=True, blank=True)
+    interested_city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True)
     referral_code = models.CharField(max_length=12, unique=True, blank=True)
     referred_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='referrals')  # Who referred this user
     referral_count = models.PositiveIntegerField(default=0)
@@ -52,7 +53,8 @@ class CustomUser(AbstractUser):
             'is_active': self.is_active,
             'user_type': self.user_type,
             'user_type_display': self.get_user_type_display(),
-            'image_url': self.image_url,
+            'image_url': self.image,
+            'interested_city': self.interested_city.name,
             'referral_code': self.referral_code,
             'referred_by': self.referred_by.__str__(),
             'referral_count': self.referral_count,

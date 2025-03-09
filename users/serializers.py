@@ -12,7 +12,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=60, min_length=8, required=False, allow_blank=True, allow_null=True)
     image_url = serializers.CharField(max_length=1000, required=False, allow_blank=True, allow_null=True)
     user_type = serializers.CharField(max_length=2, default=5)
-    interested_city = serializers.CharField(max_length=40, required=False, allow_blank=True, allow_null=True)
+    interested_city = serializers.CharField(max_length=2, required=False, allow_blank=True, allow_null=True)
     password = serializers.CharField(write_only=True)
     referral_code = serializers.CharField(max_length=12, required=False, allow_blank=True, allow_null=True)
     class Meta:
@@ -47,6 +47,8 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class AccountViewSerializer(serializers.ModelSerializer):
     account_type = serializers.CharField(source='get_user_type_display', read_only=True)
+    interested_city_name = serializers.CharField(source='interested_city.name', read_only=True)
+    interested_city = serializers.CharField(required=False, allow_null=True, write_only=True)
     phone_numbers = serializers.SerializerMethodField(read_only=True)
     referred_by_name = serializers.SerializerMethodField(read_only=True)
     class Meta:
@@ -63,6 +65,7 @@ class AccountViewSerializer(serializers.ModelSerializer):
             'phone_numbers',
             'is_active',
             'account_type',
+            'interested_city_name',
             'interested_city',
             'referred_by_name'
         ]

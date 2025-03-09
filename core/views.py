@@ -106,7 +106,7 @@ def propose_unit_view(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def request_unit_view(request):
-    request_result = services.request_unit_service(request.data, request.headers)
+    request_result = services.request_unit_service(request.data, request.user.id if request.user else None)
     status_code = (
         status.HTTP_201_CREATED if request_result.is_success
         else status.HTTP_401_UNAUTHORIZED if request_result.msg.lower().__contains__('unauthorized')
@@ -117,7 +117,7 @@ def request_unit_view(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def paginated_client_requests_view(request):
-    requests_result = services.paginated_client_requests_service(request.data, request.user.id)
+    requests_result = services.paginated_client_requests_service(request.data, request.user.id if request.user else None)
     status_code = (
         status.HTTP_200_OK if requests_result.is_success
         else status.HTTP_401_UNAUTHORIZED if requests_result.msg.lower().__contains__('unauthorized')
