@@ -22,4 +22,5 @@ urlpatterns = [
     path('dashboard/', include('admindash.urls')),
     path('core/', include('core.urls')),
     path('accounts/', include('users.urls')),
+    path('engagement/', include('engagement.urls')),
 ]

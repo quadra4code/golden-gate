@@ -5,6 +5,7 @@ from django.utils import timezone
 from core import models
 from core import serializers
 from core.base_models import ResultView
+from engagement.models import UserInteraction
 from users.utils import extract_payload_from_jwt
 from django.db.models import Min, Max, F, Value, DecimalField, Q
 from django.db.models.functions import Least, Greatest, Coalesce
@@ -727,7 +728,7 @@ def list_favorites_service(request_data, request_headers):
         token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
         page_number = int(request_data.get('page_number', 1))
         page_size = int(request_data.get('page_size', 12))
-        fav_units = models.UnitFavorite.objects.filter(is_deleted=False, created_by_id=token_decode_result.get('user_id'))
+        fav_units = UserInteraction.objects.filter(is_deleted=False, interaction_type='favorite', created_by_id=token_decode_result.get('user_id'))
         all_fav_units_count = fav_units.count()
         if all_fav_units_count <= 0:
             raise ValueError('لا يوجد وحدات مفضلة')
@@ -769,10 +770,10 @@ def list_favorites_service(request_data, request_headers):
 def delete_favorite_service(favorite_id):
     result = ResultView()
     try:
-        models.UnitFavorite.objects.get(is_deleted=False, id=favorite_id).delete()
+        UserInteraction.objects.get(is_deleted=False, id=favorite_id).delete()
         result.is_success = True
         result.msg = "تم إزالة الوحدة من المفضلة بنجاح"
-    except models.UnitFavorite.DoesNotExist as e:
+    except UserInteraction.DoesNotExist as e:
         result.msg = 'لم يتم العثور على الوحدة المطلوبة'
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء إزالة الوحدة من المفضلة'

@@ -3,7 +3,7 @@ from django.utils import timezone
 from rest_framework import serializers
 from core import models
 from core.constants import REQUEST_STATUS_CHOICES
-
+from engagement.models import UserInteraction
 # Create your serializers here.
 
 class CreateUnitSerializer(serializers.Serializer):
@@ -230,7 +230,7 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
         return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code} if obj.status else None
 
     def get_favorite_count(self, obj):
-        return obj.unitfavorite_set.count()
+        return obj.userinteraction_set.filter(interaction_type='favorite').count()
 
     def get_latest_date(self, obj):
         return timezone.localdate(obj.updated_at) if obj.updated_at and (obj.updated_at >= obj.created_at) else timezone.localdate(obj.created_at) if obj.created_at else None
@@ -414,7 +414,7 @@ class UnitFavoriteSerializer(serializers.ModelSerializer):
     main_image = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = models.UnitFavorite
+        model = UserInteraction
         fields = ['id', 'unit', 'created_by_id', 'unit_id', "title", "city", "unit_type", "project", "area", "over_price_obj", "total_price_obj", "status", "main_image"]
     
     def get_main_image(self, obj):
@@ -440,7 +440,8 @@ class UnitFavoriteSerializer(serializers.ModelSerializer):
         unit_obj = models.Unit.objects.filter(id=validated_data.get('unit')).first()
         if unit_obj:
             validated_data['unit_id'] = validated_data.pop('unit')
-            return models.UnitFavorite.objects.create(**validated_data)
+            validated_data['interaction_type'] = 'favorite'
+            return UserInteraction.objects.create(**validated_data)
         else:
             raise LookupError('الوحدة المطلوبة غير موجودة')
 

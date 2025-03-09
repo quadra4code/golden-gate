@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'admindash',
     'core',
     'users',
+    'engagement'
 ]
 
 MIDDLEWARE = [

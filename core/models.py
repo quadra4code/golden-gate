@@ -139,12 +139,12 @@ class UnitRequest(BaseEntity):
             models.UniqueConstraint(fields=['created_by', 'unit'], name='created_by_unit_request_unique_constraint', violation_error_message='لقد طلبت هذه الوحدة من قبل ولا يمكنك طلبها مره أخرى')
         ]
 
-class UnitFavorite(BaseEntity):
-    unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['created_by', 'unit'], name='created_by_unit_favorite_unique_constraint', violation_error_message='لقد أضفت هذه الوحدة للمفضلة من قبل ولا يمكنك إضافتها مره أخرى')
-        ]
+# class UnitFavorite(BaseEntity):
+#     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
+#     class Meta:
+#         constraints = [
+#             models.UniqueConstraint(fields=['created_by', 'unit'], name='created_by_unit_favorite_unique_constraint', violation_error_message='لقد أضفت هذه الوحدة للمفضلة من قبل ولا يمكنك إضافتها مره أخرى')
+#         ]
 
 class ClientReview(BaseEntity):
     rate = models.IntegerField()
