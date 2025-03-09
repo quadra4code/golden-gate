@@ -139,7 +139,7 @@ class UnitRequestSerializer(serializers.ModelSerializer):
 
     def get_status_obj(self, obj):
         status_obj = REQUEST_STATUS_CHOICES.get(obj.status)
-        return {'name': status_obj.get('name'), 'color': status_obj.get('color')}
+        return {'name': status_obj.get('name'), 'color': status_obj.get('color'), 'status_msg': obj.status_msg}
 
     def get_client_data(self, obj):
         return {

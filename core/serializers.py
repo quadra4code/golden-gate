@@ -355,7 +355,7 @@ class GetAllRequestsSerializer(serializers.ModelSerializer):
 
     def get_request_status_obj(self, obj):
         status_obj = REQUEST_STATUS_CHOICES.get(obj.status)
-        return {'name': status_obj.get('name'), 'color': status_obj.get('color')}
+        return {'name': status_obj.get('name'), 'color': status_obj.get('color'), 'status_msg': obj.status_msg}
 
 class ReviewSerializer(serializers.ModelSerializer):
     client_name = serializers.CharField(source='created_by.get_full_name', read_only=True)

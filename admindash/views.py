@@ -118,6 +118,19 @@ def unit_requests_user_view(request, unit_id):
     )
     return Response(result.to_dict(), status=status_code)
 
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def change_request_status_view(request):
+    result = services.change_request_status_service(request.data, request.user)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+
+
+
 @api_view(['GET'])
 @permission_classes([utils.IsManagerOrAdminUser])
 def update_unit_status_view(request, unit_id, status_id):
