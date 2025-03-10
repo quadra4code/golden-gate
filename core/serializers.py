@@ -97,7 +97,7 @@ class CreateUnitSerializer(serializers.Serializer):
             if not unit_id:
                 raise serializers.ValidationError({"id": "ID is required for updating a unit."})
 
-            unit = models.Unit.objects.get(id=unit_id)
+            unit = models.Unit.objects.get(id=unit_id, created_by_id=validated_data['created_by_id'])
             for key, value in validated_data.items():
                 setattr(unit, key, value)
             unit.save()

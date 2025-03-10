@@ -185,7 +185,7 @@ def recent_units_service():
     finally:
         return result
 
-def filter_paginated_units_service(request_data):
+def filter_paginated_units_service(request_data, user_id):
     result = ResultView()
     try:
         filters = Q(is_deleted=False)
@@ -212,6 +212,13 @@ def filter_paginated_units_service(request_data):
             filters &= Q(project__id=request_data['project_id'])
         if request_data.get('city_id'):
             filters &= Q(city__id=request_data['city_id'])
+            if user_id:
+                UserInteraction.objects.update_or_create(
+                    created_by_id=user_id,
+                    city_id=request_data['city_id'],
+                    interaction_type='filter',
+                    defaults={'updated_at': timezone.now()}
+                )
         if min_area:
             filters &= Q(area__gte=min_area)
         if max_area:
@@ -389,10 +396,12 @@ def filter_paginated_units_service(request_data):
 #     finally:
 #         return result
 
-def unit_details_service(unit_id):
+def unit_details_service(unit_id, user_id):
     result = ResultView()
     try:
         unit = models.Unit.objects.filter(is_deleted=False, id=unit_id).first()
+        if not unit:
+            raise ValueError('الوحدة غير موجودة')
         same_city_units = (
             models.Unit.objects.filter(is_deleted=False, city=unit.city)
                 .exclude(id=unit_id).order_by('-updated_at')
@@ -401,10 +410,15 @@ def unit_details_service(unit_id):
             or models.Unit.objects.filter(is_deleted=False, proposal=unit.proposal)
                 .exclude(id=unit_id).order_by('-updated_at')
         )
-        if not unit:
-            raise ValueError('الوحدة غير موجودة')
         unit.view_count += 1
         unit.save()
+        if user_id:
+            UserInteraction.objects.update_or_create(
+            created_by_id=user_id,
+            unit=unit,
+            interaction_type='view',
+            defaults={'updated_at': timezone.now()}
+        )
         serialized_unit = serializers.UnitDetailsSerializer(unit)
         serialized_same_city_units = serializers.GetAllUnitsSerializer(same_city_units[:12], many=True)
         result.data = {
@@ -461,10 +475,10 @@ def paginated_client_units_service(request_data, client_id):
     finally:
         return result
 
-def get_update_unit_service(unit_id):
+def get_update_unit_service(unit_id, user_obj):
     result = ResultView()
     try:
-        unit_data = models.Unit.objects.get(id=unit_id)
+        unit_data = models.Unit.objects.get(id=unit_id, created_by=user_obj)
         serialized_unit_data = serializers.UpdateUnitSerializer(unit_data)
         result.data = serialized_unit_data.data
         result.is_success = True

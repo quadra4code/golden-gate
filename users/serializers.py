@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from users.models import CustomUser, UserPhoneNumber
+from engagement.models import UserInteraction
 from django.contrib.auth.hashers import make_password
 import cloudinary.uploader
 
@@ -21,7 +22,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         referral_code = validated_data.pop('referral_code', None)
-        validated_data['interested_city_id'] = validated_data.pop('interested_city', None)
+        interested_city_id = validated_data.pop('interested_city', None)
         validated_data['password'] = make_password(validated_data['password'])
         referrer = None
         if referral_code:  # If the user used a referral code
@@ -31,6 +32,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             except CustomUser.DoesNotExist:
                 raise serializers.ValidationError({"referral_code": "كود الدعوة غير صالح"})
         new_user = super().create(validated_data)
+        if interested_city_id:
+            UserInteraction.objects.create(created_by=new_user, city_id=interested_city_id, interaction_type='register')
         # If the user was referred, increment referrer's count
         if referrer:
             referrer.referral_count += 1
@@ -48,8 +51,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class AccountViewSerializer(serializers.ModelSerializer):
     account_type = serializers.CharField(source='get_user_type_display', read_only=True)
-    interested_city_name = serializers.CharField(source='interested_city.name', read_only=True)
-    interested_city = serializers.CharField(required=False, allow_null=True, write_only=True)
+    interested_city = serializers.SerializerMethodField(read_only=True)
     phone_numbers = serializers.SerializerMethodField(read_only=True)
     referred_by_name = serializers.SerializerMethodField(read_only=True)
     class Meta:
@@ -66,13 +68,16 @@ class AccountViewSerializer(serializers.ModelSerializer):
             'phone_numbers',
             'is_active',
             'account_type',
-            'interested_city_name',
             'interested_city',
             'referred_by_name'
         ]
 
     def get_referred_by_name(self, obj):
         return obj.referred_by.get_full_name() if obj.referred_by else None
+
+    def get_interested_city(self, obj):
+        city_obj = UserInteraction.objects.get(created_by=obj, interaction_type='register').city
+        return {'id': city_obj.id, 'name': city_obj.name}
 
     def get_phone_numbers(self, obj):
         return [
@@ -88,6 +93,7 @@ class AccountViewSerializer(serializers.ModelSerializer):
 class UpdateAccountSerializer(serializers.ModelSerializer):
     phone_numbers_updated = serializers.BooleanField(write_only=True, default=False, allow_null=True)
     phone_numbers = serializers.ListField(write_only=True, required=False, allow_null=True)
+    interested_city = serializers.CharField(write_only=True, required=False, allow_null=True)
 
     class Meta:
         model = CustomUser
@@ -99,6 +105,11 @@ class UpdateAccountSerializer(serializers.ModelSerializer):
         if new_image and instance.image:
             cloudinary.uploader.destroy(instance.image.public_id)
         instance.image = new_image if new_image else instance.image
+
+        # Handle interested city
+        interested_city = validated_data.pop('interested_city', None)
+        if interested_city:
+            UserInteraction.objects.filter(created_by=instance, interaction_type='register').update(city_id=interested_city)
 
         # Handle phone numbers
         if validated_data.get('phone_numbers_updated', False):

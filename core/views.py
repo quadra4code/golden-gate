@@ -158,7 +158,7 @@ def recent_units_view(request):
 
 @api_view(["POST"])
 def filter_paginated_units_view(request):
-    filter_paginated_units_result = services.filter_paginated_units_service(request.data)
+    filter_paginated_units_result = services.filter_paginated_units_service(request.data, request.user.id)
     status_code = (
         status.HTTP_201_CREATED if filter_paginated_units_result.is_success
         else status.HTTP_401_UNAUTHORIZED if filter_paginated_units_result.msg.lower().__contains__('unauthorized')
@@ -168,7 +168,7 @@ def filter_paginated_units_view(request):
 
 @api_view(["GET"])
 def unit_details_view(request, unit_id):
-    unit_details_result = services.unit_details_service(unit_id)
+    unit_details_result = services.unit_details_service(unit_id, request.user.id)
     status_code = (
         status.HTTP_200_OK if unit_details_result.is_success
         else status.HTTP_400_BAD_REQUEST
@@ -189,7 +189,7 @@ def paginated_client_units_view(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_update_unit_view(request, unit_id):
-    result = services.get_update_unit_service(unit_id)
+    result = services.get_update_unit_service(unit_id, request.user)
     status_code = (
         status.HTTP_200_OK if result.is_success
         else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
@@ -200,7 +200,7 @@ def get_update_unit_view(request, unit_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_unit_view(request):
-    result = services.update_unit_service(request.data, request.user.id if request.user else None)
+    result = services.update_unit_service(request.data, request.user.id)
     status_code = (
         status.HTTP_200_OK if result.is_success
         else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
