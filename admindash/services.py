@@ -490,7 +490,7 @@ def change_request_status_service(request_data, admin_obj):
         status_id = request_data.get('status_id', None)
         status_msg = request_data.get('status_msg', None)
         request_obj = CoreModels.UnitRequest.objects.get(id=request_id)
-        request_obj.status = status_id
+        request_obj.status = status_id if status_id else request_obj.status
         request_obj.status_msg = status_msg if status_msg else request_obj.status_msg
         request_obj.updated_by = admin_obj
         request_obj.save()
@@ -498,7 +498,7 @@ def change_request_status_service(request_data, admin_obj):
         result.msg = 'تم تحديث حالة الطلب بنجاح'
     except ValueError as ve:
         result.msg = str(ve)
-        result.is_success = True
+        result.data = {'errors': str(ve)}
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء تحديث حالة الطلب'
         result.data = {'errors': str(e)}
