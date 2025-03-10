@@ -252,7 +252,7 @@ def delete_article_view(request, article_id):
     )
     return Response(result.to_dict(), status=status_code)
 
-@api_view(['PATCH'])
+@api_view(['PUT'])
 @permission_classes([utils.IsManagerOrAdminUser])
 def toggle_hidden_article_view(request, article_id):
     result = services.toggle_hidden_article_service(article_id, request.user if request.user else None)
