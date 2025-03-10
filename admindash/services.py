@@ -13,6 +13,24 @@ import logging
 
 # Create your services here.
 
+def get_statistics():
+    result = ResultView()
+    try:
+        requests_qs = CoreModels.UnitRequest.objects.all()
+        responded_reqeusts_count = requests_qs.filter(status__not=0).count()
+        all_requests_count = requests_qs.count()
+        all_units_qs = CoreModels.Unit.objects.all()
+        sold_units_count = all_units_qs.filter(status=CoreModels.Status.objects.filter(code=3))
+        all_clients_qs = UsersModels.CustomUser.objects.filter()
+        buyer_clients = all_clients_qs.filter(user_type=5)
+        seller_clients = all_clients_qs.filter(user_type=6)
+        broker_clients = all_clients_qs.filter(user_type=7)
+        pass
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب الإحصائيات'
+    finally:
+        return result
+
 # region staff
 def staff_login_service(request_data):
     result = ResultView()
@@ -510,7 +528,8 @@ def create_article_service(request_data, admin_id):
         if serialized_new_article.is_valid():
             serialized_new_article.save()
             result.msg = 'تم إضافة المقالة بنجاح'
-            result.data = serialized_new_article.data
+            result.data = CoreSerializers.ArticleSerializer(CoreModels.Article.objects.order_by('-created_at'), many=True).data
+            # result.data = serialized_new_article.data
             result.is_success = True
         else:
             result.msg = 'حدث خطأ أثناء معالجة بيانات المقالة'
@@ -544,7 +563,8 @@ def update_article_service(request_data, admin_id, article_id):
         if serialized_update_article.is_valid():
             serialized_update_article.save()
             result.msg = 'تم تحديث المقالة بنجاح'
-            result.data = serialized_update_article.data
+            result.data = CoreSerializers.ArticleSerializer(CoreModels.Article.objects.order_by('-created_at'), many=True).data
+            # result.data = serialized_update_article.data
             result.is_success = True
         else:
             result.msg = 'حدث خطأ أثناء معالجة بيانات المقالة'

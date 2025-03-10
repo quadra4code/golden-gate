@@ -32,8 +32,7 @@ class Status(BaseEntity):
     0 : تم الطلب : Requested
     1 : للبيع : For Sale
     2 : جارى التفاوض : Under Negotiations
-    3 : تم الشراء : Bought
-    4 : تم البيع : Sold
+    3 : تم البيع : Sold
     '''
 
 class Unit(BaseEntity):

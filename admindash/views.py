@@ -236,7 +236,7 @@ def update_article_view(request, article_id):
 def delete_article_view(request, article_id):
     result = services.delete_article_service(article_id)
     status_code = (
-        status.HTTP_201_CREATED if result.is_success
+        status.HTTP_200_OK if result.is_success
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(result.to_dict(), status=status_code)
@@ -246,7 +246,7 @@ def delete_article_view(request, article_id):
 def toggle_hidden_article_view(request, article_id):
     result = services.toggle_hidden_article_service(article_id, request.user if request.user else None)
     status_code = (
-        status.HTTP_201_CREATED if result.is_success
+        status.HTTP_200_OK if result.is_success
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(result.to_dict(), status=status_code)
