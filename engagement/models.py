@@ -9,7 +9,8 @@ class UserInteraction(BaseEntity):
     INTERACTION_TYPES = [
         ('view', 'View'),
         ('favorite', 'Favorite'),
-        ('inquiry', 'Inquiry'),
+        ('filter', 'Filter'),
+        ('register', 'Register'),
     ]
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, null=True)
@@ -19,7 +20,7 @@ class UserInteraction(BaseEntity):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['created_by', 'unit', 'interaction_type'], name='unique_user_unit_interaction'),
-            models.UniqueConstraint(fields=['created_by', 'city'], name='unique_user_city_interest'),
+            models.UniqueConstraint(fields=['created_by', 'city', 'interaction_type'], name='unique_user_city_interaction'),
         ]
 
 class Notification(BaseEntity):
