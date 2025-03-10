@@ -6,6 +6,17 @@ from admindash import utils
 
 # Create your views here.
 
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def main_statistics_view(request):
+    result = services.main_statistics_service()
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_403_FORBIDDEN if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+
 # region Staff | Users
 @api_view(['POST'])
 def staff_login_view(request):

@@ -13,21 +13,53 @@ import logging
 
 # Create your services here.
 
-def get_statistics():
+def main_statistics_service():
     result = ResultView()
     try:
-        requests_qs = CoreModels.UnitRequest.objects.all()
-        responded_reqeusts_count = requests_qs.filter(status__not=0).count()
-        all_requests_count = requests_qs.count()
-        all_units_qs = CoreModels.Unit.objects.all()
-        sold_units_count = all_units_qs.filter(status=CoreModels.Status.objects.filter(code=3))
-        all_clients_qs = UsersModels.CustomUser.objects.filter()
-        buyer_clients = all_clients_qs.filter(user_type=5)
-        seller_clients = all_clients_qs.filter(user_type=6)
-        broker_clients = all_clients_qs.filter(user_type=7)
-        pass
+        # Fetch status objects once
+        status_0 = CoreModels.Status.objects.get(code=0)
+        status_3 = CoreModels.Status.objects.get(code=3)
+        # Fetch all units and annotate counts
+        units_stats = CoreModels.Unit.objects.aggregate(
+            all_units=Count('id'),
+            requested_units=Count('id', filter=Q(status=status_0)),
+            sold_units=Count('id', filter=Q(status=status_3)),
+        )
+        # Fetch all requests and annotate counts
+        requests_stats = CoreModels.UnitRequest.objects.aggregate(
+            all_requests=Count('id'),
+            responded_requests=Count('id', filter=~Q(status=0)),
+        )
+        # Fetch all clients and annotate counts
+        clients_stats = UsersModels.CustomUser.objects.aggregate(
+            all_clients=Count('id', filter=Q(user_type__in=[5, 6, 7])),
+            managers=Count('id', filter=Q(user_type=1)),
+            admins=Count('id', filter=Q(user_type=3)),
+            sales=Count('id', filter=Q(user_type=4)),
+            buyers=Count('id', filter=Q(user_type=5)),
+            sellers=Count('id', filter=Q(user_type=6)),
+            brokers=Count('id', filter=Q(user_type=7)),
+        )
+        # Combine results
+        result.data = {
+            'all_units': units_stats['all_units'],
+            'requested_units': units_stats['requested_units'],
+            'sold_units': units_stats['sold_units'],
+            'all_requests': requests_stats['all_requests'],
+            'responded_requests': requests_stats['responded_requests'],
+            'all_clients': clients_stats['all_clients'],
+            'managers': clients_stats['managers'],
+            'admins': clients_stats['admins'],
+            'sales': clients_stats['sales'],
+            'buyers': clients_stats['buyers'],
+            'sellers': clients_stats['sellers'],
+            'brokers': clients_stats['brokers'],
+        }
+        result.msg = 'تم جلب الإحصائيات بنجاح'
+        result.is_success = True
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء جلب الإحصائيات'
+        result.data = {'errors': str(e)}
     finally:
         return result
 
