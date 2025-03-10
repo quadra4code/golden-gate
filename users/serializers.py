@@ -21,6 +21,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         referral_code = validated_data.pop('referral_code', None)
+        validated_data['interested_city_id'] = validated_data.pop('interested_city', None)
         validated_data['password'] = make_password(validated_data['password'])
         referrer = None
         if referral_code:  # If the user used a referral code
