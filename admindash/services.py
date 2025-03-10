@@ -8,6 +8,7 @@ from django.db.models import Value, CharField, Q, Count
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import StringAgg
 from django.contrib.auth import authenticate
+from django.core.paginator import Paginator
 from users.utils import generate_jwt_token
 import logging
 
@@ -63,7 +64,7 @@ def main_statistics_service():
     finally:
         return result
 
-# region staff
+# region Staff
 def staff_login_service(request_data):
     result = ResultView()
     logger = logging.getLogger(__name__)
@@ -245,7 +246,7 @@ def change_staff_permissions_service(request_data):
         return result
 # endregion
 
-# region client
+# region Client
 def paginated_clients_service(request_data):
     result = ResultView()
     try:
@@ -290,7 +291,7 @@ def paginated_clients_service(request_data):
         return result
 # endregion
 
-# region unit
+# region Unit
 def unit_requests_user_service(unit_id):
     result = ResultView()
     try:
@@ -338,28 +339,6 @@ def unit_requests_user_service(unit_id):
         result.is_success = True
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء جلب طلبات هذه الوحدة'
-        result.data = {'errors': str(e)}
-    finally:
-        return result
-
-def change_request_status_service(request_data, admin_obj):
-    result = ResultView()
-    try:
-        request_id = request_data.get('request_id', None)
-        status_id = request_data.get('status_id', None)
-        status_msg = request_data.get('status_msg', None)
-        request_obj = CoreModels.UnitRequest.objects.get(id=request_id)
-        request_obj.status = status_id
-        request_obj.status_msg = status_msg if status_msg else request_obj.status_msg
-        request_obj.updated_by = admin_obj
-        request_obj.save()
-        result.is_success = True
-        result.msg = 'تم تحديث حالة الطلب بنجاح'
-    except ValueError as ve:
-        result.msg = str(ve)
-        result.is_success = True
-    except Exception as e:
-        result.msg = 'حدث خطأ غير متوقع أثناء تحديث حالة الطلب'
         result.data = {'errors': str(e)}
     finally:
         return result
@@ -471,7 +450,63 @@ def toggle_unit_featured_service(unit_id, user_id):
         return result
 # endregion
 
-# region contact us
+# region Request
+def paginated_requests_service(request_data):
+    result = ResultView()
+    try:
+        page_number = int(request_data.get('page_number', 1))
+        page_size = request_data.get('page_size', 12)
+        all_requests = CoreModels.UnitRequest.objects.filter()
+        if not all_requests.exists():
+            raise ValueError('لا يوجد طلبات متاحة')
+        paginator = Paginator(all_requests, page_size)
+        page = paginator.get_page(page_number)
+        serialized_requests = AdminSerializers.AllRequestSerializer(page.object_list, many=True)
+        result.data = {
+            "all": serialized_requests.data,
+            "pagination": {
+                "total_items": paginator.count,
+                "total_pages": paginator.num_pages,
+                "current_page": page.number,
+                "has_next": page.has_next(),
+                "has_previous": page.has_previous()
+            }
+        }
+        result.is_success = True
+        result.msg = 'تم جلب الطلبات بنجاح'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تحديث حالة الطلب'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def change_request_status_service(request_data, admin_obj):
+    result = ResultView()
+    try:
+        request_id = request_data.get('request_id', None)
+        status_id = request_data.get('status_id', None)
+        status_msg = request_data.get('status_msg', None)
+        request_obj = CoreModels.UnitRequest.objects.get(id=request_id)
+        request_obj.status = status_id
+        request_obj.status_msg = status_msg if status_msg else request_obj.status_msg
+        request_obj.updated_by = admin_obj
+        request_obj.save()
+        result.is_success = True
+        result.msg = 'تم تحديث حالة الطلب بنجاح'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تحديث حالة الطلب'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+# endregion
+
+# region Contact Us
 def paginated_contact_msgs_service(request_data):
     result = ResultView()
     try:

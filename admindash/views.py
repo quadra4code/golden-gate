@@ -129,19 +129,6 @@ def unit_requests_user_view(request, unit_id):
     )
     return Response(result.to_dict(), status=status_code)
 
-@api_view(['PATCH'])
-@permission_classes([utils.IsManagerOrAdminUser])
-def change_request_status_view(request):
-    result = services.change_request_status_service(request.data, request.user)
-    status_code = (
-        status.HTTP_201_CREATED if result.is_success
-        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
-        else status.HTTP_500_INTERNAL_SERVER_ERROR
-    )
-    return Response(result.to_dict(), status=status_code)
-
-
-
 @api_view(['GET'])
 @permission_classes([utils.IsManagerOrAdminUser])
 def update_unit_status_view(request, unit_id, status_id):
@@ -170,6 +157,30 @@ def toggle_unit_featured_view(request, unit_id):
     result = services.toggle_unit_featured_service(unit_id, request.user.id)
     status_code = (
         status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+# endregion
+
+# region Request
+@api_view(['POST'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def paginated_requests_view(request):
+    result = services.paginated_requests_service(request.data)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def change_request_status_view(request):
+    result = services.change_request_status_service(request.data, request.user)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
         else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
