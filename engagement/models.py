@@ -28,7 +28,7 @@ class Notification(BaseEntity):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, null=True)
     city = models.ForeignKey(City, on_delete=models.CASCADE, null=True)
     message = models.TextField()
-    is_read = models.BooleanField(default=False)
+    # is_read = models.BooleanField(default=False) # replace with is_deleted
 
     class Meta:
         ordering = ['-created_at']
