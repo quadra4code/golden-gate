@@ -374,15 +374,59 @@ class ArticleSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'body', 'created_by_id', 'created_at', 'updated_by_id', 'hidden']
 
 class ConsultationTypeSerializer(serializers.ModelSerializer):
+    created_by_id = serializers.CharField(write_only=True)
+    updated_by_id = serializers.CharField(write_only=True, required=False, allow_null=True)
+    created_by_obj = serializers.SerializerMethodField(read_only=True)
+    updated_by_obj = serializers.SerializerMethodField(read_only=True)
+    hidden = serializers.BooleanField(source='is_deleted', read_only=True)
+    created_at = serializers.DateTimeField(format='Date: %d-%m-%Y | Time: %I:%M:%S-%p', read_only=True)
+    updated_at = serializers.DateTimeField(format='Date: %d-%m-%Y | Time: %I:%M:%S-%p', read_only=True)
+
     class Meta:
         model = models.ConsultationType
-        fields = ['id', 'name', 'brief']
+        fields = ['id', 'name', 'brief', 'created_by_id', 'created_by_obj', 'updated_by_id', 'updated_by_obj', 'created_at', 'updated_at', 'hidden']
+    
+    def get_created_by_obj(self, obj):
+        if obj.created_by:
+            return {'id': obj.created_by.id, 'full_name': obj.created_by.get_full_name()}
+    def get_updated_by_obj(self, obj):
+        if obj.updated_by:
+            return {'id': obj.updated_by.id, 'full_name': obj.updated_by.get_full_name()}
 
 class ConsultationSerializer(serializers.ModelSerializer):
     consultation_type = serializers.CharField(source='consultation_type.name', read_only=True)
+    consultation_type_id = serializers.CharField(required=False)
+    created_by_id = serializers.CharField(write_only=True)
+    updated_by_id = serializers.CharField(write_only=True, required=False, allow_null=True)
+    created_by_obj = serializers.SerializerMethodField(read_only=True)
+    updated_by_obj = serializers.SerializerMethodField(read_only=True)
+    hidden = serializers.BooleanField(source='is_deleted', read_only=True)
+    created_at = serializers.DateTimeField(format='Date: %d-%m-%Y | Time: %I:%M:%S-%p', read_only=True)
+    updated_at = serializers.DateTimeField(format='Date: %d-%m-%Y | Time: %I:%M:%S-%p', read_only=True)
+
     class Meta:
         model = models.Consultation
-        fields = ['id', 'title', 'body', 'consultation_type']
+        fields = [
+            'id',
+            'title',
+            'body',
+            'consultation_type',
+            'consultation_type_id',
+            'created_by_id',
+            'created_by_obj',
+            'updated_by_id',
+            'updated_by_obj',
+            'created_at',
+            'updated_at',
+            'hidden',
+        ]
+
+    def get_created_by_obj(self, obj):
+        if obj.created_by:
+            return {'id': obj.created_by.id, 'full_name': obj.created_by.get_full_name()}
+    def get_updated_by_obj(self, obj):
+        if obj.updated_by:
+            return {'id': obj.updated_by.id, 'full_name': obj.updated_by.get_full_name()}
 
 class DrawResultSerializer(serializers.ModelSerializer):
     class Meta:

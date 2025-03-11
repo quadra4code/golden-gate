@@ -274,10 +274,109 @@ def toggle_hidden_article_view(request, article_id):
     return Response(result.to_dict(), status=status_code)
 # endregion
 
-# region Consultation
+# region Consultation Type
+@api_view(['POST'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def create_consult_type_view(request):
+    result = services.create_consult_type_service(request.data, request.user.id if request.user else None)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
 
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def read_consult_types_view(request):
+    result = services.read_consult_types_service()
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PUT'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def update_consult_type_view(request, consult_type_id):
+    result = services.update_consult_type_service(request.data, request.user.id if request.user else None, consult_type_id)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['DELETE'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def delete_consult_type_view(request, consult_type_id):
+    result = services.delete_consult_type_service(consult_type_id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def toggle_hidden_consult_type_view(request, consult_type_id):
+    result = services.toggle_hidden_consult_type_service(consult_type_id, request.user if request.user else None)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
 # endregion
 
+# region Consulation
+@api_view(['POST'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def create_consultation_view(request):
+    result = services.create_consultation_service(request.data, request.user.id if request.user else None)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def read_consultations_view(request, consult_type_id):
+    result = services.read_consultations_service(consult_type_id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PUT'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def update_consultation_view(request, consultation_id):
+    result = services.update_consultation_service(request.data, request.user.id if request.user else None, consultation_id)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['DELETE'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def delete_consultation_view(request, consultation_id):
+    result = services.delete_consultation_service(consultation_id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def toggle_hidden_consultation_view(request, consultation_id):
+    result = services.toggle_hidden_consultation_service(consultation_id, request.user if request.user else None)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+# endregion
 
 
 

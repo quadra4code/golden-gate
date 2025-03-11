@@ -490,10 +490,11 @@ def change_request_status_service(request_data, admin_obj):
         status_id = request_data.get('status_id', None)
         status_msg = request_data.get('status_msg', None)
         request_obj = CoreModels.UnitRequest.objects.get(id=request_id)
-        request_obj.status = status_id if status_id else request_obj.status
-        request_obj.status_msg = status_msg if status_msg else request_obj.status_msg
-        request_obj.updated_by = admin_obj
-        request_obj.save()
+        if status_id or status_msg:
+            request_obj.status = status_id if status_id else request_obj.status
+            request_obj.status_msg = status_msg if status_msg else request_obj.status_msg
+            request_obj.updated_by = admin_obj
+            request_obj.save()
         result.is_success = True
         result.msg = 'تم تحديث حالة الطلب بنجاح'
     except ValueError as ve:
@@ -595,8 +596,7 @@ def create_article_service(request_data, admin_id):
         if serialized_new_article.is_valid():
             serialized_new_article.save()
             result.msg = 'تم إضافة المقالة بنجاح'
-            result.data = CoreSerializers.ArticleSerializer(CoreModels.Article.objects.order_by('-created_at'), many=True).data
-            # result.data = serialized_new_article.data
+            result.data = CoreSerializers.ArticleSerializer(CoreModels.Article.objects.order_by('-updated_at'), many=True).data
             result.is_success = True
         else:
             result.msg = 'حدث خطأ أثناء معالجة بيانات المقالة'
@@ -610,7 +610,7 @@ def create_article_service(request_data, admin_id):
 def read_articles_service():
     result = ResultView()
     try:
-        all_articles = CoreModels.Article.objects.order_by('-created_at')
+        all_articles = CoreModels.Article.objects.order_by('-updated_at')
         serialized_all_articles = CoreSerializers.ArticleSerializer(all_articles, many=True)
         result.data = serialized_all_articles.data
         result.msg = 'تم جلب المقالات بنجاح'
@@ -630,8 +630,7 @@ def update_article_service(request_data, admin_id, article_id):
         if serialized_update_article.is_valid():
             serialized_update_article.save()
             result.msg = 'تم تحديث المقالة بنجاح'
-            result.data = CoreSerializers.ArticleSerializer(CoreModels.Article.objects.order_by('-created_at'), many=True).data
-            # result.data = serialized_update_article.data
+            result.data = CoreSerializers.ArticleSerializer(CoreModels.Article.objects.order_by('-updated_at'), many=True).data
             result.is_success = True
         else:
             result.msg = 'حدث خطأ أثناء معالجة بيانات المقالة'
@@ -682,11 +681,199 @@ def toggle_hidden_article_service(article_id, admin_obj):
         return result
 # endregion
 
-# region Consultation
+# region Consultation Type
+def create_consult_type_service(request_data, admin_id):
+    result = ResultView()
+    try:
+        request_data['created_by_id'] = admin_id
+        serialized_new_consult_type = CoreSerializers.ConsultationTypeSerializer(data=request_data)
+        if serialized_new_consult_type.is_valid():
+            serialized_new_consult_type.save()
+            result.msg = 'تم إضافة نوع الإستشارة بنجاح'
+            result.data = CoreSerializers.ConsultationTypeSerializer(CoreModels.ConsultationType.objects.order_by('-updated_at'), many=True).data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات نوع الإستشارة'
+            result.data = serialized_new_consult_type.errors
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حفظ نوع الإستشارة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
 
+def read_consult_types_service():
+    result = ResultView()
+    try:
+        all_consult_types = CoreModels.ConsultationType.objects.order_by('-updated_at')
+        serialized_all_consult_types = CoreSerializers.ConsultationTypeSerializer(all_consult_types, many=True)
+        result.data = serialized_all_consult_types.data
+        result.msg = 'تم جلب أنواع الإستشارات بنجاح'
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب أنواع الإستشارات'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def update_consult_type_service(request_data, admin_id, consult_type_id):
+    result = ResultView()
+    try:
+        request_data['updated_by_id'] = admin_id
+        old_consult_type = CoreModels.ConsultationType.objects.get(id=consult_type_id)
+        serialized_update_consult_type = CoreSerializers.ConsultationTypeSerializer(old_consult_type, data=request_data, partial=True)
+        if serialized_update_consult_type.is_valid():
+            serialized_update_consult_type.save()
+            result.msg = 'تم تحديث نوع الإستشارة بنجاح'
+            result.data = CoreSerializers.ConsultationTypeSerializer(CoreModels.ConsultationType.objects.order_by('-updated_at'), many=True).data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات نوع الإستشارة'
+            result.data = serialized_update_consult_type.errors
+    except CoreModels.ConsultationType.DoesNotExist as e:
+        result.msg = 'نوع الإستشارة غير موجود'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تحديث نوع الإستشارة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def delete_consult_type_service(consult_type_id):
+    result = ResultView()
+    try:
+        delete_count, _ = CoreModels.ConsultationType.objects.filter(id=consult_type_id).delete()
+        if delete_count == 0:
+            raise CoreModels.ConsultationType.DoesNotExist()
+        result.msg = 'تم حذف نوع الإستشارة بنجاح'
+        result.is_success = True
+    except CoreModels.ConsultationType.DoesNotExist as e:
+        result.msg = 'نوع الإستشارة غير موجود'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حذف نوع الإستشارة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def toggle_hidden_consult_type_service(consult_type_id, admin_obj):
+    result = ResultView()
+    try:
+        consult_type = CoreModels.ConsultationType.objects.get(id=consult_type_id)
+        consult_type.is_deleted = not consult_type.is_deleted
+        consult_type.updated_by = admin_obj
+        consult_type.save()
+        result.msg = f'تم {'إخفاء' if consult_type.is_deleted else 'إظهار'} نوع الإستشارة بنجاح'
+        result.data = CoreSerializers.ConsultationTypeSerializer(consult_type).data
+        result.is_success = True
+    except CoreModels.ConsultationType.DoesNotExist as e:
+        result.msg = 'نوع الإستشارة غير موجود'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إخفاء / إظهار نوع الإستشارة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
 # endregion
 
+# region Consultation
+def create_consultation_service(request_data, admin_id):
+    result = ResultView()
+    try:
+        request_data['created_by_id'] = admin_id
+        serialized_new_consultation = CoreSerializers.ConsultationSerializer(data=request_data)
+        if serialized_new_consultation.is_valid():
+            serialized_new_consultation.save()
+            result.msg = 'تم إضافة الإستشارة بنجاح'
+            result.data = CoreSerializers.ConsultationSerializer(
+                CoreModels.Consultation.objects.filter(consultation_type=request_data.get('consultation_type_id') ).order_by('-updated_at'),
+                many=True
+            ).data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات الإستشارة'
+            result.data = serialized_new_consultation.errors
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حفظ الإستشارة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
 
+def read_consultations_service(consultation_type_id):
+    result = ResultView()
+    try:
+        all_consultations = CoreModels.Consultation.objects.filter(consultation_type=consultation_type_id).order_by('-updated_at')
+        serialized_all_consultations = CoreSerializers.ConsultationSerializer(all_consultations, many=True)
+        result.data = serialized_all_consultations.data
+        result.msg = 'تم جلب الإستشارات بنجاح'
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب الإستشارات'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def update_consultation_service(request_data, admin_id, consultation_id):
+    result = ResultView()
+    try:
+        request_data['updated_by_id'] = admin_id
+        old_consultation = CoreModels.Consultation.objects.get(id=consultation_id)
+        serialized_update_consultation = CoreSerializers.ConsultationSerializer(old_consultation, data=request_data, partial=True)
+        if serialized_update_consultation.is_valid():
+            serialized_update_consultation.save()
+            result.msg = 'تم تحديث الإستشارة بنجاح'
+            result.data = CoreSerializers.ConsultationSerializer(
+                CoreModels.Consultation.objects.filter(consultation_type=old_consultation.consultation_type).order_by('-updated_at'),
+                many=True,
+            ).data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات الإستشارة'
+            result.data = serialized_update_consultation.errors
+    except CoreModels.Consultation.DoesNotExist as e:
+        result.msg = 'الإستشارة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تحديث الإستشارة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def delete_consultation_service(consultation_id):
+    result = ResultView()
+    try:
+        delete_count, _ = CoreModels.Consultation.objects.filter(id=consultation_id).delete()
+        if delete_count == 0:
+            raise CoreModels.Consultation.DoesNotExist()
+        result.msg = 'تم حذف الإستشارة بنجاح'
+        result.is_success = True
+    except CoreModels.Consultation.DoesNotExist as e:
+        result.msg = 'الإستشارة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حذف الإستشارة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def toggle_hidden_consultation_service(consultation_id, admin_obj):
+    result = ResultView()
+    try:
+        consultation = CoreModels.Consultation.objects.get(id=consultation_id)
+        consultation.is_deleted = not consultation.is_deleted
+        consultation.updated_by = admin_obj
+        consultation.save()
+        result.msg = f'تم {'إخفاء' if consultation.is_deleted else 'إظهار'} الإستشارة بنجاح'
+        result.data = CoreSerializers.ConsultationSerializer(consultation).data
+        result.is_success = True
+    except CoreModels.Consultation.DoesNotExist as e:
+        result.msg = 'الإستشارة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إخفاء / إظهار الإستشارة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+# endregion
 
 
 
