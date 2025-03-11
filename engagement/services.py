@@ -46,3 +46,6 @@ def mark_all_read_service(user_obj):
         result.data = {'errors': str(e)}
     finally:
         return result
+
+
+
