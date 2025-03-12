@@ -38,7 +38,9 @@ ALLOWED_HOSTS = [
 
 CORS_ALLOWED_ORIGINS = [
     "https://golden-beit.vercel.app",
+    "https://golden-beit-dashboard.vercel.app",
     "https://goldenbeit.com",
+    "https://dashboard.goldenbeit.com",
     "http://localhost:3000"
 ]
 
