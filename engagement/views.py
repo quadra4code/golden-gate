@@ -42,7 +42,7 @@ def mark_all_read_view(request):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_notification_view(request, flag):
-    result = services.delete_notification_service(flag)
+    result = services.delete_notification_service(request.user, flag)
     status_code = (
         status.HTTP_200_OK if result.is_success
         else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('unauthorized')
