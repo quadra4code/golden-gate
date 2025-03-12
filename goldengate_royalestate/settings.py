@@ -61,6 +61,8 @@ INSTALLED_APPS = [
     'admindash',
     'core',
     'users',
+    'daphne',  # Required for ASGI
+    'channels',
     'engagement'
 ]
 
@@ -95,7 +97,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'goldengate_royalestate.wsgi.application'
-
+ASGI_APPLICATION = 'goldengate_royalestate.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -194,6 +196,16 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=21),
+}
+
+# Channels-Redis settings
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],  # Redis runs on port 6379 by default
+        },
+    },
 }
 
 # Fixutre Directories for initial data seedings
