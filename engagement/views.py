@@ -38,3 +38,14 @@ def mark_all_read_view(request):
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(result.to_dict(), status=status_code)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_notification_view(request, flag):
+    result = services.delete_notification_service(flag)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('unauthorized')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)

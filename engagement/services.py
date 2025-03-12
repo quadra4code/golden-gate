@@ -47,5 +47,23 @@ def mark_all_read_service(user_obj):
     finally:
         return result
 
+def delete_notification_service(user_obj, flag):
+    result = ResultView()
+    try:
+        notifications = models.Notification.objects.filter(created_by=user_obj)
+        if flag == 'all':
+            notifications.delete()
+        else:
+            notifications = notifications.filter(id=flag).delete()
+        # serialized_notifications = serializers.NotificationSerializer(notifications, many=True)
+        result.msg = f'تم حذف {'الإشعارات' if flag=='all' else 'الإشعار'} بنجاح'
+        # result.data = serialized_notifications.data
+        result.is_success = True
+    except Exception as e:
+        result.msg = f'حدث خطأ غير متوقع أثناء حذف {'الإشعارات' if flag=='all' else 'الإشعار'}'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
 
 
