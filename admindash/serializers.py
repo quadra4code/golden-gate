@@ -10,6 +10,8 @@ class GetAllUserSerializer(serializers.ModelSerializer):
     referred_by_name = serializers.CharField(source='referred_by.get_full_name', read_only=True)
     role = serializers.CharField(read_only=True)
     phone_numbers_list = serializers.SerializerMethodField()
+    last_login = serializers.DateTimeField(format="%d-%m-%Y | %I:%M:%S %p", read_only=True)
+    date_joined = serializers.DateTimeField(format="%d-%m-%Y | %I:%M:%S %p", read_only=True)
     class Meta:
         model = UsersModels.CustomUser
         fields = [

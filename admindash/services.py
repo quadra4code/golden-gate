@@ -2,7 +2,7 @@ from core import models as CoreModels
 from users import models as UsersModels
 from django.contrib.auth.models import Group
 from core import serializers as CoreSerializers
-from admindash import serializers as AdminSerializers
+from admindash import serializers as AdminSerializers, models as AdminModels
 from core.base_models import ResultView
 from django.db.models import Value, CharField, Q, Count
 from django.db.models.functions import Coalesce
@@ -244,6 +244,20 @@ def change_staff_permissions_service(request_data):
         result.data = {'errors': str(e)}
     finally:
         return result
+
+def get_sales_staff_service():
+    result = ResultView()
+    try:
+        sales_staff = UsersModels.CustomUser.objects.filter(~Q(groups__name='Superuser') & ~Q(groups__name='Client'))
+        serialized_sales_staff = AdminSerializers.GetAllUserSerializer(sales_staff, many=True)
+        result.data = serialized_sales_staff.data
+        result.msg = 'تم جلب موظفين المبيعات بنجاح'
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب موظفين المبيعات'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
 # endregion
 
 # region Client
@@ -451,19 +465,29 @@ def toggle_unit_featured_service(unit_id, user_id):
 # endregion
 
 # region Request
-def paginated_requests_service(request_data):
+def paginated_requests_service(request_data, staff_obj):
     result = ResultView()
     try:
-        page_number = int(request_data.get('page_number', 1))
+        page_number = request_data.get('page_number', 1)
         page_size = request_data.get('page_size', 12)
         all_requests = CoreModels.UnitRequest.objects.filter()
-        if not all_requests.exists():
-            raise ValueError('لا يوجد طلبات متاحة')
-        paginator = Paginator(all_requests, page_size)
+        if staff_obj.groups.filter(name='Sales').exists() and not staff_obj.groups.filter(name__in=['Superuser', "Manager", "Admin"]):
+            sales_requests = AdminModels.SalesRequest.objects.filter(sales=staff_obj).values_list('request_id', flat=True)
+            all_requests = all_requests.filter(id__in=sales_requests)
+        else:
+            sales_staff = UsersModels.CustomUser.objects.filter(groups__name="Sales")
+            serialized_sales_staff = AdminSerializers.GetAllUserSerializer(sales_staff, many=True)
+            result.data = {
+                "sales_staff": serialized_sales_staff.data
+            }
+        # if not all_requests.exists():
+        #     raise ValueError('لا يوجد طلبات متاحة')
+        paginator = Paginator(all_requests.order_by('-updated_at'), page_size)
         page = paginator.get_page(page_number)
         serialized_requests = AdminSerializers.AllRequestSerializer(page.object_list, many=True)
         result.data = {
             "all": serialized_requests.data,
+            "sales_staff": result.data['sales_staff'] if result.data else None,
             "pagination": {
                 "total_items": paginator.count,
                 "total_pages": paginator.num_pages,
@@ -502,6 +526,22 @@ def change_request_status_service(request_data, admin_obj):
         result.data = {'errors': str(ve)}
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء تحديث حالة الطلب'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def assign_sales_request_service(request_data, admin_obj):
+    result = ResultView()
+    try:
+        _, created = AdminModels.SalesRequest.objects.update_or_create(
+            sales_id=request_data.get('sales_id'),
+            request_id=request_data.get('request_id'),
+            created_by=admin_obj
+        )
+        result.msg = f'تم {'تعيين' if created else 'تحديث'} موظف المبيعات على الطلب بنجاح'
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تعيين موظف المبيعات على الطلب'
         result.data = {'errors': str(e)}
     finally:
         return result

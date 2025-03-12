@@ -104,6 +104,17 @@ def paginated_clients_view(request):
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(result.to_dict(), status=status_code)
+
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def get_sales_staff_view(request):
+    result = services.get_sales_staff_service()
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
 # endregion
 
 # region Units
@@ -165,9 +176,9 @@ def toggle_unit_featured_view(request, unit_id):
 
 # region Request
 @api_view(['POST'])
-@permission_classes([utils.IsManagerOrAdminUser])
+@permission_classes([utils.IsManagerOrAdminUser, utils.IsSalesUser])
 def paginated_requests_view(request):
-    result = services.paginated_requests_service(request.data)
+    result = services.paginated_requests_service(request.data, request.user)
     status_code = (
         status.HTTP_201_CREATED if result.is_success
         else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
@@ -183,6 +194,17 @@ def change_request_status_view(request):
         status.HTTP_201_CREATED if result.is_success
         else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
         else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['POST'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def assign_sales_request_view(request):
+    result = services.assign_sales_request_service(request.data, request.user)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('unauthorized')
+        else status.HTTP_400_BAD_REQUEST
     )
     return Response(result.to_dict(), status=status_code)
 # endregion
