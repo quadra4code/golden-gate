@@ -33,9 +33,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'golden-gate-three.vercel.app',
-    'golden-gate-git-main-quadra-codes-projects.vercel.app',
-    'golden-gate-git-main-quadra-codes-projects.vercel.app'
+    '.vercel.app',
 ]
 
 CORS_ALLOWED_ORIGINS = [
