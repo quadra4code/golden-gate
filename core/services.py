@@ -3,6 +3,7 @@ import cloudinary.uploader
 from django.http import QueryDict
 from django.utils import timezone
 from core import models
+from engagement.models import UserInteraction, Notification
 from core import serializers
 from core.base_models import ResultView
 from engagement.models import UserInteraction
@@ -25,6 +26,20 @@ def propose_unit_service(request_data, client_id):
         serialized_unit = serializers.CreateUnitSerializer(data=request_data)
         if serialized_unit.is_valid():
             serialized_unit.save()
+            interested_users_in_city = UserInteraction.objects.filter(
+                city_id=request_data.get('city_id'),
+                interaction_type__in=['register', 'filter']
+            )
+            interested_user_ids = interested_users_in_city.values_list('created_by_id', flat=True)
+            if interested_users_in_city.exists():
+                city = interested_users_in_city.first().city
+                unit_type = 'قطعة أرض' if request_data['unit_type_id'] == "1" else "وحدة سكنية"
+                notification_msg = f'تم إضافة {unit_type} جديدة فى مدينة {city.name}'
+                notifications = [
+                    Notification(created_by_id=user_id, message=notification_msg, city=city, unit_id=serialized_unit['id'])
+                    for user_id in interested_user_ids
+                ]
+                Notification.objects.bulk_create(notifications)
             result.msg = 'تم حفظ الوحدة بنجاح'
             result.is_success = True
             result.data = serialized_unit.data
@@ -503,6 +518,19 @@ def update_unit_service(request_data, client_id):
         serialized_updated_unit = serializers.CreateUnitSerializer(data=request_data)
         if serialized_updated_unit.is_valid():
             serialized_updated_unit.save()
+            interested_users_in_unit = UserInteraction.objects.filter(
+                unit_id=request_data.get('unit_id'),
+                interaction_type__in=['view', 'favorite']
+            )
+            interested_user_ids = interested_users_in_unit.values_list('created_by_id', flat=True)
+            if interested_users_in_unit.exists():
+                unit = interested_users_in_unit.first().unit
+                notification_msg = f'حدث تحديث فى بيانات الوحدة ({unit.title[:14]}...) !'
+                notifications = [
+                    Notification(created_by_id=user_id, message=notification_msg, city_id=serialized_updated_unit['city_id'], unit=unit)
+                    for user_id in interested_user_ids
+                ]
+                Notification.objects.bulk_create(notifications)
             result.msg = 'تم تحديث الوحدة بنجاح'
             result.is_success = True
         else:
