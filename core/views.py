@@ -193,6 +193,7 @@ def get_update_unit_view(request, unit_id):
     status_code = (
         status.HTTP_200_OK if result.is_success
         else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_404_NOT_FOUND if result.msg.lower().__contains__('غير موجودة')
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(result.to_dict(), status=status_code)
@@ -200,10 +201,11 @@ def get_update_unit_view(request, unit_id):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_unit_view(request):
-    result = services.update_unit_service(request.data, request.user.id)
+    result = services.update_unit_service(request.data, request.user)
     status_code = (
         status.HTTP_200_OK if result.is_success
         else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_404_NOT_FOUND if result.msg.lower().__contains__('غير موجودة')
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(result.to_dict(), status=status_code)

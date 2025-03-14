@@ -4,6 +4,7 @@ from rest_framework import serializers
 from core import models
 from core.constants import REQUEST_STATUS_CHOICES
 from engagement.models import UserInteraction
+from users.models import CustomUser
 # Create your serializers here.
 
 class CreateUnitSerializer(serializers.Serializer):
@@ -97,7 +98,11 @@ class CreateUnitSerializer(serializers.Serializer):
             if not unit_id:
                 raise serializers.ValidationError({"id": "ID is required for updating a unit."})
 
-            unit = models.Unit.objects.get(id=unit_id, created_by_id=validated_data['created_by_id'])
+            user_obj = CustomUser.objects.get(id=validated_data['created_by_id'])
+            if user_obj.is_staff and user_obj.groups.filter(name__in=['Manager', 'Admin']):
+                unit = models.Unit.objects.get(id=unit_id)
+            else:
+                unit = models.Unit.objects.get(id=unit_id, created_by=user_obj)
             for key, value in validated_data.items():
                 setattr(unit, key, value)
             unit.save()

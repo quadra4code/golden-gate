@@ -493,7 +493,10 @@ def paginated_client_units_service(request_data, client_id):
 def get_update_unit_service(unit_id, user_obj):
     result = ResultView()
     try:
-        unit_data = models.Unit.objects.get(id=unit_id, created_by=user_obj)
+        if user_obj.is_staff and user_obj.groups.filter(name__in=['Manager', 'Admin']):
+            unit_data = models.Unit.objects.get(id=unit_id)
+        else:
+            unit_data = models.Unit.objects.get(id=unit_id, created_by=user_obj)
         serialized_unit_data = serializers.UpdateUnitSerializer(unit_data)
         result.data = serialized_unit_data.data
         result.is_success = True
@@ -507,13 +510,14 @@ def get_update_unit_service(unit_id, user_obj):
     finally:
         return result
 
-def update_unit_service(request_data, client_id):
+def update_unit_service(request_data, user_obj):
     result = ResultView()
     try:
         if isinstance(request_data, QueryDict):
             request_data = request_data.copy()
         request_data['update'] = True
-        request_data['created_by_id'] = client_id
+        request_data['created_by'] = user_obj
+        request_data['created_by_id'] = user_obj.id
         logger = logging.getLogger(__name__)
         serialized_updated_unit = serializers.CreateUnitSerializer(data=request_data)
         if serialized_updated_unit.is_valid():
