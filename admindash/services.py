@@ -258,6 +258,20 @@ def get_sales_staff_service():
         result.data = {'errors': str(e)}
     finally:
         return result
+
+def reset_password_service(user_id):
+    result = ResultView()
+    try:
+        user_obj = UsersModels.CustomUser.objects.get(id=user_id)
+        user_obj.set_password('123')
+        user_obj.save()
+        result.msg = 'تم إعادة تعيين كلمة السر بنجاح'
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إعادة تعيين كلمة السر'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
 # endregion
 
 # region Client

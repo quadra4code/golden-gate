@@ -115,6 +115,17 @@ def get_sales_staff_view(request):
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(result.to_dict(), status=status_code)
+
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def reset_password_view(request, user_id):
+    result = services.reset_password_service(user_id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
 # endregion
 
 # region Units

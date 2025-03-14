@@ -11,6 +11,7 @@ urlpatterns = [
     path('change-staff-permissions', AdminViews.change_staff_permissions_view, name='change_staff_permissions'),
     path('get-sales-staff', AdminViews.get_sales_staff_view, name='get_sales_staff'),
     path('paginated-clients', AdminViews.paginated_clients_view, name='paginated_clients'),
+    path('reset-password/<int:user_id>', AdminViews.reset_password_view, name='reset_password'),
     path('paginated-units', AdminViews.paginated_units_view, name='paginated_units'),
     path('unit-requests-user/<int:unit_id>', AdminViews.unit_requests_user_view, name='unit_requests_user'),
     path('update-unit-status/<int:unit_id>/<int:status_id>', AdminViews.update_unit_status_view, name='update_unit_status'),
