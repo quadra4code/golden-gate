@@ -203,7 +203,7 @@ SIMPLE_JWT = {
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis:redis-16576.crce176.me-central-1-1.ec2.redns.redis-cloud.com:16576',  # Redis server URL
+        'LOCATION': 'redis://redis-16576.crce176.me-central-1-1.ec2.redns.redis-cloud.com:16576',  # Redis server URL
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
