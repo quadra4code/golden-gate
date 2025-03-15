@@ -10,6 +10,9 @@ from django.contrib.postgres.aggregates import StringAgg
 from django.contrib.auth import authenticate
 from django.core.paginator import Paginator
 from users.utils import generate_jwt_token
+from django.core.cache import cache
+from django.utils import timezone
+from datetime import datetime, timedelta
 import logging
 
 # Create your services here.
@@ -41,6 +44,21 @@ def main_statistics_service():
             sellers=Count('id', filter=Q(user_type=6)),
             brokers=Count('id', filter=Q(user_type=7)),
         )
+        active_time_window = timezone.now() - timedelta(minutes=5)
+    
+        # Get all keys from Redis
+        user_keys = cache.keys("user:*")
+        session_keys = cache.keys("session:*")
+        all_keys = user_keys + session_keys
+
+        # Count users active within the time window
+        active_count = 0
+        for key in all_keys:
+            last_activity_str = cache.get(key)
+            if last_activity_str:
+                last_activity = datetime.fromisoformat(last_activity_str)
+                if last_activity >= active_time_window:
+                    active_count += 1
         # Combine results
         result.data = {
             'all_units': units_stats['all_units'],
@@ -49,6 +67,7 @@ def main_statistics_service():
             'all_requests': requests_stats['all_requests'],
             'responded_requests': requests_stats['responded_requests'],
             'all_clients': clients_stats['all_clients'],
+            'active_clients': active_count,
             'managers': clients_stats['managers'],
             'admins': clients_stats['admins'],
             'sales': clients_stats['sales'],

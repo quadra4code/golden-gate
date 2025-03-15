@@ -6,6 +6,7 @@ from admindash import utils
 
 # Create your views here.
 
+# region Statistics
 @api_view(['GET'])
 @permission_classes([utils.IsManagerOrAdminUser])
 def main_statistics_view(request):
@@ -16,6 +17,7 @@ def main_statistics_view(request):
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
     return Response(result.to_dict(), status=status_code)
+# endregion
 
 # region Staff | Users
 @api_view(['POST'])
