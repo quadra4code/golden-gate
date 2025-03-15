@@ -2,7 +2,7 @@ from rest_framework import serializers
 from users.models import CustomUser, UserPhoneNumber
 from engagement.models import UserInteraction
 from django.contrib.auth.hashers import make_password
-import cloudinary.uploader
+from cloudinary import uploader
 
 # Create your serializers here.
 
@@ -103,7 +103,7 @@ class UpdateAccountSerializer(serializers.ModelSerializer):
         # Handle image update
         new_image = validated_data.get('image', None)
         if new_image and instance.image:
-            cloudinary.uploader.destroy(instance.image.public_id)
+            uploader.destroy(instance.image.public_id)
         instance.image = new_image if new_image else instance.image
 
         # Handle interested city

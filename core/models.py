@@ -1,7 +1,11 @@
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.forms import ValidationError
 from core.base_models import BaseEntity
 from cloudinary.models import CloudinaryField
+from cloudinary import uploader
+
 # Create your models here.
 class UnitType(BaseEntity):
     name = models.CharField(max_length=40, unique=True)
@@ -128,6 +132,13 @@ class UnitImage(BaseEntity):
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
     image = CloudinaryField('image', folder='units_images')
     # image = models.ImageField(upload_to='units_images/')
+
+@receiver(post_delete, sender=UnitImage)
+def delete_unit_image_from_cloudinary(sender, instance, **kwargs):
+    """
+    Signal handler to delete the image from Cloudinary when a UnitImage is deleted.
+    """
+    uploader.destroy(instance.image.public_id)
 
 class UnitRequest(BaseEntity):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)

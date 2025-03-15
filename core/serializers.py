@@ -111,7 +111,7 @@ class CreateUnitSerializer(serializers.Serializer):
             if old_images is not None:
                 for old_img in models.UnitImage.objects.filter(unit_id=unit.id):
                     if old_img.image.url not in old_images:
-                        cloudinary.uploader.destroy(old_img.image.public_id)
+                        # cloudinary.uploader.destroy(old_img.image.public_id)
                         old_img.delete()
 
         # Handle new images
@@ -136,7 +136,7 @@ class CreateUnitSerializer(serializers.Serializer):
     #                     print('it exists in both so no deletion')
     #                 else:
     #                     print('oops! in db not in old list so we delete it from db and server')
-    #                     api_call_res = cloudinary.uploader.destroy(old_img.image.public_id)
+    #                     # api_call_res = cloudinary.uploader.destroy(old_img.image.public_id)
     #                     print(f'api delete call result => {api_call_res}')
     #                     old_img.delete()
     #         validated_data.pop('update')

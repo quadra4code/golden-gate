@@ -551,23 +551,23 @@ def hard_delete_unit_service(unit_id):
     result = ResultView()
     try:
         unit_obj = models.Unit.objects.get(id=unit_id)
-        allimgs = unit_obj.unitimage_set.all()
-        print(allimgs)
-        counter = 0
-        for img in allimgs:
-            counter += 1
-            print(f"img number {counter} is {img}")
-            if img.image:
-                print(f'found image inside img number {counter} and here it is {img.image} and that\'s the public id => {img.image.public_id} and we r gonna destroy it')
-                api_call_res = cloudinary.uploader.destroy(img.image.public_id)
-                print('destroyed it successfully, moving to next one')
-                print(f'and here is the api call result => {api_call_res}')
-            else:
-                print(f'didn\'t find image inside img number {counter} instead it\'s {img.image} so we skip')
-        print(f'finished destroying all images in for loop now to delete all the images query from db and here it is before deleting => {allimgs}')
-        allimgs.delete()
-        print(f'deleted all imgs from db successfully and here it is after deleting => {allimgs}')
-        print(f'now to delete the unit itself => {unit_obj}')
+        # allimgs = unit_obj.unitimage_set.all()
+        # print(allimgs)
+        # counter = 0
+        # for img in allimgs:
+        #     counter += 1
+        #     print(f"img number {counter} is {img}")
+        #     if img.image:
+        #         print(f'found image inside img number {counter} and here it is {img.image} and that\'s the public id => {img.image.public_id} and we r gonna destroy it')
+        #         api_call_res = cloudinary.uploader.destroy(img.image.public_id)
+        #         print('destroyed it successfully, moving to next one')
+        #         print(f'and here is the api call result => {api_call_res}')
+        #     else:
+        #         print(f'didn\'t find image inside img number {counter} instead it\'s {img.image} so we skip')
+        # print(f'finished destroying all images in for loop now to delete all the images query from db and here it is before deleting => {allimgs}')
+        # allimgs.delete()
+        # print(f'deleted all imgs from db successfully and here it is after deleting => {allimgs}')
+        # print(f'now to delete the unit itself => {unit_obj}')
         unit_obj.delete()
         print(f'deleted the unit itself successfully, after deletion => {unit_obj}')
         result.is_success = True
