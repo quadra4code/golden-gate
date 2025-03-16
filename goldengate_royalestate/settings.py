@@ -75,7 +75,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'core.middleware.UpdateLastActivityMiddleware',
+    'core.middleware.JWTAuthAndActivityMiddleware',
+    # 'core.middleware.UpdateLastActivityMiddleware',
     # 'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
@@ -206,6 +207,7 @@ CACHES = {
         'LOCATION': 'redis://redis-16576.crce176.me-central-1-1.ec2.redns.redis-cloud.com:16576',  # Redis server URL
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'PASSWORD': env('REDIS_PASSWORD')
         }
     }
 }
