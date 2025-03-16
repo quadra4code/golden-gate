@@ -10,10 +10,12 @@ from django.contrib.postgres.aggregates import StringAgg
 from django.contrib.auth import authenticate
 from django.core.paginator import Paginator
 from users.utils import generate_jwt_token
+from core import utils
 import logging
 
 # Create your services here.
 
+# region Statistics
 def main_statistics_service():
     result = ResultView()
     try:
@@ -41,6 +43,7 @@ def main_statistics_service():
             sellers=Count('id', filter=Q(user_type=6)),
             brokers=Count('id', filter=Q(user_type=7)),
         )
+        
         # Combine results
         result.data = {
             'all_units': units_stats['all_units'],
@@ -49,6 +52,7 @@ def main_statistics_service():
             'all_requests': requests_stats['all_requests'],
             'responded_requests': requests_stats['responded_requests'],
             'all_clients': clients_stats['all_clients'],
+            'active_count': utils.get_active_visitors_count(),
             'managers': clients_stats['managers'],
             'admins': clients_stats['admins'],
             'sales': clients_stats['sales'],
@@ -64,6 +68,21 @@ def main_statistics_service():
     finally:
         return result
 
+def active_visitors_service():
+    result = ResultView()
+    try:
+        active_count = utils.get_active_visitors_count()
+        result.data = {
+            'active_count': active_count
+        }
+        result.msg = 'تم جلب عدد الزوار الحالى بنجاح'
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ إثناء جلب عدد الزوار الحالى'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+# endregion
 # region Staff
 def staff_login_service(request_data):
     result = ResultView()
