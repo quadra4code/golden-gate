@@ -20,8 +20,8 @@ def main_statistics_view(request):
 
 @api_view(['GET'])
 @permission_classes([utils.IsManagerOrAdminUser])
-def active_visitors_view(request):
-    result = services.active_visitors_service()
+def active_visitors_count_view(request):
+    result = services.active_visitors_count_service()
     status_code = (
         status.HTTP_200_OK if result.is_success
         else status.HTTP_403_FORBIDDEN if result.msg.lower().__contains__('غير مصرح')

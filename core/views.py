@@ -178,7 +178,6 @@ def unit_details_view(request, unit_id):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def paginated_client_units_view(request):
-    print(request.user)
     paginated_client_units_result = services.paginated_client_units_service(request.data, request.user.id if request.user else None)
     status_code = (
         status.HTTP_200_OK if paginated_client_units_result.is_success

@@ -105,6 +105,9 @@ class Unit(BaseEntity):
     featured = models.BooleanField(default=False)
     view_count = models.PositiveIntegerField(default=0)
 
+    class Meta:
+        ordering = ['id']
+
     def clean(self):
         """Ensure at least one price field is provided."""
         if not any([self.over_price, self.total_price, self.meter_price]):

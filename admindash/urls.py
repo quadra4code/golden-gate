@@ -2,7 +2,7 @@ from django.urls import path
 from admindash import views as AdminViews
 urlpatterns = [
     path('main-statistics', AdminViews.main_statistics_view, name='main_statistics'),
-    path('active-visitors', AdminViews.active_visitors_view, name='active_visitors'),
+    path('active-visitors-count', AdminViews.active_visitors_count_view, name='active_visitors_count'),
     path('staff-login', AdminViews.staff_login_view, name='staff_login'),
     path('staff-roles', AdminViews.staff_roles_view, name='staff_roles'),
     path('paginated-staff', AdminViews.paginated_staff_view, name='paginated_staff'),

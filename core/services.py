@@ -1,5 +1,5 @@
 from datetime import timedelta
-import cloudinary.uploader
+# import cloudinary.uploader
 from django.http import QueryDict
 from django.utils import timezone
 from core import models
@@ -8,6 +8,7 @@ from core import serializers
 from core.base_models import ResultView
 from engagement.models import UserInteraction
 from users.utils import extract_payload_from_jwt
+from users.models import CustomUser
 from django.db.models import Min, Max, F, Value, DecimalField, Q
 from django.db.models.functions import Least, Greatest, Coalesce
 from django.core.paginator import Paginator
@@ -184,10 +185,12 @@ def recent_units_service():
     result = ResultView()
     try:
         twenty_four_hours_ago = timezone.now() - timedelta(hours=24)
-        recent_units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2], created_at__gte=twenty_four_hours_ago)
-        if recent_units.count() <= 0:
-            raise ValueError('لا يوجد وحدات متاحة')
-        serialized_recent_units = serializers.GetAllUnitsSerializer(recent_units, many=True)
+        all_units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2])
+        recent_24h_units = all_units.filter(created_at__gte=twenty_four_hours_ago)
+        if recent_24h_units.count() <= 0:
+            recent_24h_units = all_units.filter(created_by_id__in=CustomUser.objects.filter(groups__name__in=['Superuser', 'Manager', 'Admin']).values_list('id', flat=True))
+            # raise ValueError('لا يوجد وحدات متاحة')
+        serialized_recent_units = serializers.GetAllUnitsSerializer(recent_24h_units, many=True)
         result.data = serialized_recent_units.data
         result.is_success = True
         result.msg = 'تم جلب أحدث الوحدات بنجاح'
@@ -568,8 +571,8 @@ def hard_delete_unit_service(unit_id):
         # allimgs.delete()
         # print(f'deleted all imgs from db successfully and here it is after deleting => {allimgs}')
         # print(f'now to delete the unit itself => {unit_obj}')
+        # print(f'deleted the unit itself successfully, after deletion => {unit_obj}')
         unit_obj.delete()
-        print(f'deleted the unit itself successfully, after deletion => {unit_obj}')
         result.is_success = True
         result.msg = 'تم حذف الوحدة بنجاح'
     except models.Unit.DoesNotExist as e:

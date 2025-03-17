@@ -10,7 +10,7 @@ from django.contrib.postgres.aggregates import StringAgg
 from django.contrib.auth import authenticate
 from django.core.paginator import Paginator
 from users.utils import generate_jwt_token
-from core import utils
+from admindash import utils
 import logging
 
 # Create your services here.
@@ -52,7 +52,7 @@ def main_statistics_service():
             'all_requests': requests_stats['all_requests'],
             'responded_requests': requests_stats['responded_requests'],
             'all_clients': clients_stats['all_clients'],
-            'active_count': utils.get_active_visitors_count(),
+            # 'active_visitors_count': utils.get_active_visitors_count(),
             'managers': clients_stats['managers'],
             'admins': clients_stats['admins'],
             'sales': clients_stats['sales'],
@@ -68,12 +68,12 @@ def main_statistics_service():
     finally:
         return result
 
-def active_visitors_service():
+def active_visitors_count_service():
     result = ResultView()
     try:
-        active_count = utils.get_active_visitors_count()
+        active_visitors_count = utils.get_active_visitors_count()
         result.data = {
-            'active_count': active_count
+            'active_visitors_count': active_visitors_count
         }
         result.msg = 'تم جلب عدد الزوار الحالى بنجاح'
         result.is_success = True

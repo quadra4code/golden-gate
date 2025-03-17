@@ -76,8 +76,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'core.middleware.JWTAuthAndActivityMiddleware',
-    # 'core.middleware.UpdateLastActivityMiddleware',
-    # 'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'goldengate_royalestate.urls'
