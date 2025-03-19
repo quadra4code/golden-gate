@@ -77,8 +77,8 @@ class AccountViewSerializer(serializers.ModelSerializer):
         return obj.referred_by.get_full_name() if obj.referred_by else None
 
     def get_interested_city(self, obj):
-        city_obj = UserInteraction.objects.get(created_by=obj, interaction_type='register').city
-        return {'id': city_obj.id, 'name': city_obj.name}
+        city_obj = UserInteraction.objects.filter(created_by=obj, interaction_type='register').first()
+        return {'id': city_obj.city.id, 'name': city_obj.city.name} if city_obj else None
 
     def get_phone_numbers(self, obj):
         return [
