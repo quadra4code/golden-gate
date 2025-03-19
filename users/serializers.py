@@ -54,6 +54,7 @@ class AccountViewSerializer(serializers.ModelSerializer):
     interested_city = serializers.SerializerMethodField(read_only=True)
     phone_numbers = serializers.SerializerMethodField(read_only=True)
     referred_by_name = serializers.SerializerMethodField(read_only=True)
+    image_url = serializers.CharField(source='image.url', read_only=True)
     class Meta:
         model = CustomUser
         fields = [
