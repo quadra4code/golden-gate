@@ -98,7 +98,7 @@ class UpdateAccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'username', 'image', 'interested_city', 'user_type', 'phone_numbers_updated', 'phone_numbers']
+        fields = ['first_name', 'last_name', 'email', 'image', 'interested_city', 'phone_numbers_updated', 'phone_numbers']#'username', 'user_type', 
 
     def update(self, instance, validated_data):
         # Handle image update
