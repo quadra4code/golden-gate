@@ -265,6 +265,7 @@ def filter_paginated_units_service(request_data, user_id):
         sorting_key = next((sort_fields[key] for key in sort_fields if request_data.get(key)), None)
         if sorting_key:
             ordering = sorting_key if request_data.get('asc', True) else f'-{sorting_key}'
+            print(f"now ordering with {ordering}\nasc is => {request_data.get('asc')}")
             units = units.order_by(ordering)
         # Pagination
         paginator = Paginator(units, int(request_data.get('page_size', 12)))
