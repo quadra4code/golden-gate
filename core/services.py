@@ -206,6 +206,7 @@ def recent_units_service():
 def filter_paginated_units_service(request_data, user_id):
     result = ResultView()
     try:
+        print(f"request_data => {request_data}")
         filters = Q(is_deleted=False)
         # Numeric Validations
         def validate_numeric(value, error_message):
