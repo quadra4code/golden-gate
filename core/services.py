@@ -263,7 +263,7 @@ def filter_paginated_units_service(request_data, user_id):
             'area': 'area',
             'most_viewed': 'view_count'
         }
-        sorting_key = next((sort_fields[key] for key in sort_fields if request_data.get(key)), None)
+        sorting_key = next((sort_fields[key] for key in sort_fields if request_data.get("sort_by")==key), None)
         if sorting_key:
             ordering = sorting_key if request_data.get('asc', True) else f'-{sorting_key}'
             print(f"now ordering with {ordering}\nasc is => {request_data.get('asc')}")
