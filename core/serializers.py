@@ -365,9 +365,11 @@ class GetAllRequestsSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     client_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
     created_by_id = serializers.IntegerField(min_value=1, write_only=True)
+    image_url = serializers.CharField(source='created_by.image.url', read_only=True)
+
     class Meta:
         model = models.ClientReview
-        fields = ['id', 'rate', 'client_name', 'review', 'created_by_id']
+        fields = ['id', 'rate', 'client_name', 'review', 'created_by_id', 'image_url']
 
 class ArticleSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format='%d-%b-%Y', read_only=True)
