@@ -1,0 +1,1457 @@
+[
+  {
+    "model": "users.CustomUser",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$4lI4YfBVByjORejZCNy1Kt$Gp7QvlbR1pDM3wz0B70IP8k5o8OtCL1Z8hWldkrOENw=",
+      "is_superuser": true,
+      "username": "superuser",
+      "first_name": "Super",
+      "last_name": "User",
+      "email": "fomr777@gmail.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2025-01-24 18:32:52.790 +0200",
+      "referral_code": "bde1b03c0357",
+      "user_type": "0"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$KAflpZO9jmHTZvMRlkvXjM$l47DJxo44VaWmxabz+La7dwcOoSM1sRKoii1mWBbo5U=",
+      "is_superuser": false,
+      "username": "manager@albraa",
+      "first_name": "Albraa",
+      "last_name": "Ali",
+      "email": "albraamanager@gmail.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2025-01-24 18:32:52.790 +0200",
+      "referral_code": "27d8dcc07f84",
+      "user_type": "1"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$AKfNWK25YXddSRTU5g6exX$KwZg4MyBVK3fe1yROXr+Act5ITUyPjAZqpVVa5lX7IQ=",
+      "is_superuser": false,
+      "username": "admin@anas",
+      "first_name": "Anas",
+      "last_name": "Zayed",
+      "email": "anasadmin@gmail.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2025-01-24 18:32:52.790 +0200",
+      "referral_code": "416e304ad24a",
+      "user_type": "3"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$nBTY6h9Ml0FoNfhoKnSs7s$KbDZFl4suu6MJAzsUudSPEjoKf1Zd5Hvc+PE1vJ1xOg=",
+      "is_superuser": false,
+      "username": "admin@mohamed",
+      "first_name": "Mohamed",
+      "last_name": "Ali",
+      "email": "mohamedadmin@gmail.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2025-01-24 18:32:52.790 +0200",
+      "referral_code": "d909924bfec3",
+      "user_type": "3"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 5,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$SQNAaFrPMFLDTt3Afg1HN5$oogEs0hz3qFS7uBqIbEjW4T1SbSywMBz1z+wFWJf4Xk=",
+      "is_superuser": false,
+      "username": "userreview1",
+      "first_name": "أيمن",
+      "last_name": "عبدالله",
+      "email": "userreview1@gmail.com",
+      "is_staff": false,
+      "is_active": false,
+      "date_joined": "2025-01-24 18:32:52.790 +0200",
+      "referral_code": "d919924bfec3",
+      "user_type": "5"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 6,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$SQNAaFrPMFLDTt3Afg1HN5$oogEs0hz3qFS7uBqIbEjW4T1SbSywMBz1z+wFWJf4Xk=",
+      "is_superuser": false,
+      "username": "userreview2",
+      "first_name": "عبدالله",
+      "last_name": "محمود",
+      "email": "userreview2@gmail.com",
+      "is_staff": false,
+      "is_active": false,
+      "date_joined": "2025-01-24 18:32:52.790 +0200",
+      "referral_code": "d91992f4bec3",
+      "user_type": "5"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 7,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$SQNAaFrPMFLDTt3Afg1HN5$oogEs0hz3qFS7uBqIbEjW4T1SbSywMBz1z+wFWJf4Xk=",
+      "is_superuser": false,
+      "username": "userreview3",
+      "first_name": "اسماء",
+      "last_name": "مصطفى",
+      "email": "userreview3@gmail.com",
+      "is_staff": false,
+      "is_active": false,
+      "date_joined": "2025-01-24 18:32:52.790 +0200",
+      "referral_code": "d91992b4fec3",
+      "user_type": "5"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 8,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$SQNAaFrPMFLDTt3Afg1HN5$oogEs0hz3qFS7uBqIbEjW4T1SbSywMBz1z+wFWJf4Xk=",
+      "is_superuser": false,
+      "username": "userreview4",
+      "first_name": "Hala",
+      "last_name": "Ibrahem",
+      "email": "userreview4@gmail.com",
+      "is_staff": false,
+      "is_active": false,
+      "date_joined": "2025-01-24 18:32:52.790 +0200",
+      "referral_code": "d941992bfec3",
+      "user_type": "5"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 9,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$SQNAaFrPMFLDTt3Afg1HN5$oogEs0hz3qFS7uBqIbEjW4T1SbSywMBz1z+wFWJf4Xk=",
+      "is_superuser": false,
+      "username": "userreview5",
+      "first_name": "Islam",
+      "last_name": "Mohamed",
+      "email": "userreview5@gmail.com",
+      "is_staff": false,
+      "is_active": false,
+      "date_joined": "2025-01-24 18:32:52.790 +0200",
+      "referral_code": "d99924bf1ec3",
+      "user_type": "5"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 10,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$SQNAaFrPMFLDTt3Afg1HN5$oogEs0hz3qFS7uBqIbEjW4T1SbSywMBz1z+wFWJf4Xk=",
+      "is_superuser": false,
+      "username": "userreview6",
+      "first_name": "محمد",
+      "last_name": "عبدالله",
+      "email": "userreview6@gmail.com",
+      "is_staff": false,
+      "is_active": false,
+      "date_joined": "2025-01-24 18:32:52.790 +0200",
+      "referral_code": "d91e9924bfc3",
+      "user_type": "5"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 11,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$SQNAaFrPMFLDTt3Afg1HN5$oogEs0hz3qFS7uBqIbEjW4T1SbSywMBz1z+wFWJf4Xk=",
+      "is_superuser": false,
+      "username": "userreview7",
+      "first_name": "Ahmed",
+      "last_name": "Mostafa",
+      "email": "userreview7@gmail.com",
+      "is_staff": false,
+      "is_active": false,
+      "date_joined": "2025-01-24 18:32:52.790 +0200",
+      "referral_code": "d919924ifec3",
+      "user_type": "5"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 12,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$SQNAaFrPMFLDTt3Afg1HN5$oogEs0hz3qFS7uBqIbEjW4T1SbSywMBz1z+wFWJf4Xk=",
+      "is_superuser": false,
+      "username": "userreview8",
+      "first_name": "احمد",
+      "last_name": "عمر",
+      "email": "userreview8@gmail.com",
+      "is_staff": false,
+      "is_active": false,
+      "date_joined": "2025-01-24 18:32:52.790 +0200",
+      "referral_code": "d919924bfe83",
+      "user_type": "5"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 13,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$SQNAaFrPMFLDTt3Afg1HN5$oogEs0hz3qFS7uBqIbEjW4T1SbSywMBz1z+wFWJf4Xk=",
+      "is_superuser": false,
+      "username": "userreview9",
+      "first_name": "عبدالله",
+      "last_name": "جمال",
+      "email": "userreview9@gmail.com",
+      "image": "image/upload/v1741621908/users_images/zildtmz5nwmnjpukkfyy.jpg",
+      "is_staff": false,
+      "is_active": false,
+      "date_joined": "2025-02-19 20:17:31.968 +0200",
+      "referral_code": "635f89k17763",
+      "user_type": "5"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 14,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$SQNAaFrPMFLDTt3Afg1HN5$oogEs0hz3qFS7uBqIbEjW4T1SbSywMBz1z+wFWJf4Xk=",
+      "is_superuser": false,
+      "username": "userreview10",
+      "first_name": "احمد",
+      "last_name": "مصطفى",
+      "email": "userreview10@gmail.com",
+      "image": "image/upload/v1741621907/users_images/af8azhy2boqtrytwxfbg.jpg",
+      "is_staff": false,
+      "is_active": false,
+      "date_joined": "2025-02-19 20:17:31.968 +0200",
+      "referral_code": "635f89n17763",
+      "user_type": "5"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 15,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$SQNAaFrPMFLDTt3Afg1HN5$oogEs0hz3qFS7uBqIbEjW4T1SbSywMBz1z+wFWJf4Xk=",
+      "is_superuser": false,
+      "username": "userreview11",
+      "first_name": "Saber",
+      "last_name": "Mohamed",
+      "email": "userreview11@gmail.com",
+      "image": "image/upload/v1741621908/users_images/xq0ryfbxmdroxo4z3nib.jpg",
+      "is_staff": false,
+      "is_active": false,
+      "date_joined": "2025-02-19 20:17:31.968 +0200",
+      "referral_code": "635f89u17763",
+      "user_type": "5"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 16,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$SQNAaFrPMFLDTt3Afg1HN5$oogEs0hz3qFS7uBqIbEjW4T1SbSywMBz1z+wFWJf4Xk=",
+      "is_superuser": false,
+      "username": "userreview12",
+      "first_name": "Mostafa",
+      "last_name": "Mahmoud",
+      "email": "userreview12@gmail.com",
+      "image": "image/upload/v1741621909/users_images/gcfqxdkkrfdjdxm3wmho.jpg",
+      "is_staff": false,
+      "is_active": false,
+      "date_joined": "2025-02-19 20:17:31.968 +0200",
+      "referral_code": "635f89q17763",
+      "user_type": "5"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 17,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$SQNAaFrPMFLDTt3Afg1HN5$oogEs0hz3qFS7uBqIbEjW4T1SbSywMBz1z+wFWJf4Xk=",
+      "is_superuser": false,
+      "username": "userreview13",
+      "first_name": "Ahmed",
+      "last_name": "El Sayed",
+      "email": "userreview13@gmail.com",
+      "image": "image/upload/v1741621907/users_images/hb5a48e8hsdv0mfcibdv.jpg",
+      "is_staff": false,
+      "is_active": false,
+      "date_joined": "2025-02-19 20:17:31.968 +0200",
+      "referral_code": "635f89z17763",
+      "user_type": "5"
+    }
+  },
+  {
+    "model": "users.CustomUser",
+    "pk": 18,
+    "fields": {
+      "password": "pbkdf2_sha256$870000$lL1wgCnflGE3jI9XZCdiIj$saziUtasdC/wuEdhKB7AvJRloW8Y74LPSVVT1I0u/qc=",
+      "is_superuser": false,
+      "username": "123456789",
+      "first_name": "محمد",
+      "last_name": "اسماعيل",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2025-02-19 20:17:31.968 +0200",
+      "referral_code": "635f89e17763",
+      "user_type": "6"
+    }
+  },
+  {
+    "model": "engagement.UserInteraction",
+    "pk": 1,
+    "fields": {
+      "created_by": 18,
+      "city": 15,
+      "interaction_type": "register"
+    }
+  },
+  {
+    "model": "users.UserPhoneNumber",
+    "pk": 1,
+    "fields": {
+      "created_at": "2025-02-19 20:17:32.056 +0200",
+      "created_by": 18,
+      "phone_number": "123456789",
+      "is_main_number": true
+    }
+  },
+  
+  {
+    "model": "auth.Group",
+    "pk": 1,
+    "fields": {
+      "name": "Superuser"
+    }
+  },
+  {
+    "model": "auth.Group",
+    "pk": 2,
+    "fields": {
+      "name": "Manager"
+    }
+  },
+  {
+    "model": "auth.Group",
+    "pk": 3,
+    "fields": {
+      "name": "Admin"
+    }
+  },
+  {
+    "model": "auth.Group",
+    "pk": 4,
+    "fields": {
+      "name": "Sales"
+    }
+  },
+  {
+    "model": "auth.Group",
+    "pk": 5,
+    "fields": {
+      "name": "Client"
+    }
+  },
+  {
+    "model": "users.CustomUser_Groups",
+    "pk": 1,
+    "fields": {
+      "customuser": "1",
+      "group": "1"
+    }
+  },
+  {
+    "model": "users.CustomUser_Groups",
+    "pk": 2,
+    "fields": {
+      "customuser": "1",
+      "group": "2"
+    }
+  },
+  {
+    "model": "users.CustomUser_Groups",
+    "pk": 3,
+    "fields": {
+      "customuser": "1",
+      "group": "3"
+    }
+  },
+  {
+    "model": "users.CustomUser_Groups",
+    "pk": 4,
+    "fields": {
+      "customuser": "1",
+      "group": "4"
+    }
+  },
+  {
+    "model": "users.CustomUser_Groups",
+    "pk": 5,
+    "fields": {
+      "customuser": "2",
+      "group": "2"
+    }
+  },
+  {
+    "model": "users.CustomUser_Groups",
+    "pk": 6,
+    "fields": {
+      "customuser": "3",
+      "group": "3"
+    }
+  },
+  {
+    "model": "users.CustomUser_Groups",
+    "pk": 7,
+    "fields": {
+      "customuser": "4",
+      "group": "3"
+    }
+  },
+  {
+    "model": "users.CustomUser_Groups",
+    "pk": 8,
+    "fields": {
+      "customuser": "18",
+      "group": "5"
+    }
+  },
+  {
+    "model": "core.Status",
+    "pk": 1,
+    "fields": {
+      "name": "تم الطلب",
+      "code": "0",
+      "color": "#42ddf5",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Status",
+    "pk": 2,
+    "fields": {
+      "name": "للبيع",
+      "code": "1",
+      "color": "#f59042",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Status",
+    "pk": 3,
+    "fields": {
+      "name": "جارى التفاوض",
+      "code": "2",
+      "color": "#8a42f5",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Status",
+    "pk": 4,
+    "fields": {
+      "name": "تم البيع",
+      "code": "3",
+      "color": "#1c1b61",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.UnitType",
+    "pk": 1,
+    "fields": {
+      "name": "اراضى",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.UnitType",
+    "pk": 2,
+    "fields": {
+      "name": "شقق",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Proposal",
+    "pk": 1,
+    "fields": {
+      "name": "مسكن 3",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Proposal",
+    "pk": 2,
+    "fields": {
+      "name": "مسكن 4",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Proposal",
+    "pk": 3,
+    "fields": {
+      "name": "مسكن 5",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Proposal",
+    "pk": 4,
+    "fields": {
+      "name": "صبا",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Proposal",
+    "pk": 5,
+    "fields": {
+      "name": "نزهة",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Proposal",
+    "pk": 6,
+    "fields": {
+      "name": "أكاسيا",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Proposal",
+    "pk": 7,
+    "fields": {
+      "name": "المنتزه",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Proposal",
+    "pk": 8,
+    "fields": {
+      "name": "داره",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Project",
+    "pk": 1,
+    "fields": {
+      "name": "محور الأراضى الأكثر تميزاً",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Project",
+    "pk": 2,
+    "fields": {
+      "name": "محور الأراضى المميزة",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Project",
+    "pk": 3,
+    "fields": {
+      "name": "محور الأراضى المتوسطة",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Project",
+    "pk": 4,
+    "fields": {
+      "name": "جنة للإسكان الفاخر",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Project",
+    "pk": 5,
+    "fields": {
+      "name": "سكن مصر",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Project",
+    "pk": 6,
+    "fields": {
+      "name": "دار مصر",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Project",
+    "pk": 7,
+    "fields": {
+      "name": "الإسكان المتميز",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Project",
+    "pk": 8,
+    "fields": {
+      "name": "روضة العبور",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.Project",
+    "pk": 9,
+    "fields": {
+      "name": "ڤالى تاورز",
+      "created_at": "2025-01-24 18:32:52.790 +0200",
+      "created_by": "1"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 1,
+    "fields": {
+      "name": "السادس من أكتوبر",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 2,
+    "fields": {
+      "name": "الشروق",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 3,
+    "fields": {
+      "name": "العبور",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 4,
+    "fields": {
+      "name": "أخميم الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 5,
+    "fields": {
+      "name": "أسوان الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 6,
+    "fields": {
+      "name": "السادات",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 7,
+    "fields": {
+      "name": "العاشر من رمضان",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 8,
+    "fields": {
+      "name": "الفيوم الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 9,
+    "fields": {
+      "name": "سوهاج الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 10,
+    "fields": {
+      "name": "قنا الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 11,
+    "fields": {
+      "name": "ملوى الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 12,
+    "fields": {
+      "name": "ناصر الجديدة - غرب أسيوط",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 13,
+    "fields": {
+      "name": "أسيوط الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 14,
+    "fields": {
+      "name": "المنيا الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 15,
+    "fields": {
+      "name": "بدر",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 16,
+    "fields": {
+      "name": "برج العرب الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 17,
+    "fields": {
+      "name": "بنى سويف الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 18,
+    "fields": {
+      "name": "حدائق أكتوبر",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 19,
+    "fields": {
+      "name": "طيبة الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 20,
+    "fields": {
+      "name": "غرب قنا",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 21,
+    "fields": {
+      "name": "السادس من اكتوبر الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 22,
+    "fields": {
+      "name": "العلمين الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 23,
+    "fields": {
+      "name": "القاهرة الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 24,
+    "fields": {
+      "name": "المنصورة الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 25,
+    "fields": {
+      "name": "المنيا",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 26,
+    "fields": {
+      "name": "دمياط الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 27,
+    "fields": {
+      "name": "الشيخ زايد",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 28,
+    "fields": {
+      "name": "الصالحية الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 29,
+    "fields": {
+      "name": "العاصمة الإدارية",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 30,
+    "fields": {
+      "name": "الفشن الجديدة",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 31,
+    "fields": {
+      "name": "مايو 15",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 32,
+    "fields": {
+      "name": "الرحاب",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.City",
+    "pk": 33,
+    "fields": {
+      "name": "مدينتى",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.UnitTypeProject",
+    "fields": {
+      "unit_type": "1",
+      "project": "1",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.UnitTypeProject",
+    "fields": {
+      "unit_type": "1",
+      "project": "2",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.UnitTypeProject",
+    "fields": {
+      "unit_type": "1",
+      "project": "3",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.UnitTypeProject",
+    "fields": {
+      "unit_type": "2",
+      "project": "4",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.UnitTypeProject",
+    "fields": {
+      "unit_type": "2",
+      "project": "5",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.UnitTypeProject",
+    "fields": {
+      "unit_type": "2",
+      "project": "6",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.UnitTypeProject",
+    "fields": {
+      "unit_type": "2",
+      "project": "7",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.UnitTypeProject",
+    "fields": {
+      "unit_type": "2",
+      "project": "8",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.UnitTypeProject",
+    "fields": {
+      "unit_type": "2",
+      "project": "9",
+      "created_by": "1",
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Article",
+    "pk": 1,
+    "fields": {
+      "title": "اتجاهات السوق العقاري لعام 2025: ماذا نتوقع؟",
+      "body": "زيادة الطلب على العقارات الذكية مع التطور التكنولوجي، ستصبح المنازل الذكية خيارًا أساسيًا للمشترين. اهتمام أكبر بالعقارات المستدامة نتيجة ارتفاع الوعي البيئي، ستزداد شعبية المشاريع الصديقة للبيئة. ارتفاع الأسعار في المناطق الحيوية بسبب زيادة الطلب على العقارات في المدن الكبرى والمناطق المزدهرة.",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Article",
+    "pk": 2,
+    "fields": {
+      "title": "هل تخطط لشراء منزلك الأول؟ إليك أهم النصائح!",
+      "body": "حدد احتياجاتك جيدًا: ما هو عدد الغرف الذي تحتاجه؟ هل تريد شرفة أو حديقة؟ ضع أولوياتك بوضوح. اختر الحي بعناية: تأكد من توفر الخدمات الأساسية، المدارس، المواصلات، والأمان في المنطقة. تفاوض على السعر بحكمة: لا تتردد في طلب خصم أو البحث عن عروض أفضل، فالتفاوض جزء أساسي من عملية الشراء.",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Article",
+    "pk": 3,
+    "fields": {
+      "title": "الاستثمار في العقارات التجارية أم السكنية؟ أيهما أفضل لك؟",
+      "body": "العقارات التجارية: تحقق عوائد مرتفعة لكنها تحتاج إلى رأس مال كبير.العقارات السكنية: أكثر استقرارًا، لكنها توفر عوائد أقل نسبيًا. القرار النهائي؟ يعتمد على ميزانيتك ومدى استعدادك للمخاطرة والاستثمار طويل الأجل.",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Article",
+    "pk": 4,
+    "fields": {
+      "title": "كيف تختار الموقع المثالي لعقارك؟",
+      "body": "القرب من المواصلات والخدمات: يرفع قيمة العقار ويجعله أكثر طلبًا. المناطق الناشئة: قد توفر فرصًا رائعة قبل ارتفاع الأسعار. البنية التحتية والأمان: من أهم العوامل التي تؤثر على القيمة المستقبلية للعقار. باختيارك لموقع استراتيجي، تضمن استثمارًا مربحًا وقيمة متزايدة لعقارك على المدى الطويل.",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ConsultationType",
+    "pk": 1,
+    "fields": {
+      "name": "استشارات عقارية",
+      "brief": "نصائح وتوجيهات حول شراء وبيع وتأجير العقارات، بالإضافة إلى تحليل السوق العقاري ومساعدة العملاء في اتخاذ قرارات سليمة",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ConsultationType",
+    "pk": 2,
+    "fields": {
+      "name": "استشارات استثمارية",
+      "brief": "ارشادات ومعلومات حول كيفية استثمار الأموال بشكل مربح، سواء في العقارات، المشاريع، أو أي أصول أخرى، مع تحليل المخاطر والعوائد",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ConsultationType",
+    "pk": 3,
+    "fields": {
+      "name": "استشارات قانونية",
+      "brief": "نصائح ومعلومات قانونية في مختلف القضايا، مثل العقود، النزاعات، المعاملات التجارية، حقوق الملكية، والقوانين التنظيمية لضمان الامتثال وحماية الحقوق",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ConsultationType",
+    "pk": 4,
+    "fields": {
+      "name": "استشارات مالية",
+      "brief": "حلول مالية تشمل إدارة الميزانية، التخطيط المالي، تحليل المخاطر، وإدارة الديون والاستثمارات لضمان تحقيق الاستقرار المالي للأفراد أو الشركات",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 1,
+    "fields": {
+      "title": "كيف تختار الموقع المثالي لعقارك؟",
+      "body": "عند شراء أو استثمار عقار، اختر موقعًا قريبًا من الخدمات الأساسية مثل المدارس، المستشفيات، ووسائل النقل. تحقق من مستقبل المنطقة ونموها المتوقع لضمان زيادة قيمة العقار مع الوقت.",
+      "consultation_type": "1",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 2,
+    "fields": {
+      "title": "هل تشتري أم تستأجر؟ أيهما أفضل لك؟",
+      "body": "الشراء مناسب إذا كنت تبحث عن استقرار طويل الأمد واستثمار مستقبلي، بينما الإيجار يمنحك مرونة أكبر دون التزام مالي طويل. قارن بين تكلفة الإيجار وسعر العقارات في منطقتك لاتخاذ القرار الأنسب.",
+      "consultation_type": "1",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 3,
+    "fields": {
+      "title": "كيف تحصل على أفضل تمويل عقاري؟",
+      "body": "قارن بين عروض البنوك والشركات التمويلية لاختيار أقل فائدة وأفضل شروط سداد. تأكد من قدرتك المالية على الالتزام بالأقساط قبل التوقيع على أي عقد تمويل.",
+      "consultation_type": "1",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 4,
+    "fields": {
+      "title": "الأخطاء الشائعة عند شراء العقارات",
+      "body": "عدم فحص العقار قانونيًا قبل الشراء؛ تجاهل فحص البناء والبنية التحتية؛ عدم حساب تكاليف الصيانة المستقبلية؛ اتخاذ القرار بسرعة دون دراسة كافية",
+      "consultation_type": "1",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 5,
+    "fields": {
+      "title": "كيف تزيد من قيمة عقارك عند البيع؟",
+      "body": "تحسين الديكور والتشطيبات؛ إجراء صيانة دورية؛ تقديم صور احترافية للإعلان؛ تحديد سعر تنافسي بناءً على السوق",
+      "consultation_type": "2",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 6,
+    "fields": {
+      "title": "كيف تختار العقار الاستثماري المربح؟",
+      "body": "استهدف المناطق ذات الطلب المرتفع، مثل القريبة من الجامعات أو المناطق التجارية. اختر عقارات قابلة للتطوير أو التأجير بسهولة لتحقيق عائد استثماري جيد.",
+      "consultation_type": "2",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 7,
+    "fields": {
+      "title": "متى يكون الوقت المناسب لشراء عقار؟",
+      "body": "راقب السوق العقاري لمعرفة متى تنخفض الأسعار أو تتوافر العروض الترويجية. غالبًا ما تكون العروض العقارية مميزة في نهاية العام أو خلال فترات الركود الاقتصادي.",
+      "consultation_type": "2",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 8,
+    "fields": {
+      "title": "نصائح لشراء عقار تحت الإنشاء",
+      "body": "تأكد من سمعة المطور العقاري؛ راجع العقد والشروط بدقة؛ تحقق من جدول التسليم والمواصفات النهائية؛ ضع في اعتبارك تأمين العقار ضد التأخيرات",
+      "consultation_type": "2",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 9,
+    "fields": {
+      "title": "كيفية تسويق عقارك للبيع أو الإيجار بسرعة",
+      "body": "استخدم مواقع الإعلان العقاري والشبكات الاجتماعية؛ التقط صورًا بجودة عالية وابحث عن زوايا جذابة؛ حدد سعرك بناءً على دراسات السوق؛ اعرض ميزات العقار مثل المساحات المفتوحة والخدمات المتاحة",
+      "consultation_type": "2",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 10,
+    "fields": {
+      "title": "كيف تتأكد من صحة الأوراق القانونية للعقار قبل الشراء؟",
+      "body": "قبل شراء أي عقار، تأكد من:؛ سند الملكية: يجب أن يكون باسم البائع وخاليًا من النزاعات.؛ رخصة البناء: لضمان أن العقار مبني وفق القوانين.؛ كشف الرهن والتسجيل العقاري: لمعرفة إن كان العقار مرهونًا أو عليه أي قيود قانونية.؛ استعن بمحامٍ عقاري لمراجعة جميع المستندات.",
+      "consultation_type": "3",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 11,
+    "fields": {
+      "title": "أهمية التعاقد الرسمي عند شراء العقارات",
+      "body": "يجب أن يكون هناك عقد رسمي موثق عند شراء أي عقار لضمان حقوقك. تأكد من أن العقد يحتوي على:؛ تفاصيل البائع والمشتري؛ وصف دقيق للعقار وموقعه؛ قيمة المبلغ المدفوع وطريقة السداد؛ موعد التسليم والالتزامات القانونية للطرفين؛ توقيع جميع الأطراف والتوثيق القانوني",
+      "consultation_type": "3",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 12,
+    "fields": {
+      "title": "المخاطر القانونية لشراء عقار غير مسجل",
+      "body": "شراء عقار غير مسجل رسميًا قد يعرضك لمشاكل قانونية مثل:؛ عدم القدرة على نقل الملكية بشكل قانوني؛ إمكانية فقدان العقار إذا كان ملكًا للغير؛ عدم إمكانية الحصول على تمويل بنكي للعقار؛ لذلك، تأكد دائمًا من تسجيل العقار في الشهر العقاري قبل الشراء.",
+      "consultation_type": "3",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 13,
+    "fields": {
+      "title": "كيفية التعامل مع مشاكل العقود في العقارات المؤجرة؟",
+      "body": "لتجنب النزاعات مع المستأجرين أو المؤجرين:؛ تأكد من وضوح مدة الإيجار وقيمته في العقد؛ حدد بوضوح من يتحمل مسؤولية الصيانة؛ ضع شروط فسخ العقد والإخلاء؛ وثق العقد رسميًا لضمان تنفيذه قانونيًا",
+      "consultation_type": "3",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 14,
+    "fields": {
+      "title": "ما هي حقوقك القانونية عند تأخر تسليم العقار تحت الإنشاء؟",
+      "body": "إذا تأخر المطور العقاري في تسليم العقار، يمكنك:؛ مطالبة المطور بدفع تعويض مالي وفقًا للعقد؛ تقديم شكوى للجهات المختصة مثل جهاز حماية المستهلك؛ اللجوء للقضاء للحصول على تعويض أو فسخ العقد؛ تحقق دائمًا من وجود بند التعويض في العقد قبل الشراء",
+      "consultation_type": "3",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 15,
+    "fields": {
+      "title": "كيف تحسب ميزانيتك عند شراء عقار؟",
+      "body": "قبل شراء عقار، احسب التكاليف الأساسية:؛ سعر العقار: المبلغ الأساسي المطلوب؛ الضرائب والرسوم: مثل رسوم التسجيل والشهر العقاري؛ مصاريف الصيانة والإدارة: خاصة للعقارات الاستثمارية؛ القروض والفوائد: في حال اللجوء للتمويل العقاري؛ احرص على أن لا تتجاوز الدفعات الشهرية 30-40% من دخلك الشهري",
+      "consultation_type": "4",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 16,
+    "fields": {
+      "title": "كيف تحصل على أفضل تمويل عقاري؟",
+      "body": "للحصول على قرض عقاري بأفضل شروط:؛ قارن بين عروض البنوك من حيث الفائدة والمدة؛ اختر مدة سداد تناسب قدرتك المالية؛ تأكد من أن نسبة الفائدة ثابتة أو متغيرة حسب احتياجاتك؛ اقرأ شروط السداد المبكر والغرامات إن وجدت",
+      "consultation_type": "4",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 17,
+    "fields": {
+      "title": "هل الاستثمار العقاري أفضل من الادخار في البنوك؟",
+      "body": "الاستثمار العقاري يتميز بأنه؛ يحقق عائدًا طويل الأمد من الإيجار أو البيع؛ يحمي من تأثير التضخم مقارنة بالودائع البنكية؛ يمكن استخدامه كضمان للحصول على تمويل مستقبلي؛ لكن تأكد من اختيار عقارات ذات طلب مرتفع لتحقيق أقصى استفادة",
+      "consultation_type": "4",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 18,
+    "fields": {
+      "title": "كيف تزيد من العائد الاستثماري لعقارك؟",
+      "body": "لتحقيق أقصى ربح من عقارك:؛ اختر موقعًا جيدًا يضمن ارتفاع الطلب؛ حسّن تشطيبات العقار لجذب مستأجرين أو مشترين؛ استخدم إدارة احترافية للإيجارات لضمان دخل ثابت؛ فكر في تقسيم العقار إلى وحدات أصغر لزيادة العائد",
+      "consultation_type": "4",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.Consultation",
+    "pk": 19,
+    "fields": {
+      "title": "كيف تتجنب الوقوع في أزمة مالية بعد شراء عقار؟",
+      "body": "لا تعتمد بالكامل على التمويل العقاري، وحاول دفع مقدم مناسب؛ ضع خطة مالية تشمل تكاليف الصيانة والضرائب؛ لا تستثمر كل مدخراتك في العقار، واحتفظ بسيولة نقدية للطوارئ؛ تجنب العقارات التي تحتاج لتمويل إضافي كبير بعد الشراء",
+      "consultation_type": "4",
+      "created_by": "1",
+      "created_at":"2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ClientReview",
+    "pk": 1,
+    "fields": {
+      "rate": "5",
+      "review": "شركه جولدن جيت من افضل الشركات في مجال التسويق العقاري معامله محترمه جدا",
+      "created_by": "5",
+      "is_deleted": true,
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ClientReview",
+    "pk": 2,
+    "fields": {
+      "rate": "5",
+      "review": "لو بتدور على حد يساعدك في شراء عقار بثقه جولدن بيت هو الاختيار الصح",
+      "created_by": "6",
+      "is_deleted": true,
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ClientReview",
+    "pk": 3,
+    "fields": {
+      "rate": "5",
+      "review": "احسن قرار خدته اني تعاملت مع جولدن بيت ناس فاهمه شغلها وبتساعدك بكل امانه",
+      "created_by": "7",
+      "is_deleted": true,
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ClientReview",
+    "pk": 4,
+    "fields": {
+      "rate": "5",
+      "review": "التعامل معاهم مريح جدا فهموني كويس وقدموا لي افضل الحلول اللى تناسبني",
+      "created_by": "8",
+      "is_deleted": true,
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ClientReview",
+    "pk": 5,
+    "fields": {
+      "rate": "5",
+      "review": "الخدمه فوق الممتازه من اول ما بدأت أدور على شقه لحد ما استلمتها كل حاجه كانت سلسة وواضحة",
+      "created_by": "9",
+      "is_deleted": true,
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ClientReview",
+    "pk": 6,
+    "fields": {
+      "rate": "5",
+      "review": "شركه محترمه وتعاملهم في منتهى الذوق كانوا واضحين وصادقين معايا من اول لحظه",
+      "created_by": "10",
+      "is_deleted": true,
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ClientReview",
+    "pk": 7,
+    "fields": {
+      "rate": "5",
+      "review": "بجد تجربه ممتازه مع جولدن بيت فريق محترف وبيساعد في كل خطوه لحد ما تلاقي المكان المناسب ليك",
+      "created_by": "11",
+      "is_deleted": true,
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ClientReview",
+    "pk": 8,
+    "fields": {
+      "rate": "5",
+      "review": "شركه جولدن جيت من افضل الشركات في مجال التسويق العقاري معامله محترمه جدا",
+      "created_by": "12",
+      "is_deleted": true,
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ClientReview",
+    "pk": 9,
+    "fields": {
+      "rate": "5",
+      "review": "شركة ممتازة مقارنة بالخدمة المميزة اللي بيقدموها، وكمان عندهم اختيار كبير من العقارات.",
+      "created_by": "13",
+      "is_deleted": false,
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ClientReview",
+    "pk": 10,
+    "fields": {
+      "rate": "5",
+      "review": "شركات كتير بس جولدين بيت فعلاً ليهم طابع خاص. تعامل سريع وسهل، وده خلاني أتعامل معاهم في أكتر من مرة.",
+      "created_by": "14",
+      "is_deleted": false,
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ClientReview",
+    "pk": 11,
+    "fields": {
+      "rate": "5",
+      "review": "اشتريت قطعة ارض منهم وكانوا معانا في كل خطوة من البداية للنهاية",
+      "created_by": "15",
+      "is_deleted": false,
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ClientReview",
+    "pk": 12,
+    "fields": {
+      "rate": "5",
+      "review": "جولدن بيت شركة موثوقة، قدروا يساعدوني أختار البيت المناسب بميزانيتي، والأوراق كلها كانت جاهزة في وقتها",
+      "created_by": "16",
+      "is_deleted": false,
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  },
+  {
+    "model": "core.ClientReview",
+    "pk": 13,
+    "fields": {
+      "rate": "5",
+      "review": "شركة ممتازة، تعاملت معهم فى شراء شقة وكانت الخدمة فوق الممتازة. النصائح كانت مفيدة والموظفين محترمين جداً.",
+      "created_by": "17",
+      "is_deleted": false,
+      "created_at": "2025-01-24 18:32:52.790 +0200"
+    }
+  }
+]

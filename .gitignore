@@ -6,8 +6,8 @@ functions.cpython-36.pyc
 .vscode
 images/
 # migrations/
-fixtures/
-all_initial_data.json
+# fixtures/
+# all_initial_data.json
 auth_user_data.json
 
 # Byte-compiled / optimized / DLL files
