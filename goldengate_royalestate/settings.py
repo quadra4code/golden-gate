@@ -28,12 +28,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '.vercel.app',
+    '.goldenbeit.com'
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -44,8 +45,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000"
 ]
 
-# CORS_ALLOW_ALL_ORIGINS = True
-# CORS_ALLOW_CREDENTIALS = True
 # Application definition
 
 INSTALLED_APPS = [
@@ -111,22 +110,6 @@ DATABASES = {
         'USER': env('DB_USER'),
         'PASSWORD': env('DB_PASSWORD'),
     },
-    # 'default': {
-    #     'ENGINE': env('DB_ENGINE'),
-    #     'HOST': env('NEON_DB_HOST'),
-    #     'PORT': env('NEON_DB_PORT'),
-    #     'NAME': env('NEON_DB_NAME'),
-    #     'USER': env('NEON_DB_USER'),
-    #     'PASSWORD': env('NEON_DB_PASSWORD'),
-    # },
-    # 'default': {
-    #     'ENGINE': env('DB_ENGINE'),
-    #     'HOST': env('CLOUD_DB_HOST'),
-    #     'PORT': env('CLOUD_DB_PORT'),
-    #     'NAME': env('CLOUD_DB_NAME'),
-    #     'USER': env('CLOUD_DB_USER'),
-    #     'PASSWORD': env('CLOUD_DB_PASSWORD'),
-    # },
 }
 
 

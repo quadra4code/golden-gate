@@ -303,11 +303,6 @@ def paginated_clients_service(request_data):
         all_clients_count = all_clients_q.count()
         if all_clients_count <= 0:
             raise ValueError('لا يوجد عملاء للعرض')
-        # if all_clients_count > page_size*(page_number-1):
-        #     all_clients_q = all_clients_q[page_size*(page_number-1):page_size*page_number]
-        # else:
-        #     all_clients_q = all_clients_q[page_size*int(all_clients_count/page_size) if all_clients_count%page_size!=0 else int(all_clients_count/page_size)-1:]
-        #     page_number = int(all_clients_count/page_size) if all_clients_count%page_size == 0 else int(all_clients_count/page_size)+1
         total_pages = (all_clients_count + page_size - 1) // page_size
         page_number = min(page_number, total_pages)
         start_index = (page_number - 1) * page_size
@@ -342,44 +337,12 @@ def paginated_clients_service(request_data):
 def unit_requests_user_service(unit_id):
     result = ResultView()
     try:
-        # page_number = request_data.get('page_number', 1)
-        # page_size = request_data.get('page_size', 10)
         all_unit_requests_query = CoreModels.UnitRequest.objects.filter(unit__id=unit_id).order_by('created_at')
         all_unit_requests_count = all_unit_requests_query.count()
         if all_unit_requests_count <= 0:
             raise ValueError('لا يوجد طلبات لهذه الوحدة')
-        # if all_unit_requests_count > page_size*(page_number-1):
-        #     all_requests_q = all_requests_q[page_size*(page_number-1):page_size*page_number]
-        # else:
-        #     all_requests_q = all_requests_q[page_size*int(all_unit_requests_count/page_size) if all_unit_requests_count%page_size!=0 else int(all_unit_requests_count/page_size)-1:]
-            # page_number = int(all_unit_requests_count/page_size) if all_unit_requests_count%page_size == 0 else int(all_unit_requests_count/page_size)+1
-        # total_pages = (all_unit_requests_count + page_size - 1) // page_size
-        # page_number = min(page_number, total_pages)
-        # start_index = (page_number - 1) * page_size
-        # end_index = start_index + page_size
-        # all_unit_requests_query = all_unit_requests_query[start_index:end_index]
         serialized_user_requests = AdminSerializers.UnitRequestSerializer(all_unit_requests_query, many=True)
-        any_unit = all_unit_requests_query.first().unit
-        price = any_unit.over_price if any_unit.over_price else any_unit.total_price if any_unit.total_price else any_unit.meter_price
-        price_type = 'الأوفر' if any_unit.over_price else 'الإجمالى' if any_unit.total_price else 'سعر المتر'
-        currency = any_unit.get_over_price_currency_display() if any_unit.over_price else any_unit.get_total_price_currency_display() if any_unit.total_price else any_unit.get_meter_price_currency_display()
         result.data = serialized_user_requests.data
-        # result.data = {
-        #     "users": serialized_user_requests.data,
-        #     "unit_data": {
-        #         'id': unit_id,
-        #         'title': any_unit.title,
-        #         'area': any_unit.area,
-        #         'price_obj': {'price_type': price_type, 'price_value': f'{price:,.0f}', 'currency': currency}
-        #     }
-            # "pagination": {
-            #     "total_items": all_unit_requests_count,
-            #     "total_pages": total_pages,
-            #     "current_page": page_number,
-            #     "has_next": page_number < total_pages,
-            #     "has_previous": page_number > 1
-            # }
-        # }
         result.is_success = True
     except ValueError as ve:
         result.msg = str(ve)
@@ -401,11 +364,6 @@ def paginated_units_service(request_data):
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد طلبات وحدات متاحة للعرض')
-        # if all_units_count > page_size*(page_number-1):
-        #     all_units_q = all_units_q[page_size*(page_number-1):page_size*page_number]
-        # else:
-        #     all_units_q = all_units_q[page_size*int(all_units_count/page_size) if all_units_count%page_size!=0 else int(all_units_count/page_size)-1:]
-        #     page_number = int(all_units_count/page_size) if all_units_count%page_size == 0 else int(all_units_count/page_size)+1
         total_pages = (all_units_count + page_size - 1) // page_size
         page_number = min(page_number, total_pages)
         start_index = (page_number - 1) * page_size
@@ -513,8 +471,6 @@ def paginated_requests_service(request_data, staff_obj):
             result.data = {
                 "sales_staff": serialized_sales_staff.data
             }
-        # if not all_requests.exists():
-        #     raise ValueError('لا يوجد طلبات متاحة')
         paginator = Paginator(all_requests.order_by('-updated_at'), page_size)
         page = paginator.get_page(page_number)
         serialized_requests = AdminSerializers.AllRequestSerializer(page.object_list, many=True)
@@ -590,11 +546,6 @@ def paginated_contact_msgs_service(request_data):
         all_msgs_count = all_msgs_q.count()
         if all_msgs_count <= 0:
             raise ValueError('لا يوجد رسائل للعرض')
-        # if all_msgs_count > page_size*(page_number-1):
-        #     all_msgs_q = all_msgs_q[page_size*(page_number-1):page_size*page_number]
-        # else:
-        #     all_msgs_q = all_msgs_q[page_size*int(all_msgs_count/page_size) if all_msgs_count%page_size!=0 else int(all_msgs_count/page_size)-1:]
-        #     page_number = int(all_msgs_count/page_size) if all_msgs_count%page_size == 0 else int(all_msgs_count/page_size)+1
         total_pages = (all_msgs_count + page_size - 1) // page_size
         page_number = min(page_number, total_pages)
         start_index = (page_number - 1) * page_size

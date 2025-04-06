@@ -1,5 +1,4 @@
 from datetime import timedelta
-# import cloudinary.uploader
 from django.http import QueryDict
 from django.utils import timezone
 from core import models
@@ -57,8 +56,6 @@ def propose_unit_service(request_data, client_id):
 def request_unit_service(request_data, client_id):
     result = ResultView()
     try:
-        # token = request_headers.get('Authorization', '')
-        # token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
         request_data['created_by_id'] = client_id
         serialized_land_request = serializers.UnitRequestSerializer(data=request_data)
         if serialized_land_request.is_valid():
@@ -189,7 +186,6 @@ def recent_units_service():
         recent_24h_units = all_units.filter(created_at__gte=twenty_four_hours_ago)
         if recent_24h_units.count() <= 0:
             recent_24h_units = all_units.filter(created_by_id__in=CustomUser.objects.filter(groups__name__in=['Superuser', 'Manager', 'Admin']).values_list('id', flat=True))
-            # raise ValueError('لا يوجد وحدات متاحة')
         serialized_recent_units = serializers.GetAllUnitsSerializer(recent_24h_units, many=True)
         result.data = serialized_recent_units.data
         result.is_success = True
@@ -295,126 +291,6 @@ def filter_paginated_units_service(request_data, user_id):
         result.data = {'error': str(e)}
     finally:
         return result
-
-# def filter_paginated_units_service(request_data):
-#     result = ResultView()
-#     try:
-#         # Extract filters
-#         unit_type_id = request_data.get('unit_type_id')
-#         proposal_id = request_data.get('proposal_id')
-#         project_id = request_data.get('project_id')
-#         city_id = request_data.get('city_id')
-#         min_price = request_data.get('min_price')
-#         max_price = request_data.get('max_price')
-#         min_area = request_data.get('min_area')
-#         max_area = request_data.get('max_area')
-#         currency = request_data.get('currency')
-#         facade = request_data.get('facade')
-#         floor = request_data.get('floor')
-#         featured = request_data.get('featured')
-#         sorting = request_data.get('sorting', False)
-#         asc = request_data.get('asc', True)
-#         price = request_data.get('price')
-#         date = request_data.get('date')
-#         area = request_data.get('area')
-#         most_viewed = request_data.get('most_viewed')
-#         page_number = int(request_data.get('page_number', 1))
-#         page_size = int(request_data.get('page_size', 12))
-#         filters = {
-#             'is_deleted': False,
-#             # 'status__code__in': [0, 1, 2]
-#         }
-#         # price validation
-#         if min_price is not None:
-#             try:
-#                 min_price = float(min_price)
-#             except (TypeError, ValueError):
-#                 raise ValueError("أقل سعر يجب أن يكون رقم صحيحاً")
-#         if max_price is not None:
-#             try:
-#                 max_price = float(max_price)
-#             except (TypeError, ValueError):
-#                 raise ValueError("أقصى سعر يجب أن يكون رقم صحيحاً")
-#         if min_price is not None and max_price is not None and min_price > max_price:
-#             raise ValueError("أقل سعر لا يمكن أن يكون أكبر من أقصى سعر")
-#         # area validation
-#         if min_area is not None:
-#             try:
-#                 min_area = float(min_area)
-#             except (TypeError, ValueError):
-#                 raise ValueError("أقل مساحة يجب أن يكون رقم صحيحاً")
-#         if max_area is not None:
-#             try:
-#                 max_area = float(max_area)
-#             except (TypeError, ValueError):
-#                 raise ValueError("أقصى مساحة يجب أن يكون رقم صحيحاً")
-#         if min_area is not None and max_area is not None and min_area > max_area:
-#             raise ValueError("أقل مساحة لا يمكن أن يكون أكبر من أقصى مساحة")
-#         if unit_type_id:
-#             filters['unit_type__id'] = unit_type_id
-#         if proposal_id:
-#             filters['proposal__id'] = proposal_id
-#         if project_id:
-#             filters['project__id'] = project_id
-#         if city_id:
-#             filters['city__id'] = city_id
-#         if min_area and max_area:
-#             filters['area__gte'] = min_area
-#             filters['area__lte'] = max_area
-#         if min_price:
-#             filters['total_price__gte'] = min_price
-#         if max_price:
-#             filters['total_price__lte'] = max_price
-#         if currency:
-#             filters['total_price_currency'] = currency
-#         if facade:
-#             filters['facade'] = facade
-#         if floor:
-#             filters['floor'] = floor
-#         if featured:
-#             filters['featured'] = featured
-#         units = models.Unit.objects.filter(**filters)
-#         if sorting:
-#             if date:
-#                 units = units.order_by('created_at') if asc else units.order_by('-created_at')
-#             if price:
-#                 units = units.order_by('total_price') if asc else units.order_by('-total_price')
-#             if area:
-#                 units = units.order_by('area') if asc else units.order_by('-area')
-#             if most_viewed:
-#                 units = units.order_by('view_count') if asc else units.order_by('-view_count')
-#         all_units_count = units.count()
-#         if all_units_count <= 0:
-#             raise ValueError('لا يوجد وحدات متاحة')
-#         total_pages = (all_units_count + page_size - 1) // page_size
-#         page_number = min(page_number, total_pages)
-#         start_index = (page_number - 1) * page_size
-#         end_index = start_index + page_size
-#         units = units[start_index:end_index]
-#         serialized_units = serializers.GetAllUnitsSerializer(units, many=True)
-#         result.data = {
-#             "all": serialized_units.data,
-#             "pagination": {
-#                 "total_items": all_units_count,
-#                 "total_pages": total_pages,
-#                 "current_page": page_number,
-#                 "has_next": page_number < total_pages,
-#                 "has_previous": page_number > 1
-#             }
-#         }
-#         result.is_success = True
-#         result.msg = 'Success'
-#     except ValueError as ve:
-#         result.msg = str(ve)
-#         result.is_success = True
-#         result.data = {
-#             "all": []
-#         }
-#     except Exception as e:
-#         result.msg = 'حدث خطأ غير متوقع أثناء جلب البيانات'
-#         result.data = {'error': str(e)}
-#     finally:
-#         return result
 
 def unit_details_service(unit_id, user_id):
     result = ResultView()
@@ -556,24 +432,6 @@ def hard_delete_unit_service(unit_id):
     result = ResultView()
     try:
         unit_obj = models.Unit.objects.get(id=unit_id)
-        # allimgs = unit_obj.unitimage_set.all()
-        # print(allimgs)
-        # counter = 0
-        # for img in allimgs:
-        #     counter += 1
-        #     print(f"img number {counter} is {img}")
-        #     if img.image:
-        #         print(f'found image inside img number {counter} and here it is {img.image} and that\'s the public id => {img.image.public_id} and we r gonna destroy it')
-        #         api_call_res = cloudinary.uploader.destroy(img.image.public_id)
-        #         print('destroyed it successfully, moving to next one')
-        #         print(f'and here is the api call result => {api_call_res}')
-        #     else:
-        #         print(f'didn\'t find image inside img number {counter} instead it\'s {img.image} so we skip')
-        # print(f'finished destroying all images in for loop now to delete all the images query from db and here it is before deleting => {allimgs}')
-        # allimgs.delete()
-        # print(f'deleted all imgs from db successfully and here it is after deleting => {allimgs}')
-        # print(f'now to delete the unit itself => {unit_obj}')
-        # print(f'deleted the unit itself successfully, after deletion => {unit_obj}')
         unit_obj.delete()
         result.is_success = True
         result.msg = 'تم حذف الوحدة بنجاح'

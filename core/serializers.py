@@ -79,8 +79,6 @@ class CreateUnitSerializer(serializers.Serializer):
             raise ValueError('الدور لا يجب أن يكون موجوداً للأراضى')
         elif self.initial_data.get('unit_type_id') == "1" and self.initial_data.get('building_number'):
             raise ValueError('رقم العمارة لا يجب أن يكون موجوداً للأراضى')
-        # elif not any([self.initial_data.get('over_price') or self.initial_data.get('total_price') or self.initial_data.get('meter_price')]):
-        #     raise ValueError("يجب إدخال سعر الأوفر أو إجمالى السعر أو سعر المتر على الأقل")
         elif not models.UnitTypeProject.objects.filter(unit_type_id=self.initial_data.get('unit_type_id'), project_id=self.initial_data.get('project_id')).exists():
             raise ValueError(f'مشروع {models.Project.objects.get(id=self.initial_data.get("project_id")).name} غير متاح لل{models.UnitType.objects.get(id=self.initial_data.get("unit_type_id")).name}')
         elif not (self.initial_data.get('images') or self.initial_data.get('update')):
@@ -111,7 +109,6 @@ class CreateUnitSerializer(serializers.Serializer):
             if old_images is not None:
                 for old_img in models.UnitImage.objects.filter(unit_id=unit.id):
                     if old_img.image.url not in old_images:
-                        # cloudinary.uploader.destroy(old_img.image.public_id)
                         old_img.delete()
 
         # Handle new images
@@ -120,30 +117,6 @@ class CreateUnitSerializer(serializers.Serializer):
             models.UnitImage.objects.bulk_create(unit_images)
 
         return unit
-    # def create(self, validated_data):
-    #     images = validated_data.pop('images') if validated_data.get('images') else None
-    #     if not validated_data['update']:
-    #         validated_data['status'] = models.Status.objects.filter(code=1).first()# For Sale
-    #         unit = models.Unit.objects.create(**validated_data)
-    #     else:
-    #         validated_data['status'] = models.Status.objects.filter(id=models.Unit.objects.get(id=validated_data.get('id')).status.id).first()# For Sale
-    #         print('updating')
-    #         old_images = validated_data.pop('old_images') if validated_data.get('old_images') else None
-    #         if old_images:
-    #             for old_img in models.UnitImage.objects.filter(unit_id=validated_data['id']):
-    #                 print(f'old => {old_img.image.url} vs {old_images}')
-    #                 if old_img.image.url in old_images:
-    #                     print('it exists in both so no deletion')
-    #                 else:
-    #                     print('oops! in db not in old list so we delete it from db and server')
-    #                     # api_call_res = cloudinary.uploader.destroy(old_img.image.public_id)
-    #                     print(f'api delete call result => {api_call_res}')
-    #                     old_img.delete()
-    #         validated_data.pop('update')
-    #         unit = models.Unit.objects.update(**validated_data)
-    #     if images:
-    #             unit_images = [models.UnitImage(unit=unit, image=img, created_by_id=validated_data['created_by_id']) for img in images]
-    #             models.UnitImage.objects.bulk_create(unit_images)
 
 class GetAllUnitsSerializer(serializers.ModelSerializer):
     city = serializers.CharField(source="city.name")
@@ -163,15 +136,9 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
         return main_image.image.url if main_image else None
 
     def get_over_price_obj(self, obj):
-        # price = obj.over_price or obj.total_price or obj.meter_price
-        # price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
-        # currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
         return {'price_type': 'الأوفر', 'price_value': f'{obj.over_price:,.0f}', 'currency': obj.get_over_price_currency_display()} if obj.over_price else None
     
     def get_total_price_obj(self, obj):
-        # price = obj.over_price or obj.total_price or obj.meter_price
-        # price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
-        # currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
         return {'price_type': 'الإجمالى', 'price_value': f'{obj.total_price:,.0f}', 'currency': obj.get_total_price_currency_display()} if obj.total_price else None
 
     def get_status(self, obj):
@@ -264,29 +231,6 @@ class UpdateUnitSerializer(serializers.ModelSerializer):
     project_id = serializers.CharField(source='project.id')
     city_id = serializers.CharField(source='city.id')
     images = serializers.SerializerMethodField(read_only=True)
-    # unit_number = serializers.CharField(max_length=5)
-    # building_number = serializers.CharField(max_length=150, required=False, allow_null=True)
-    # area = serializers.FloatField()
-    # paid_amount = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
-    # paid_amount_currency = serializers.CharField(source='paid_amount_currency')
-    # remaining_amount = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
-    # remaining_amount_currency = serializers.CharField(source='remaining_amount_currency')
-    # over_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
-    # over_price_currency = serializers.CharField(source='over_price_currency')
-    # total_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
-    # total_price_currency = serializers.CharField(source='total_price_currency')
-    # meter_price = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
-    # meter_price_currency = serializers.CharField(source='meter_price_currency')
-    # title = serializers.CharField(max_length=200, required=False, allow_blank=True, allow_null=True)
-    # phone_number = serializers.CharField(max_length=20)
-    # description = serializers.CharField(max_length=1000, required=False, allow_blank=True, allow_null=True)
-    # floor = serializers.CharField(source='floor')
-    # facade = serializers.CharField(source='facade')
-    # payment_method = serializers.CharField(max_length=150, required=False, allow_null=True)
-    # installment_period = serializers.CharField(max_length=150, required=False, allow_null=True)
-    # first_installment_value = serializers.DecimalField(decimal_places=4, max_digits=16, required=False, allow_null=True)
-    # first_installment_value_currency = serializers.CharField(source='first_installment_value_currency')
-    # created_by_id = serializers.IntegerField(min_value=1)
     class Meta:
         model = models.Unit
         fields = [
@@ -474,15 +418,9 @@ class UnitFavoriteSerializer(serializers.ModelSerializer):
         return main_image.image.url if main_image else None
 
     def get_over_price_obj(self, obj):
-        # price = obj.over_price or obj.total_price or obj.meter_price
-        # price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
-        # currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
         return {'price_type': 'الأوفر', 'price_value': f'{obj.unit.over_price:,.0f}', 'currency': obj.unit.get_over_price_currency_display()} if obj.unit.over_price else None
     
     def get_total_price_obj(self, obj):
-        # price = obj.over_price or obj.total_price or obj.meter_price
-        # price_type = 'الأوفر' if obj.over_price else 'الإجمالى' if obj.total_price else 'سعر المتر'
-        # currency = obj.get_over_price_currency_display() if obj.over_price else obj.get_total_price_currency_display() if obj.total_price else obj.get_meter_price_currency_display()
         return {'price_type': 'الإجمالى', 'price_value': f'{obj.unit.total_price:,.0f}', 'currency': obj.unit.get_total_price_currency_display()} if obj.unit.total_price else None
 
     def get_status(self, obj):

@@ -1,7 +1,7 @@
 from django.urls import path
 from engagement import views
 
-# create your urls here.
+# Create your urls here.
 
 urlpatterns = [
     path('all-notifications', views.all_notifications_view, name='all_notifications'),

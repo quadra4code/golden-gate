@@ -23,9 +23,7 @@ def mark_read_service(user_obj, notification_id):
     try:
         notification = models.Notification.objects.get(notification_id=notification_id)
         notification.is_deleted = True
-        # serialized_notifications = serializers.NotificationSerializer(notifications, many=True)
         result.msg = 'تم تعليم الإشعار كمقروء بنجاح'
-        # result.data = serialized_notifications.data
         result.is_success = True
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء تعليم الإشعار كمقروء'
@@ -55,9 +53,7 @@ def delete_notification_service(user_obj, flag):
             notifications.delete()
         else:
             notifications = notifications.filter(id=flag).delete()
-        # serialized_notifications = serializers.NotificationSerializer(notifications, many=True)
         result.msg = f'تم حذف {'الإشعارات' if flag=='all' else 'الإشعار'} بنجاح'
-        # result.data = serialized_notifications.data
         result.is_success = True
     except Exception as e:
         result.msg = f'حدث خطأ غير متوقع أثناء حذف {'الإشعارات' if flag=='all' else 'الإشعار'}'
