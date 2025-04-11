@@ -110,7 +110,7 @@ def login_user_service(login_data):
                             'username': user_to_auth.username,
                             'full_name': user_to_auth.first_name,
                             'referral_code': user_to_auth.referral_code,
-                            'image_url': user_to_auth.image.url
+                            'image_url': user_to_auth.image.url if user_to_auth.image else ''
                         }
                     }
                     result.is_success = True
