@@ -24,6 +24,14 @@ class IsManagerOrAdminUser(BasePermission):
     def has_permission(self, request, view):
         return bool((request.user and request.user.groups.filter(name='Manager')) or (request.user and request.user.groups.filter(name='Admin')) or (request.user and request.user.is_superuser))
 
+class IsManagerOrAdminOrSalesUser(BasePermission):
+    """
+    Allows access only to manager or admin or sales users.
+    """
+
+    def has_permission(self, request, view):
+        return bool(request.user or request.user.groups.filter(name__in=['Manager', 'Admin', 'Sales']))
+
 class IsManagerUser(BasePermission):
     """
     Allows access only to manager users.
