@@ -132,7 +132,7 @@ class Unit(BaseEntity):
         super().save(*args, **kwargs)
 
 class UnitImage(BaseEntity):
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
     image = CloudinaryField('image', folder='units_images')
     # image = models.ImageField(upload_to='units_images/')
 
