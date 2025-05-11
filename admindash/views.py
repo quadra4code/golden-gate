@@ -202,7 +202,6 @@ def toggle_unit_featured_view(request, unit_id):
 @api_view(['POST'])
 @permission_classes([utils.IsManagerOrAdminOrSalesUser])
 def paginated_requests_view(request):
-    print("passed to view")
     result = services.paginated_requests_service(request.data, request.user)
     status_code = (
         status.HTTP_201_CREATED if result.is_success

@@ -35,6 +35,8 @@ class CreateUnitSerializer(serializers.Serializer):
         '13',
         '14',
         '15',
+        '16',
+        '17',
     ]
     CURRENCY_CHOICES = ['EGP', 'USD']
     

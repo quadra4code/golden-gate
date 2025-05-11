@@ -95,10 +95,10 @@ class UpdateAccountSerializer(serializers.ModelSerializer):
     phone_numbers_updated = serializers.BooleanField(write_only=True, default=False, allow_null=True)
     phone_numbers = serializers.ListField(write_only=True, required=False, allow_null=True)
     interested_city = serializers.CharField(write_only=True, required=False, allow_null=True)
-
+    phone_numbers_list = serializers.ListField(read_only=True)
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'image', 'interested_city', 'phone_numbers_updated', 'phone_numbers']#'username', 'user_type', 
+        fields = ['first_name', 'last_name', 'email', 'image', 'interested_city', 'phone_numbers_updated', 'phone_numbers', 'phone_numbers_list']#'username', 'user_type', 
 
     def update(self, instance, validated_data):
         # Handle image update
@@ -135,6 +135,16 @@ class UpdateAccountSerializer(serializers.ModelSerializer):
             if attr not in ['phone_numbers', 'phone_numbers_updated']:
                 setattr(instance, attr, value)
         instance.save()
+        # Add phone numbers to the instance
+        instance.phone_numbers_list = [
+            {
+                'pn_id': pn.id,
+                'number': pn.phone_number,
+                'pn_confirmed': pn.phone_number_confirmed,
+                'is_main': pn.is_main_number
+            }
+            for pn in UserPhoneNumber.objects.filter(created_by=instance)
+        ]
         return instance
 
 

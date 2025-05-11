@@ -1,4 +1,5 @@
 from core import models as CoreModels
+from core.constants import REQUEST_STATUS_CHOICES
 from users import models as UsersModels
 from django.contrib.auth.models import Group
 from core import serializers as CoreSerializers
@@ -476,6 +477,7 @@ def paginated_requests_service(request_data, staff_obj):
         serialized_requests = AdminSerializers.AllRequestSerializer(page.object_list, many=True)
         result.data = {
             "all": serialized_requests.data,
+            "request_statuses": [{'code': key, 'name': val.get("name"), 'color': val.get("color")} for key, val in REQUEST_STATUS_CHOICES.items()],
             "sales_staff": result.data['sales_staff'] if result.data else None,
             "pagination": {
                 "total_items": paginator.count,
