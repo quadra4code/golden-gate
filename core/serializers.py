@@ -105,6 +105,7 @@ class CreateUnitSerializer(serializers.Serializer):
                 unit = models.Unit.objects.get(id=unit_id, created_by=user_obj)
             for key, value in validated_data.items():
                 setattr(unit, key, value)
+            unit.is_deleted = True
             unit.save()
             # Handle image updates
             old_images = validated_data.pop('old_images', None)
