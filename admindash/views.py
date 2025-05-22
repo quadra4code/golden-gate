@@ -204,7 +204,7 @@ def toggle_unit_featured_view(request, unit_id):
 def paginated_requests_view(request):
     result = services.paginated_requests_service(request.data, request.user)
     status_code = (
-        status.HTTP_201_CREATED if result.is_success
+        status.HTTP_200_OK if result.is_success
         else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
         else status.HTTP_500_INTERNAL_SERVER_ERROR
     )
