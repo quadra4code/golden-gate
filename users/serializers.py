@@ -1,3 +1,4 @@
+import json
 from rest_framework import serializers
 from users.models import CustomUser, UserPhoneNumber
 from engagement.models import UserInteraction
@@ -99,6 +100,39 @@ class UpdateAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['first_name', 'last_name', 'email', 'image', 'interested_city', 'phone_numbers_updated', 'phone_numbers', 'phone_numbers_list']#'username', 'user_type', 
+
+    def validate_phone_numbers(self, value):
+        if isinstance(value[0], str):
+            try:
+                deserialized_value = json.loads(value[0])
+                if deserialized_value[0] == '':
+                    return []
+                return deserialized_value
+            except json.JSONDecodeError:
+                return []
+        return value
+
+    def to_internal_value(self, data):
+        # Create a mutable copy of the data
+        data = data.copy()
+        # Convert string booleans to Python booleans
+        if 'phone_numbers_updated' in data:
+            if isinstance(data['phone_numbers_updated'], str):
+                data['phone_numbers_updated'] = data['phone_numbers_updated'].lower() == 'true'
+        
+        # Convert empty string to None for interested_city
+        if 'interested_city' in data and data['interested_city'] == '':
+            data.pop('interested_city', None)
+        
+        # Convert empty string to None for email
+        if 'email' in data and data['email'] == '':
+            data.pop('email', None)
+        
+        # Convert empty string to None for last_name
+        if 'last_name' in data and data['last_name'] == '':
+            data.pop('last_name', None)
+
+        return super().to_internal_value(data)
 
     def update(self, instance, validated_data):
         # Handle image update
