@@ -121,16 +121,16 @@ class UpdateAccountSerializer(serializers.ModelSerializer):
                 data['phone_numbers_updated'] = data['phone_numbers_updated'].lower() == 'true'
         
         # Convert empty string to None for interested_city
-        if 'interested_city' in data and data['interested_city'] == '':
-            data.pop('interested_city', None)
+        if 'interested_city' in data and (data['interested_city'] == '' or data['interested_city'] == 'null' or data['interested_city'] == ['']):
+            data['interested_city'] = None
         
         # Convert empty string to None for email
-        if 'email' in data and data['email'] == '':
+        if 'email' in data and (data['email'] == '' or data['email'] == 'null' or data['email'] == ['']):
             data['email'] = None
         
         # Convert empty string to None for last_name
-        if 'last_name' in data and data['last_name'] == '':
-            data.pop('last_name', None)
+        if 'last_name' in data and (data['last_name'] == '' or data['last_name'] == 'null' or data['last_name'] == ['']):
+            data['last_name'] = None
 
         return super().to_internal_value(data)
 

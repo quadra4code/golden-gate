@@ -17,9 +17,9 @@ def register_user_service(registration_data):
         password = registration_data.get("password", '')
         confirm_password = registration_data.get("confirm_password", '')
         if not password or password != confirm_password:
-            result.msg = f"{'Passwords Don\'t match' if password else 'Password is required'}"
+            result.msg = f"{'كلمتا السر غير متطابقتين' if password else 'كلمة السر مطلوبة'}"
         elif UserPhoneNumber.objects.filter(phone_number=phone_as_username).exists() or CustomUser.objects.filter(username=phone_as_username, email=email).exists():
-            result.msg = 'This user already exists, please login'
+            result.msg = 'هذا المستخدم موجود بالفعل'
         else:
             serialized_new_user_data = RegisterSerializer(data=registration_data) # here we should set the is_active to false and turn it on when verified phone number
             if serialized_new_user_data.is_valid():
@@ -70,13 +70,13 @@ def register_user_service(registration_data):
                     'role': new_user.groups.filter(name="Client").first().name,
                     'referral_code': new_user.referral_code
                 }
-                result.msg = f"User {new_user.first_name} created successfully"
+                result.msg = f"تم تسجيل الحساب بنجاح"
                 result.is_success = True
             else:
-                result.msg = f'Error happened while serializing new user data'
+                result.msg = f'حدث خطأ أثناء معالجة بيانات المستخدم الجديد'
                 result.data = {'errors': serialized_new_user_data.errors, 'error messages': serialized_new_user_data.error_messages}
     except Exception as e:
-        result.msg = f'Unexpected error happened while registering new user'
+        result.msg = f'حدث خطأ غير متوقع أثناء تسجيل المستخدم'
         result.data = {'error': str(e)}
     finally:
         return result
@@ -88,7 +88,7 @@ def login_user_service(login_data):
         username = login_data.get('username', '').strip()
         password = login_data.get('password', '').strip()
         if not username or not password:
-            result.msg = 'Username is required' if password else 'Password is required' if username  else 'Username & Password are required'
+            result.msg = 'رقم الهاتف مطلوب' if password else 'كلمة السر مطلوبة' if username  else 'رقم الهاتف وكلمة السر مطلوبان'
         else:
             serialized_login_data = LoginSerializer(data=login_data)
             if serialized_login_data.is_valid():
