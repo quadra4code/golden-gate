@@ -110,9 +110,13 @@ class CreateUnitSerializer(serializers.Serializer):
             # Handle image updates
             old_images = validated_data.pop('old_images', None)
             if old_images is not None:
-                for old_img in models.UnitImage.objects.filter(unit_id=unit.id):
-                    if old_img.image.url not in old_images:
-                        old_img.delete()
+                for existing_img in models.UnitImage.objects.filter(unit_id=unit.id):
+                    if existing_img.image.url not in old_images:
+                        existing_img.delete()
+
+            elif old_images is None:
+                for existing_img in models.UnitImage.objects.filter(unit_id=unit.id):
+                    existing_img.delete()
 
         # Handle new images
         if images:
