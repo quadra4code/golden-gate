@@ -126,7 +126,7 @@ class UpdateAccountSerializer(serializers.ModelSerializer):
         
         # Convert empty string to None for email
         if 'email' in data and data['email'] == '':
-            data.pop('email', None)
+            data['email'] = None
         
         # Convert empty string to None for last_name
         if 'last_name' in data and data['last_name'] == '':
