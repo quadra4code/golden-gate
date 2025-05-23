@@ -17,6 +17,7 @@ urlpatterns = [
     path('unit-requests-user/<int:unit_id>', AdminViews.unit_requests_user_view, name='unit_requests_user'),
     path('update-unit-status/<int:unit_id>/<int:status_id>', AdminViews.update_unit_status_view, name='update_unit_status'),
     path('toggle-unit-hide/<int:unit_id>', AdminViews.toggle_unit_deleted_view, name='toggle_unit_hide'),
+    path('toggle-unit-featured/<int:unit_id>', AdminViews.toggle_unit_featured_view, name='toggle_unit_featured'),
     path('paginated-requests', AdminViews.paginated_requests_view, name='paginated_requests'),
     path('change-request-status', AdminViews.change_request_status_view, name='change_request_status'),
     path('assign-sales-request', AdminViews.assign_sales_request_view, name='assign_sales_request'),

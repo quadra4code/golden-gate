@@ -74,7 +74,7 @@ class AllUnitSerializer(serializers.ModelSerializer):
     hidden = serializers.BooleanField(source='is_deleted', read_only=True)
     class Meta:
         model = CoreModels.Unit
-        fields = ['id', 'title', 'over_price_obj', 'total_price_obj', 'created_at', 'requests_count', 'status_obj', 'hidden']
+        fields = ['id', 'title', 'over_price_obj', 'total_price_obj', 'created_at', 'requests_count', 'status_obj', 'hidden', 'featured']
 
     def get_over_price_obj(self, obj):
         return {'price_type': 'الأوفر', 'price_value': f'{obj.over_price:,.0f}', 'currency': obj.get_over_price_currency_display()} if obj.over_price else None

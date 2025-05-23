@@ -92,6 +92,7 @@ class CreateUnitSerializer(serializers.Serializer):
         is_update = validated_data.pop('update', False)
         if not is_update:  # Create new unit
             validated_data['status'] = models.Status.objects.filter(code=1).first()  # For Sale
+            validated_data['is_deleted'] = True
             unit = models.Unit.objects.create(**validated_data)
         else:  # Update existing unit
             unit_id = validated_data.pop('id', None)
@@ -105,7 +106,6 @@ class CreateUnitSerializer(serializers.Serializer):
                 unit = models.Unit.objects.get(id=unit_id, created_by=user_obj)
             for key, value in validated_data.items():
                 setattr(unit, key, value)
-            unit.is_deleted = True
             unit.save()
             # Handle image updates
             old_images = validated_data.pop('old_images', None)
