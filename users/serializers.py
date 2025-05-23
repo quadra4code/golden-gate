@@ -105,7 +105,7 @@ class UpdateAccountSerializer(serializers.ModelSerializer):
         if isinstance(value[0], str):
             try:
                 deserialized_value = json.loads(value[0])
-                if deserialized_value[0] == '':
+                if deserialized_value == [] or deserialized_value[0] == '':
                     return []
                 return deserialized_value
             except json.JSONDecodeError:

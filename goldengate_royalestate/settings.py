@@ -193,6 +193,9 @@ CACHES = {
     }
 }
 
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB (adjust as needed)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+
 # Fixutre Directories for initial data seedings
 FIXTURE_DIRS = [
     os.path.join(BASE_DIR, 'fixtures')
