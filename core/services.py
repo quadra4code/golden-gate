@@ -40,7 +40,7 @@ def propose_unit_service(request_data, client_id):
                     for user_id in interested_user_ids
                 ]
                 Notification.objects.bulk_create(notifications)
-            result.msg = 'تم حفظ الوحدة بنجاح'
+            result.msg = 'تم حفظ الوحدة بنجاح وسيتم مراجعة بيانات الوحدة'
             result.is_success = True
             result.data = serialized_unit.data
         else:
