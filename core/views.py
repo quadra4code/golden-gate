@@ -126,6 +126,17 @@ def update_unit_view(request):
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
+def soft_delete_unit_view(request, unit_id):
+    result = services.soft_delete_unit_service(unit_id, request.user.id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def hard_delete_unit_view(request, unit_id):
     result = services.hard_delete_unit_service(unit_id)
     status_code = (

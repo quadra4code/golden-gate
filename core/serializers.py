@@ -92,7 +92,8 @@ class CreateUnitSerializer(serializers.Serializer):
         is_update = validated_data.pop('update', False)
         if not is_update:  # Create new unit
             validated_data['status'] = models.Status.objects.filter(code=1).first()  # For Sale
-            validated_data['is_deleted'] = True
+            # validated_data['is_approved'] = False
+            # validated_data['is_deleted'] = True
             unit = models.Unit.objects.create(**validated_data)
         else:  # Update existing unit
             unit_id = validated_data.pop('id', None)
@@ -106,6 +107,7 @@ class CreateUnitSerializer(serializers.Serializer):
                 unit = models.Unit.objects.get(id=unit_id, created_by=user_obj)
             for key, value in validated_data.items():
                 setattr(unit, key, value)
+            unit.is_approved = None if unit.is_approved == False else unit.is_approved  # Reset approval status if it was False to request another review
             unit.save()
             # Handle image updates
             old_images = validated_data.pop('old_images', None)
@@ -133,10 +135,10 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
     total_price_obj = serializers.SerializerMethodField()
     main_image = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
-
+    approver_message = serializers.SerializerMethodField()
     class Meta:
         model = models.Unit
-        fields = ["id", "title", "city", "unit_type", "project", "area", "over_price_obj", "total_price_obj", "status", "main_image"]
+        fields = ["id", "title", "city", "unit_type", "project", "area", "over_price_obj", "total_price_obj", "status", "main_image", "is_approved", "approver_message"]
 
     def get_main_image(self, obj):
         main_image = obj.unitimage_set.order_by("id").first()
@@ -150,6 +152,9 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return {'id': obj.status.id, 'name': obj.status.name, 'code': obj.status.code, 'color': obj.status.color} if obj.status else None
+
+    def get_approver_message(self, obj):
+        return 'تم قبول الوحدة' if obj.is_approved else 'في انتظار المراجعة' if obj.is_approved is None else obj.approver_message 
 
 class UnitDetailsSerializer(serializers.ModelSerializer):
     unit_type = serializers.CharField(source="unit_type.name")

@@ -103,6 +103,8 @@ class Unit(BaseEntity):
     facade = models.CharField(max_length=1, choices=FACADE_CHOICES, null=True)
     floor = models.CharField(max_length=2, choices=FLOOR_CHOICES, null=True)
     featured = models.BooleanField(default=False)
+    is_approved = models.BooleanField(null=True, default=None)
+    approver_message = models.CharField(max_length=400, null=True, blank=True)
     view_count = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -151,6 +153,7 @@ class UnitRequest(BaseEntity):
         constraints = [
             models.UniqueConstraint(fields=['created_by', 'unit'], name='created_by_unit_request_unique_constraint', violation_error_message='لقد طلبت هذه الوحدة من قبل ولا يمكنك طلبها مره أخرى')
         ]
+        ordering = ['id']
 
 class ClientReview(BaseEntity):
     rate = models.IntegerField()
@@ -163,15 +166,21 @@ class ClientReview(BaseEntity):
 class Article(BaseEntity):
     title = models.CharField(max_length=250)
     body = models.CharField(max_length=2000)
+    class Meta:
+        ordering = ['id']
 
 class ConsultationType(BaseEntity):
     name = models.CharField(max_length=100)
     brief = models.CharField(max_length=500, null=True, blank=True)
+    class Meta:
+        ordering = ['id']
 
 class Consultation(BaseEntity):
     title = models.CharField(max_length=250)
     body = models.CharField(max_length=2000)
     consultation_type = models.ForeignKey(ConsultationType, on_delete=models.CASCADE)
+    class Meta:
+        ordering = ['id']
 
 class DrawResult(BaseEntity):
     winner_name = models.CharField(max_length=150)
@@ -190,3 +199,5 @@ class ContactUs(BaseEntity):
     email = models.EmailField(null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     message = models.CharField(max_length=1000)
+    class Meta:
+        ordering = ['id']

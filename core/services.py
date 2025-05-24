@@ -182,7 +182,7 @@ def recent_units_service():
     result = ResultView()
     try:
         twenty_four_hours_ago = timezone.now() - timedelta(hours=24)
-        all_units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2])
+        all_units = models.Unit.objects.filter(is_deleted=False, is_approved=True, status__code__in=[0, 1, 2])
         recent_24h_units = all_units.filter(created_at__gte=twenty_four_hours_ago)
         if recent_24h_units.count() <= 0:
             recent_24h_units = all_units.filter(created_by_id__in=CustomUser.objects.filter(groups__name__in=['Superuser', 'Manager', 'Admin']).values_list('id', flat=True))
@@ -203,7 +203,7 @@ def filter_paginated_units_service(request_data, user_id):
     result = ResultView()
     try:
         print(f"request_data => {request_data}")
-        filters = Q(is_deleted=False)
+        filters = Q(is_deleted=False, is_approved=True)
         # Numeric Validations
         def validate_numeric(value, error_message):
             try:
@@ -341,20 +341,17 @@ def paginated_client_units_service(request_data, client_id):
         all_units_count = units.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد وحدات متاحة')
-        total_pages = (all_units_count + page_size - 1) // page_size
-        page_number = min(page_number, total_pages)
-        start_index = (page_number - 1) * page_size
-        end_index = start_index + page_size
-        units = units[start_index:end_index]
-        serialized_units = serializers.GetAllUnitsSerializer(units, many=True)
+        paginator = Paginator(units.order_by('-created_at'), page_size)
+        page = paginator.get_page(page_number)
+        serialized_units = serializers.GetAllUnitsSerializer(page.object_list, many=True)
         result.data = {
             "all": serialized_units.data,
             "pagination": {
-                "total_items": all_units_count,
-                "total_pages": total_pages,
-                "current_page": page_number,
-                "has_next": page_number < total_pages,
-                "has_previous": page_number > 1
+                "total_items": paginator.count,
+                "total_pages": paginator.num_pages,
+                "current_page": page.number,
+                "has_next": page.has_next(),
+                "has_previous": page.has_previous()
             }
         }
         result.is_success = True
@@ -428,13 +425,31 @@ def update_unit_service(request_data, user_obj):
     finally:
         return result
 
+def soft_delete_unit_service(unit_id, user_id):
+    result = ResultView()
+    try:
+        unit_obj = models.Unit.objects.get(id=unit_id)
+        unit_obj.is_deleted = True
+        unit_obj.updated_by_id = user_id
+        unit_obj.save()
+        result.is_success = True
+        result.msg = 'تم حذف الوحدة بنجاح'
+    except models.Unit.DoesNotExist as e:
+        result.msg = 'الوحدة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حذف الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
 def hard_delete_unit_service(unit_id):
     result = ResultView()
     try:
         unit_obj = models.Unit.objects.get(id=unit_id)
         unit_obj.delete()
         result.is_success = True
-        result.msg = 'تم حذف الوحدة بنجاح'
+        result.msg = 'تم حذف الوحدة نهائيا بنجاح'
     except models.Unit.DoesNotExist as e:
         result.msg = 'الوحدة غير موجودة'
         result.data = {'errors': str(e)}
@@ -504,7 +519,7 @@ def consultations_by_type_service(consult_type_id):
 def home_featured_units_service():
     result = ResultView()
     try:
-        units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2], featured=True)
+        units = models.Unit.objects.filter(is_deleted=False, is_approved=True, status__code__in=[0, 1, 2], featured=True)
         if units.count() <= 0:
             raise ValueError('لا يوجد وحدات متاحة')
         serialized_featured_units = serializers.GetAllUnitsSerializer(units, many=True)
@@ -523,7 +538,7 @@ def home_featured_units_service():
 def home_most_viewed_units_service():
     result = ResultView()
     try:
-        most_viewed_units = models.Unit.objects.filter(is_deleted=False, status__code__in=[0, 1, 2]).order_by('-view_count')[:12]
+        most_viewed_units = models.Unit.objects.filter(is_deleted=False, is_approved=True, status__code__in=[0, 1, 2]).order_by('-view_count')[:12]
         if most_viewed_units.count() <= 0:
             raise ValueError('لا يوجد وحدات متاحة')
         serialized_most_viewed_units = serializers.GetAllUnitsSerializer(most_viewed_units, many=True)
