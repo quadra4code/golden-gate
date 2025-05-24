@@ -12,3 +12,19 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Notification
         fields = ['id', 'unit_id', 'city_id', 'city_obj', 'unit_obj', 'message', 'is_read']
+
+    def get_city_obj(self, obj):
+        if obj.city:
+            return {
+                'id': obj.city.id,
+                'name': obj.city.name
+            }
+        return None
+    
+    def get_unit_obj(self, obj):
+        if obj.unit:
+            return {
+                'id': obj.unit.id,
+                'name': obj.unit.title
+            }
+        return None
