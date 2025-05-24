@@ -1014,7 +1014,7 @@ def toggle_hidden_consultation_service(consultation_id, admin_obj):
         return result
 # endregion
 
-# region Clien Reviews
+# region Client Reviews
 def read_reviews_service():
     result = ResultView()
     try:

@@ -468,7 +468,7 @@ def toggle_hidden_consultation_view(request, consultation_id):
     return Response(result.to_dict(), status=status_code)
 # endregion
 
-# region User Reviews
+# region Client Reviews
 @api_view(['GET'])
 @permission_classes([utils.IsManagerOrAdminUser])
 def read_reviews_view(request):
