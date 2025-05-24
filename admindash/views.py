@@ -153,6 +153,28 @@ def paginated_units_view(request):
     )
     return Response(result.to_dict(), status=status_code)
 
+@api_view(['POST'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def paginated_units_addition_requests_view(request):
+    result = services.paginated_units_addition_requests_service(request.data)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['POST'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def paginated_soft_deleted_units_view(request):
+    result = services.paginated_soft_deleted_units_service(request.data)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+
 @api_view(['GET'])
 @permission_classes([utils.IsManagerOrAdminUser])
 def unit_requests_user_view(request, unit_id):
@@ -190,6 +212,28 @@ def toggle_unit_deleted_view(request, unit_id):
 @permission_classes([utils.IsManagerOrAdminUser])
 def toggle_unit_featured_view(request, unit_id):
     result = services.toggle_unit_featured_service(unit_id, request.user.id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def approve_unit_addition_view(request, unit_id):
+    result = services.approve_unit_addition_service(unit_id, request.user.id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')
+        else status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def disapprove_unit_addition_view(request):
+    result = services.disapprove_unit_addition_service(request.data, request.user.id)
     status_code = (
         status.HTTP_200_OK if result.is_success
         else status.HTTP_401_UNAUTHORIZED if result.msg.lower().__contains__('غير مصرح')

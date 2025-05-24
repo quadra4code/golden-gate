@@ -1,8 +1,9 @@
 from core import models as CoreModels
 from core.constants import REQUEST_STATUS_CHOICES
+from core import serializers as CoreSerializers
+from engagement import models as EngagementModels
 from users import models as UsersModels
 from django.contrib.auth.models import Group
-from core import serializers as CoreSerializers
 from admindash import serializers as AdminSerializers, models as AdminModels
 from core.base_models import ResultView
 from django.db.models import Value, CharField, Q, Count
@@ -361,7 +362,7 @@ def paginated_units_service(request_data):
         page_size = int(request_data.get('page_size', 10))
         all_units_q = CoreModels.Unit.objects.annotate(
             requests_count=Count('unitrequest')  # Assuming 'unitrequest' is the related name
-        ).order_by('-requests_count')
+        ).filter(is_deleted=False, is_approved=True).order_by('-requests_count')
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد طلبات وحدات متاحة للعرض')
@@ -391,6 +392,76 @@ def paginated_units_service(request_data):
     except Exception as e:
         logging.error(f'Unexpected error occurred: {str(e)}')
         result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات الوحدات'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def paginated_units_addition_requests_service(request_data):
+    result = ResultView()
+    try:
+        page_number = int(request_data.get('page_number', 1))
+        page_size = int(request_data.get('page_size', 10))
+        all_units_q = CoreModels.Unit.objects.filter(is_deleted=False, is_approved=None).order_by('created_at')
+        all_units_count = all_units_q.count()
+        if all_units_count <= 0:
+            raise ValueError('لا يوجد وحدات جديدة متاحة للعرض')
+        paginator = Paginator(all_units_q, page_size)
+        page = paginator.get_page(page_number)
+        serialized_units = AdminSerializers.AllUnitSerializer(page.object_list, many=True)
+        # statuses = CoreSerializers.StatusSerializer(CoreModels.Status.objects.all(), many=True)
+        result.data = {
+            "all": serialized_units.data,
+            # "statuses": statuses.data,
+            "pagination": {
+                "total_items": paginator.count,
+                "total_pages": paginator.num_pages,
+                "current_page": page.number,
+                "has_next": page.has_next(),
+                "has_previous": page.has_previous()
+            }
+        }
+        result.is_success = True
+        result.msg = 'تم جلب بيانات الوحدات الجديدة بنجاح'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+    except Exception as e:
+        logging.error(f'Unexpected error occurred: {str(e)}')
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات الوحدات الجديدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def paginated_soft_deleted_units_service(request_data):
+    result = ResultView()
+    try:
+        page_number = int(request_data.get('page_number', 1))
+        page_size = int(request_data.get('page_size', 10))
+        all_units_q = CoreModels.Unit.objects.filter(is_deleted=True).order_by('-updated_at')
+        all_units_count = all_units_q.count()
+        if all_units_count <= 0:
+            raise ValueError('لا يوجد وحدات محذوفة متاحة للعرض')
+        paginator = Paginator(all_units_q, page_size)
+        page = paginator.get_page(page_number)
+        serialized_units = AdminSerializers.AllUnitSerializer(page.object_list, many=True)
+        result.data = {
+            "all": serialized_units.data,
+            "pagination": {
+                "total_items": paginator.count,
+                "total_pages": paginator.num_pages,
+                "current_page": page.number,
+                "has_next": page.has_next(),
+                "has_previous": page.has_previous()
+            }
+        }
+        result.is_success = True
+        result.msg = 'تم جلب بيانات الوحدات المحذوفة بنجاح'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+    except Exception as e:
+        logging.error(f'Unexpected error occurred: {str(e)}')
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات الوحدات المحذوفة'
         result.data = {'errors': str(e)}
     finally:
         return result
@@ -451,6 +522,48 @@ def toggle_unit_featured_service(unit_id, user_id):
         result.data = {'errors': str(e)}
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء تعديل تميز الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def approve_unit_addition_service(unit_id, user_id):
+    result = ResultView()
+    try:
+        unit_obj = CoreModels.Unit.objects.get(id=unit_id)
+        unit_obj.is_approved = True
+        unit_obj.updated_by_id = user_id
+        unit_obj.save()
+        EngagementModels.Notification.objects.create(unit_id=unit_id, message='تم قبول طلب إضافةوحدتكم بنجاح', created_by_id=user_id)
+        result.is_success = True
+        result.msg = 'تم قبول طلب إضافة الوحدة وإرسال إشعار للمستخدم بنجاح'
+    except CoreModels.Unit.DoesNotExist as e:
+        result.msg = 'الوحدة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء قبول طلب إضافة الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def disapprove_unit_addition_service(request_data, user_id):
+    result = ResultView()
+    try:
+        unit_obj = CoreModels.Unit.objects.get(id=unit_id)
+        unit_id = request_data.get('unit_id', None)
+        approver_message = request_data.get('message', None)
+        unit_obj.updated_by_id = user_id
+        unit_obj.approver_message = approver_message if approver_message else ''
+        unit_obj.is_approved = False
+        unit_obj.save()
+        msg = f'تم رفض طلب إضافة وحدتكم للأسباب الآتية: {approver_message}'
+        EngagementModels.Notification.objects.create(unit_id=unit_id, message=msg, created_by_id=user_id)
+        result.is_success = True
+        result.msg = f'تم رفض طلب إضافة الوحدة وإرسال إشعار للمستخدم بنجاح'
+    except CoreModels.Unit.DoesNotExist as e:
+        result.msg = 'الوحدة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء رفض طلب إضافة الوحدة'
         result.data = {'errors': str(e)}
     finally:
         return result
