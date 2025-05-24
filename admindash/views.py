@@ -468,6 +468,26 @@ def toggle_hidden_consultation_view(request, consultation_id):
     return Response(result.to_dict(), status=status_code)
 # endregion
 
+# region User Reviews
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def read_reviews_view(request):
+    result = services.read_reviews_service()
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
 
+@api_view(['DELETE'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def delete_review_view(request, review_id):
+    result = services.delete_review_service(review_id)
+    status_code = (
+        status.HTTP_204_NO_CONTENT if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+# endregion
 
 

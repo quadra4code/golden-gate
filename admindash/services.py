@@ -1014,9 +1014,35 @@ def toggle_hidden_consultation_service(consultation_id, admin_obj):
         return result
 # endregion
 
+# region Clien Reviews
+def read_reviews_service():
+    result = ResultView()
+    try:
+        all_reviews = CoreModels.ClientReview.objects.all().order_by('-created_at')
+        serialized_all_reviews = AdminSerializers.ClientReviewSerializer(all_reviews, many=True)
+        result.data = serialized_all_reviews.data
+        result.msg = 'تم جلب تقييمات العملاء بنجاح'
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب تقييمات العملاء'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
 
-
-
-
-
+def delete_review_service(review_id):
+    result = ResultView()
+    try:
+        review_obj = CoreModels.ClientReview.objects.get(id=review_id)
+        review_obj.delete()
+        result.msg = 'تم حذف تقييم العميل بنجاح'
+        result.is_success = True
+    except CoreModels.ClientReview.DoesNotExist as e:
+        result.msg = 'تقييم العميل غير موجود'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حذف تقييم العميل'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+# endregion
 

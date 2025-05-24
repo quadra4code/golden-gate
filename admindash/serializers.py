@@ -198,3 +198,19 @@ class AllRequestSerializer(serializers.ModelSerializer):
     def get_total_price_obj(self, obj):
         return {'price_type': 'الإجمالى', 'price_value': f'{obj.unit.total_price:,.0f}', 'currency': obj.unit.get_total_price_currency_display()} if obj.unit.total_price else None
 
+class ClientReviewSerializer(serializers.ModelSerializer):
+    client_obj = serializers.SerializerMethodField(read_only=True)
+    class Meta:
+        model = CoreModels.ClientReview
+        fields = ['id', 'rate', 'review', 'created_at', 'client_obj']
+
+    def get_client_obj(self, obj):
+        return {
+            'id': obj.created_by.id,
+            'first_name': obj.created_by.first_name,
+            'last_name': obj.created_by.last_name,
+            'phone_number': obj.created_by.username,
+            'email': obj.created_by.email,
+            'email_confirmed': obj.created_by.email_confirmed,
+            'image': obj.created_by.image.url if obj.created_by.image else None,
+        }
