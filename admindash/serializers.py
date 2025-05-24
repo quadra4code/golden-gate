@@ -187,7 +187,7 @@ class AllRequestSerializer(serializers.ModelSerializer):
 
     def get_status_obj(self, obj):
         status_obj = REQUEST_STATUS_CHOICES.get(obj.status)
-        return {'code': obj.status, 'label': status_obj.get('name'), 'color': status_obj.get('color')}
+        return {'code': obj.status, 'name': status_obj.get('name'), 'color': status_obj.get('color')}
 
     def get_unit_status_obj(self, obj):
         return {'name': obj.unit.status.name, 'code': obj.unit.status.code, 'color': obj.unit.status.color}
