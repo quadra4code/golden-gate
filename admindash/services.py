@@ -477,7 +477,7 @@ def paginated_requests_service(request_data, staff_obj):
         serialized_requests = AdminSerializers.AllRequestSerializer(page.object_list, many=True)
         result.data = {
             "all": serialized_requests.data,
-            "request_statuses": [{'code': key, 'name': val.get("name"), 'color': val.get("color")} for key, val in REQUEST_STATUS_CHOICES.items()],
+            "request_statuses": [{'code': key, 'label': val.get("name"), 'color': val.get("color")} for key, val in REQUEST_STATUS_CHOICES.items()],
             "sales_staff": result.data['sales_staff'] if result.data else None,
             "pagination": {
                 "total_items": paginator.count,
