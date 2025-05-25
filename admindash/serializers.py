@@ -67,6 +67,11 @@ class AddStaffSerializer(serializers.ModelSerializer):
 
 class AllUnitSerializer(serializers.ModelSerializer):
     requests_count = serializers.IntegerField(read_only=True)
+    unit_type = serializers.CharField(source='unit_type.name', read_only=True)
+    project = serializers.CharField(source='project.name', read_only=True)
+    city = serializers.CharField(source='city.name', read_only=True)
+    unit_number = serializers.CharField(source='unit_number', read_only=True)
+    building_number = serializers.CharField(source='building_number', read_only=True)
     over_price_obj = serializers.SerializerMethodField(read_only=True)
     total_price_obj = serializers.SerializerMethodField(read_only=True)
     status_obj = serializers.SerializerMethodField(read_only=True)
@@ -74,7 +79,24 @@ class AllUnitSerializer(serializers.ModelSerializer):
     hidden = serializers.BooleanField(source='is_deleted', read_only=True)
     class Meta:
         model = CoreModels.Unit
-        fields = ['id', 'title', 'over_price_obj', 'total_price_obj', 'created_at', 'requests_count', 'status_obj', 'hidden', 'featured', 'is_approved', 'approver_message']
+        fields = [
+            'id',
+            'title',
+            'over_price_obj',
+            'total_price_obj',
+            'created_at',
+            'requests_count',
+            'unit_type',
+            'project',
+            'city',
+            'unit_number',
+            'building_number',
+            'status_obj',
+            'hidden',
+            'featured',
+            'is_approved',
+            'approver_message'
+        ]
 
     def get_over_price_obj(self, obj):
         return {'price_type': 'الأوفر', 'price_value': f'{obj.over_price:,.0f}', 'currency': obj.get_over_price_currency_display()} if obj.over_price else None
