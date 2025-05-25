@@ -464,8 +464,8 @@ def hard_delete_unit_service(unit_id):
 def home_reviews_service():
     result = ResultView()
     try:
-        top_reviews = models.ClientReview.objects.filter(is_deleted=False, rate__gte=4)[:15]
-        serialized_reviews = serializers.ReviewSerializer(top_reviews, many=True)
+        random_top_reviews = models.ClientReview.objects.filter(is_deleted=False, rate=5).order_by('?')[:15]
+        serialized_reviews = serializers.ReviewSerializer(random_top_reviews, many=True)
         result.data = serialized_reviews.data
         result.is_success = True
         result.msg = "Success"
@@ -589,6 +589,7 @@ def add_review_service(request_data, request_headers):
         token = request_headers.get('Authorization', '')
         token_decode_result = extract_payload_from_jwt(token=str.replace(token, 'Bearer ', ''))
         request_data['created_by_id'] = str(token_decode_result.get('user_id'))
+        request_data['is_deleted'] = True
         serialized_review = serializers.ReviewSerializer(data=request_data)
         if serialized_review.is_valid():
             serialized_review.save()
