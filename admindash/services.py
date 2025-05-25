@@ -582,9 +582,9 @@ def approve_unit_addition_service(unit_id, user_id):
 def disapprove_unit_addition_service(request_data, user_id):
     result = ResultView()
     try:
-        unit_obj = CoreModels.Unit.objects.get(id=unit_id)
         unit_id = request_data.get('unit_id', None)
         approver_message = request_data.get('message', None)
+        unit_obj = CoreModels.Unit.objects.get(id=unit_id)
         unit_obj.updated_by_id = user_id
         unit_obj.approver_message = approver_message if approver_message else ''
         unit_obj.is_approved = False
