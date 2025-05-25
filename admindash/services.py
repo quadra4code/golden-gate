@@ -396,6 +396,40 @@ def paginated_units_service(request_data):
     finally:
         return result
 
+def paginated_featured_units_service(request_data):
+    result = ResultView()
+    try:
+        page_number = int(request_data.get('page_number', 1))
+        page_size = int(request_data.get('page_size', 10))
+        all_units_q = CoreModels.Unit.objects.filter(is_deleted=False, featured=True).order_by('created_at')
+        all_units_count = all_units_q.count()
+        if all_units_count <= 0:
+            raise ValueError('لا يوجد وحدات مميزة متاحة للعرض')
+        paginator = Paginator(all_units_q, page_size)
+        page = paginator.get_page(page_number)
+        serialized_units = AdminSerializers.AllUnitSerializer(page.object_list, many=True)
+        result.data = {
+            "all": serialized_units.data,
+            "pagination": {
+                "total_items": paginator.count,
+                "total_pages": paginator.num_pages,
+                "current_page": page.number,
+                "has_next": page.has_next(),
+                "has_previous": page.has_previous()
+            }
+        }
+        result.is_success = True
+        result.msg = 'تم جلب بيانات الوحدات المميزة بنجاح'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+    except Exception as e:
+        logging.error(f'Unexpected error occurred: {str(e)}')
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات الوحدات المميزة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
 def paginated_units_addition_requests_service(request_data):
     result = ResultView()
     try:
@@ -1015,13 +1049,32 @@ def toggle_hidden_consultation_service(consultation_id, admin_obj):
 # endregion
 
 # region Client Reviews
-def read_reviews_service():
+def read_reviews_service(request_data):
     result = ResultView()
     try:
+        page_number = int(request_data.get('page_number', 1))
+        page_size = int(request_data.get('page_size', 10))
         all_reviews = CoreModels.ClientReview.objects.all().order_by('-created_at')
-        serialized_all_reviews = AdminSerializers.ClientReviewSerializer(all_reviews, many=True)
-        result.data = serialized_all_reviews.data
+        all_reviews_count = all_reviews.count()
+        if all_reviews_count <= 0:
+            raise ValueError('لا يوجد تقييمات متاحة للعرض')
+        paginator = Paginator(all_reviews, page_size)
+        page = paginator.get_page(page_number)
+        serialized_all_reviews = AdminSerializers.ClientReviewSerializer(page.object_list, many=True)
         result.msg = 'تم جلب تقييمات العملاء بنجاح'
+        result.is_success = True
+        result.data = {
+            "all": serialized_all_reviews.data,
+            "pagination": {
+                "total_items": paginator.count,
+                "total_pages": paginator.num_pages,
+                "current_page": page.number,
+                "has_next": page.has_next(),
+                "has_previous": page.has_previous()
+            }
+        }
+    except ValueError as ve:
+        result.msg = str(ve)
         result.is_success = True
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء جلب تقييمات العملاء'
