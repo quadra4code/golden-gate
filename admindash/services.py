@@ -1029,6 +1029,24 @@ def read_reviews_service():
     finally:
         return result
 
+def toggle_hidden_review_service(review_id, admin_id):
+    result = ResultView()
+    try:
+        review_obj = CoreModels.ClientReview.objects.get(id=review_id)
+        review_obj.is_deleted = not review_obj.is_deleted
+        review_obj.updated_by_id = admin_id
+        review_obj.save()
+        result.msg = f'تم {'إخفاء' if review_obj.is_deleted else 'إظهار'} تقييم العميل بنجاح'
+        result.is_success = True
+    except CoreModels.ClientReview.DoesNotExist as e:
+        result.msg = 'تقييم العميل غير موجود'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إخفاء / إظهار تقييم العميل'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
 def delete_review_service(review_id):
     result = ResultView()
     try:

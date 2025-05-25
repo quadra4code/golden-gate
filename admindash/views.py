@@ -479,6 +479,16 @@ def read_reviews_view(request):
     )
     return Response(result.to_dict(), status=status_code)
 
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def toggle_hidden_review_view(request, review_id):
+    result = services.read_reviews_service(review_id, request.user.id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
 @api_view(['DELETE'])
 @permission_classes([utils.IsManagerOrAdminUser])
 def delete_review_view(request, review_id):

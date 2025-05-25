@@ -200,9 +200,10 @@ class AllRequestSerializer(serializers.ModelSerializer):
 
 class ClientReviewSerializer(serializers.ModelSerializer):
     client_obj = serializers.SerializerMethodField(read_only=True)
+    is_hidden = serializers.BooleanField(source='is_deleted', read_only=True)
     class Meta:
         model = CoreModels.ClientReview
-        fields = ['id', 'rate', 'review', 'created_at', 'client_obj']
+        fields = ['id', 'rate', 'review', 'created_at', 'client_obj', 'is_hidden']
 
     def get_client_obj(self, obj):
         return {

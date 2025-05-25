@@ -44,5 +44,6 @@ urlpatterns = [
     path('delete-consultation/<int:consultation_id>', AdminViews.delete_consultation_view, name='delete_consultation'),
     path('toggle-hidden-consultation/<int:consultation_id>', AdminViews.toggle_hidden_consultation_view, name='toggle_hidden_consultation'),
     path('all-reviews', AdminViews.read_reviews_view, name='all_reviews'),
+    path('toggle-hidden-review/<int:review_id>', AdminViews.toggle_hidden_review_view, name='toggle_hidden_review'),
     path('delete-review/<int:review_id>', AdminViews.delete_review_view, name='delete_review'),
 ]
