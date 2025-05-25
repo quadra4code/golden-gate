@@ -295,26 +295,27 @@ def filter_paginated_units_service(request_data, user_id):
 def unit_details_service(unit_id, user_id):
     result = ResultView()
     try:
-        unit = models.Unit.objects.filter(is_deleted=False, id=unit_id).first()
+        unit = models.Unit.objects.filter(id=unit_id).first()
         if not unit:
             raise ValueError('الوحدة غير موجودة')
         same_city_units = (
-            models.Unit.objects.filter(is_deleted=False, city=unit.city)
+            models.Unit.objects.filter(is_deleted=False, is_approved=True, city=unit.city)
                 .exclude(id=unit_id).order_by('-updated_at')
-            or models.Unit.objects.filter(is_deleted=False, project=unit.project)
+            or models.Unit.objects.filter(is_deleted=False, is_approved=True, project=unit.project)
                 .exclude(id=unit_id).order_by('-updated_at')
-            or models.Unit.objects.filter(is_deleted=False, proposal=unit.proposal)
+            or models.Unit.objects.filter(is_deleted=False, is_approved=True, proposal=unit.proposal)
                 .exclude(id=unit_id).order_by('-updated_at')
-        )
-        unit.view_count += 1
-        unit.save()
-        if user_id:
-            UserInteraction.objects.update_or_create(
-            created_by_id=user_id,
-            unit=unit,
-            interaction_type='view',
-            defaults={'updated_at': timezone.now()}
-        )
+        ).order_by('?')
+        if (not unit.is_deleted and unit.is_approved):
+            unit.view_count += 1
+            unit.save()
+            if user_id:
+                UserInteraction.objects.update_or_create(
+                created_by_id=user_id,
+                unit=unit,
+                interaction_type='view',
+                defaults={'updated_at': timezone.now()}
+            )
         serialized_unit = serializers.UnitDetailsSerializer(unit)
         serialized_same_city_units = serializers.GetAllUnitsSerializer(same_city_units[:12], many=True)
         result.data = {

@@ -284,14 +284,15 @@ class UnitRequestSerializer(serializers.Serializer):
     created_by_id = serializers.IntegerField(min_value=1)
 
     def create(self, validated_data):
-            unit_obj = models.Unit.objects.filter(id=validated_data.get('unit_id')).first()
+            unit_obj = models.Unit.objects.filter(id=validated_data.get('unit_id'), is_deleted=False, is_approved=True).first()
             if unit_obj:
                 requested_status = models.Status.objects.filter(code=0).first()# For Requested
                 unit_obj.status = requested_status
                 unit_obj.save()
                 return models.UnitRequest.objects.create(**validated_data)
             else:
-                raise LookupError('الوحدة المطلوبة غير موجودة')
+                raise LookupError('هذه الوحدة غير متاحة للطلب حالياً')
+                # raise LookupError('الوحدة المطلوبة غير موجودة')
 
 class GetAllRequestsSerializer(serializers.ModelSerializer):
     unit_id = serializers.CharField(source='unit.id', read_only=True)
@@ -442,13 +443,14 @@ class UnitFavoriteSerializer(serializers.ModelSerializer):
         return {'id': obj.unit.status.id, 'name': obj.unit.status.name, 'code': obj.unit.status.code, 'color': obj.unit.status.color} if obj.unit.status else None
     
     def create(self, validated_data):
-        unit_obj = models.Unit.objects.filter(id=validated_data.get('unit')).first()
+        unit_obj = models.Unit.objects.filter(id=validated_data.get('unit'), is_delete=False, is_approved=True).first()
         if unit_obj:
             validated_data['unit_id'] = validated_data.pop('unit')
             validated_data['interaction_type'] = 'favorite'
             return UserInteraction.objects.create(**validated_data)
         else:
-            raise LookupError('الوحدة المطلوبة غير موجودة')
+            raise LookupError('هذه الوحدة غير متاحة للمفضلة حالياً')
+            # raise LookupError('الوحدة المطلوبة غير موجودة')
 
 class StatusSerializer(serializers.ModelSerializer):
     label = serializers.CharField(source="name")

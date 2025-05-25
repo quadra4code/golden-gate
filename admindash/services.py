@@ -401,7 +401,9 @@ def paginated_featured_units_service(request_data):
     try:
         page_number = int(request_data.get('page_number', 1))
         page_size = int(request_data.get('page_size', 10))
-        all_units_q = CoreModels.Unit.objects.filter(is_deleted=False, featured=True).order_by('created_at')
+        all_units_q = CoreModels.Unit.objects.annotate(
+            requests_count=Count('unitrequest')  # Assuming 'unitrequest' is the related name
+        ).filter(is_deleted=False, featured=True).order_by('created_at')
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد وحدات مميزة متاحة للعرض')
@@ -471,7 +473,9 @@ def paginated_soft_deleted_units_service(request_data):
     try:
         page_number = int(request_data.get('page_number', 1))
         page_size = int(request_data.get('page_size', 10))
-        all_units_q = CoreModels.Unit.objects.filter(is_deleted=True).order_by('-updated_at')
+        all_units_q = CoreModels.Unit.objects.annotate(
+            requests_count=Count('unitrequest')  # Assuming 'unitrequest' is the related name
+        ).filter(is_deleted=True).order_by('-updated_at')
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد وحدات محذوفة متاحة للعرض')
