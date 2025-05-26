@@ -138,7 +138,7 @@ class GetAllUnitsSerializer(serializers.ModelSerializer):
     approver_message = serializers.SerializerMethodField()
     class Meta:
         model = models.Unit
-        fields = ["id", "title", "city", "unit_type", "project", "area", "over_price_obj", "total_price_obj", "status", "main_image", "is_approved", "approver_message"]
+        fields = ["id", "title", "city", "unit_type", "project", "unit_number", "building_number", "area", "over_price_obj", "total_price_obj", "status", "main_image", "is_approved", "approver_message"]
 
     def get_main_image(self, obj):
         main_image = obj.unitimage_set.order_by("id").first()

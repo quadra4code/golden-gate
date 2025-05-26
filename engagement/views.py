@@ -17,7 +17,7 @@ def all_notifications_view(request):
     )
     return Response(result.to_dict(), status=status_code)
 
-@api_view(['PATCH'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def mark_read_view(request, notification_id):
     result = services.mark_read_service(request.user, notification_id)
@@ -28,7 +28,7 @@ def mark_read_view(request, notification_id):
     )
     return Response(result.to_dict(), status=status_code)
 
-@api_view(['PATCH'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def mark_all_read_view(request):
     result = services.mark_all_read_service(request.user)

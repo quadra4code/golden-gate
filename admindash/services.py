@@ -571,7 +571,7 @@ def approve_unit_addition_service(unit_id, user_id):
         unit_obj.is_approved = True
         unit_obj.updated_by_id = user_id
         unit_obj.save()
-        EngagementModels.Notification.objects.create(unit_id=unit_id, message='تم قبول طلب إضافةوحدتكم بنجاح', created_by_id=user_id)
+        EngagementModels.Notification.objects.create(unit_id=unit_id, message='تم قبول طلب إضافةوحدتكم بنجاح', created_by=unit_obj.created_by)
         result.is_success = True
         result.msg = 'تم قبول طلب إضافة الوحدة وإرسال إشعار للمستخدم بنجاح'
     except CoreModels.Unit.DoesNotExist as e:
@@ -594,7 +594,7 @@ def disapprove_unit_addition_service(request_data, user_id):
         unit_obj.is_approved = False
         unit_obj.save()
         msg = f'تم رفض طلب إضافة وحدتكم للأسباب الآتية: {approver_message}'
-        EngagementModels.Notification.objects.create(unit_id=unit_id, message=msg, created_by_id=user_id)
+        EngagementModels.Notification.objects.create(unit_id=unit_id, message=msg, created_by=unit_obj.created_by)
         result.is_success = True
         result.msg = f'تم رفض طلب إضافة الوحدة وإرسال إشعار للمستخدم بنجاح'
     except CoreModels.Unit.DoesNotExist as e:

@@ -21,7 +21,7 @@ def all_notifications_service(user_obj):
 def mark_read_service(user_obj, notification_id):
     result = ResultView()
     try:
-        notification = models.Notification.objects.get(notification_id=notification_id)
+        notification = models.Notification.objects.get(id=notification_id)
         notification.is_deleted = True
         result.msg = 'تم تعليم الإشعار كمقروء بنجاح'
         result.is_success = True
@@ -34,8 +34,9 @@ def mark_read_service(user_obj, notification_id):
 def mark_all_read_service(user_obj):
     result = ResultView()
     try:
-        notifications = models.Notification.objects.filter(created_by=user_obj, is_deleted=False).update(is_delete=True)
-        serialized_notifications = serializers.NotificationSerializer(notifications, many=True)
+        notifications = models.Notification.objects.filter(created_by=user_obj, is_deleted=False).update(is_deleted=True)
+        all_notifications = models.Notification.objects.filter(created_by=user_obj)
+        serialized_notifications = serializers.NotificationSerializer(all_notifications, many=True)
         result.msg = 'تم تعليم كل الإشعارات كمقروءة بنجاح'
         result.data = serialized_notifications.data
         result.is_success = True
