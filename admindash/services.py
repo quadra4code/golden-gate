@@ -360,12 +360,15 @@ def paginated_units_service(request_data):
     try:
         page_number = int(request_data.get('page_number', 1))
         page_size = int(request_data.get('page_size', 10))
+        status_id = request_data.get('status_id', None)
         all_units_q = CoreModels.Unit.objects.annotate(
             requests_count=Count('unitrequest')  # Assuming 'unitrequest' is the related name
         ).filter(is_deleted=False, is_approved=True).order_by('-requests_count')
+        if status_id is not None:
+            all_units_q = all_units_q.filter(status_id=status_id)
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
-            raise ValueError('لا يوجد طلبات وحدات متاحة للعرض')
+            raise ValueError('لا يوجد وحدات متاحة للعرض')
         total_pages = (all_units_count + page_size - 1) // page_size
         page_number = min(page_number, total_pages)
         start_index = (page_number - 1) * page_size
@@ -401,9 +404,12 @@ def paginated_featured_units_service(request_data):
     try:
         page_number = int(request_data.get('page_number', 1))
         page_size = int(request_data.get('page_size', 10))
+        status_id = request_data.get('status_id', None)
         all_units_q = CoreModels.Unit.objects.annotate(
             requests_count=Count('unitrequest')  # Assuming 'unitrequest' is the related name
         ).filter(is_deleted=False, featured=True).order_by('created_at')
+        if status_id is not None:
+            all_units_q = all_units_q.filter(status_id=status_id)
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد وحدات مميزة متاحة للعرض')
@@ -437,7 +443,10 @@ def paginated_units_addition_requests_service(request_data):
     try:
         page_number = int(request_data.get('page_number', 1))
         page_size = int(request_data.get('page_size', 10))
+        status_id = request_data.get('status_id', None)
         all_units_q = CoreModels.Unit.objects.filter(is_deleted=False, is_approved=None).order_by('created_at')
+        if status_id is not None:
+            all_units_q = all_units_q.filter(status_id=status_id)
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد وحدات جديدة متاحة للعرض')
@@ -473,9 +482,12 @@ def paginated_soft_deleted_units_service(request_data):
     try:
         page_number = int(request_data.get('page_number', 1))
         page_size = int(request_data.get('page_size', 10))
+        status_id = request_data.get('status_id', None)
         all_units_q = CoreModels.Unit.objects.annotate(
             requests_count=Count('unitrequest')  # Assuming 'unitrequest' is the related name
         ).filter(is_deleted=True).order_by('-updated_at')
+        if status_id is not None:
+            all_units_q = all_units_q.filter(status_id=status_id)
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد وحدات محذوفة متاحة للعرض')
@@ -613,7 +625,8 @@ def paginated_requests_service(request_data, staff_obj):
     try:
         page_number = request_data.get('page_number', 1)
         page_size = request_data.get('page_size', 12)
-        all_requests = CoreModels.UnitRequest.objects.filter()
+        status_id = request_data.get('status_id', None)
+        all_requests = CoreModels.UnitRequest.objects.filter(is_deleted=False)
         if staff_obj.groups.filter(name='Sales').exists() and not staff_obj.groups.filter(name__in=['Superuser', "Manager", "Admin"]):
             sales_requests = AdminModels.SalesRequest.objects.filter(sales=staff_obj).values_list('request_id', flat=True)
             all_requests = all_requests.filter(id__in=sales_requests)
@@ -623,6 +636,7 @@ def paginated_requests_service(request_data, staff_obj):
             result.data = {
                 "sales_staff": serialized_sales_staff.data
             }
+        all_requests = all_requests.filter(status=status_id) if status_id else all_requests
         paginator = Paginator(all_requests.order_by('-updated_at'), page_size)
         page = paginator.get_page(page_number)
         serialized_requests = AdminSerializers.AllRequestSerializer(page.object_list, many=True)
