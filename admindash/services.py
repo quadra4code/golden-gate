@@ -360,12 +360,25 @@ def paginated_units_service(request_data):
     try:
         page_number = int(request_data.get('page_number', 1))
         page_size = int(request_data.get('page_size', 10))
-        status_id = request_data.get('status_id', None)
+
+        filter_kwargs = {
+            'is_deleted': False,
+            'is_approved': True
+        }
+
+        optional_filters = {
+            'status_id': request_data.get('status_id', None),
+            'unit_type_id': request_data.get('unit_type_id', None),
+            'project_id': request_data.get('project_id', None),
+            'city_id': request_data.get('city_id', None)
+        }
+
+        filter_kwargs.update({
+            k: v for k, v in optional_filters.items() if v is not None
+        })
         all_units_q = CoreModels.Unit.objects.annotate(
             requests_count=Count('unitrequest')  # Assuming 'unitrequest' is the related name
-        ).filter(is_deleted=False, is_approved=True).order_by('-requests_count')
-        if status_id is not None:
-            all_units_q = all_units_q.filter(status_id=status_id)
+        ).filter(**filter_kwargs).order_by('-requests_count')
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد وحدات متاحة للعرض')
@@ -404,12 +417,25 @@ def paginated_featured_units_service(request_data):
     try:
         page_number = int(request_data.get('page_number', 1))
         page_size = int(request_data.get('page_size', 10))
-        status_id = request_data.get('status_id', None)
+        
+        filter_kwargs = {
+            'is_deleted': False,
+            'featured': True
+        }
+
+        optional_filters = {
+            'status_id': request_data.get('status_id', None),
+            'unit_type_id': request_data.get('unit_type_id', None),
+            'project_id': request_data.get('project_id', None),
+            'city_id': request_data.get('city_id', None)
+        }
+
+        filter_kwargs.update({
+            k: v for k, v in optional_filters.items() if v is not None
+        })
         all_units_q = CoreModels.Unit.objects.annotate(
             requests_count=Count('unitrequest')  # Assuming 'unitrequest' is the related name
-        ).filter(is_deleted=False, featured=True).order_by('created_at')
-        if status_id is not None:
-            all_units_q = all_units_q.filter(status_id=status_id)
+        ).filter(**filter_kwargs).order_by('created_at')
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد وحدات مميزة متاحة للعرض')
@@ -443,10 +469,23 @@ def paginated_units_addition_requests_service(request_data):
     try:
         page_number = int(request_data.get('page_number', 1))
         page_size = int(request_data.get('page_size', 10))
-        status_id = request_data.get('status_id', None)
-        all_units_q = CoreModels.Unit.objects.filter(is_deleted=False, is_approved=None).order_by('created_at')
-        if status_id is not None:
-            all_units_q = all_units_q.filter(status_id=status_id)
+        
+        filter_kwargs = {
+            'is_deleted': False,
+            'is_approved': None
+        }
+
+        optional_filters = {
+            'status_id': request_data.get('status_id', None),
+            'unit_type_id': request_data.get('unit_type_id', None),
+            'project_id': request_data.get('project_id', None),
+            'city_id': request_data.get('city_id', None)
+        }
+
+        filter_kwargs.update({
+            k: v for k, v in optional_filters.items() if v is not None
+        })
+        all_units_q = CoreModels.Unit.objects.filter(**filter_kwargs).order_by('created_at')
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد وحدات جديدة متاحة للعرض')
@@ -482,12 +521,24 @@ def paginated_soft_deleted_units_service(request_data):
     try:
         page_number = int(request_data.get('page_number', 1))
         page_size = int(request_data.get('page_size', 10))
-        status_id = request_data.get('status_id', None)
+        
+        filter_kwargs = {
+            'is_deleted': True
+        }
+
+        optional_filters = {
+            'status_id': request_data.get('status_id', None),
+            'unit_type_id': request_data.get('unit_type_id', None),
+            'project_id': request_data.get('project_id', None),
+            'city_id': request_data.get('city_id', None)
+        }
+
+        filter_kwargs.update({
+            k: v for k, v in optional_filters.items() if v is not None
+        })
         all_units_q = CoreModels.Unit.objects.annotate(
             requests_count=Count('unitrequest')  # Assuming 'unitrequest' is the related name
-        ).filter(is_deleted=True).order_by('-updated_at')
-        if status_id is not None:
-            all_units_q = all_units_q.filter(status_id=status_id)
+        ).filter(**filter_kwargs).order_by('-updated_at')
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد وحدات محذوفة متاحة للعرض')
@@ -583,7 +634,7 @@ def approve_unit_addition_service(unit_id, user_id):
         unit_obj.is_approved = True
         unit_obj.updated_by_id = user_id
         unit_obj.save()
-        EngagementModels.Notification.objects.create(unit_id=unit_id, message='تم قبول طلب إضافةوحدتكم بنجاح', created_by=unit_obj.created_by)
+        EngagementModels.Notification.objects.create(unit_id=unit_id, message='تم قبول طلب إضافة وحدتكم بنجاح', created_by=unit_obj.created_by)
         result.is_success = True
         result.msg = 'تم قبول طلب إضافة الوحدة وإرسال إشعار للمستخدم بنجاح'
     except CoreModels.Unit.DoesNotExist as e:
