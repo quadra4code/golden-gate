@@ -75,7 +75,8 @@ class AllUnitSerializer(serializers.ModelSerializer):
     over_price_obj = serializers.SerializerMethodField(read_only=True)
     total_price_obj = serializers.SerializerMethodField(read_only=True)
     status_obj = serializers.SerializerMethodField(read_only=True)
-    created_at = serializers.DateTimeField(format="%Y-%m-%d", read_only=True) # '%d-%b-%Y' => 01-jan-2025 | "%Y-%m-%d" => 2025-1-1
+    created_at = serializers.DateTimeField(format="%d-%m-%Y | %I:%M:%S %p", read_only=True) # '%d-%b-%Y' => 01-jan-2025 | "%Y-%m-%d" => 2025-1-1
+    updated_at = serializers.DateTimeField(format="%d-%m-%Y | %I:%M:%S %p", read_only=True) # '%d-%b-%Y' => 01-jan-2025 | "%Y-%m-%d" => 2025-1-1
     hidden = serializers.BooleanField(source='is_deleted', read_only=True)
     class Meta:
         model = CoreModels.Unit
@@ -85,6 +86,7 @@ class AllUnitSerializer(serializers.ModelSerializer):
             'over_price_obj',
             'total_price_obj',
             'created_at',
+            'updated_at',
             'requests_count',
             'unit_type',
             'project',

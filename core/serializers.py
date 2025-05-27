@@ -305,11 +305,12 @@ class GetAllRequestsSerializer(serializers.ModelSerializer):
     over_price_obj = serializers.SerializerMethodField(read_only=True)
     total_price_obj = serializers.SerializerMethodField(read_only=True)
     request_status_obj = serializers.SerializerMethodField(read_only=True)
-    created_at = serializers.DateTimeField(format="%Y-%m-%d", read_only=True)
+    created_at = serializers.DateTimeField(format="%d-%m-%Y | %I:%M:%S %p", read_only=True)
+    updated_at = serializers.DateTimeField(format="%d-%m-%Y | %I:%M:%S %p", read_only=True)
 
     class Meta:
         model = models.UnitRequest
-        fields = ['id', 'unit_id', 'unit_type', 'unit_title', 'unit_proposal', 'unit_project', 'unit_city', 'unit_area', 'over_price_obj', 'total_price_obj', 'request_status_obj', 'created_at']
+        fields = ['id', 'unit_id', 'unit_type', 'unit_title', 'unit_proposal', 'unit_project', 'unit_city', 'unit_area', 'over_price_obj', 'total_price_obj', 'request_status_obj', 'created_at', 'updated_at']
     
     def get_over_price_obj(self, obj):
         return {'price_type': 'الأوفر', 'price_value': f'{obj.unit.over_price:,.0f}', 'currency': obj.unit.get_over_price_currency_display()} if obj.unit.over_price else None
