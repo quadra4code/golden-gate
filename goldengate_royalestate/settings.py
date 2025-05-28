@@ -42,7 +42,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://golden-beit-dashboard.vercel.app",
     "https://goldenbeit.com",
     "https://dashboard.goldenbeit.com",
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "http://localhost:3001",
 ]
 
 # Application definition
