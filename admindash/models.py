@@ -5,9 +5,9 @@ from core.base_models import BaseEntity
 
 # Create your models here.
 
-class SalesRequest(BaseEntity):
-    sales = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    request = models.OneToOneField(UnitRequest, on_delete=models.CASCADE)
+# class SalesRequest(BaseEntity):
+#     sales = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+#     request = models.OneToOneField(UnitRequest, on_delete=models.CASCADE)
 
     # class Meta:
     #     constraints = [

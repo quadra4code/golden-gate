@@ -164,6 +164,7 @@ class AllRequestSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%d-%m-%Y | %I:%M:%S %p", read_only=True)
     updated_at = serializers.DateTimeField(format="%d-%m-%Y | %I:%M:%S %p", read_only=True)
     status_obj = serializers.SerializerMethodField(read_only=True)
+    sales_obj = serializers.SerializerMethodField(read_only=True)
     title = serializers.CharField(source='unit.title', read_only=True)
     unit_type = serializers.CharField(source='unit.unit_type.name', read_only=True)
     project = serializers.CharField(source='unit.project.name', read_only=True)
@@ -187,6 +188,7 @@ class AllRequestSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'status_obj',
+            'sales_obj',
             'title',
             'unit_type',
             'project',
@@ -229,6 +231,12 @@ class AllRequestSerializer(serializers.ModelSerializer):
     
     def get_total_price_obj(self, obj):
         return {'price_type': 'الإجمالى', 'price_value': f'{obj.unit.total_price:,.0f}', 'currency': obj.unit.get_total_price_currency_display()} if obj.unit.total_price else None
+
+    def get_sales_obj(self, obj):
+        return {'id': obj.sales_staff.id, 'name': obj.sales_staff.get_full_name()} if obj.sales_staff else None
+        # sales_staff = obj.salesrequest_set.first()
+        # return {'id': sales_staff.id, 'name': sales_staff.get_full_name()} if sales_staff else None
+
 
 class ClientReviewSerializer(serializers.ModelSerializer):
     client_obj = serializers.SerializerMethodField(read_only=True)

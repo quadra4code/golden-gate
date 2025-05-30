@@ -692,8 +692,9 @@ def paginated_requests_service(request_data, staff_obj):
         })
         all_requests = CoreModels.UnitRequest.objects.filter(**filter_kwargs)
         if staff_obj.groups.filter(name='Sales').exists() and not staff_obj.groups.filter(name__in=['Superuser', "Manager", "Admin"]):
-            sales_requests = AdminModels.SalesRequest.objects.filter(sales=staff_obj).values_list('request_id', flat=True)
-            all_requests = all_requests.filter(id__in=sales_requests)
+            all_requests = all_requests.filter(sales_staff=staff_obj)
+            # sales_requests = AdminModels.SalesRequest.objects.filter(sales=staff_obj).values_list('request_id', flat=True)
+            # all_requests = all_requests.filter(id__in=sales_requests)
         else:
             sales_staff = UsersModels.CustomUser.objects.filter(groups__name="Sales")
             serialized_sales_staff = AdminSerializers.GetAllUserSerializer(sales_staff, many=True)
@@ -752,13 +753,28 @@ def change_request_status_service(request_data, admin_obj):
 def assign_sales_request_service(request_data, admin_obj):
     result = ResultView()
     try:
-        _, created = AdminModels.SalesRequest.objects.update_or_create(
-            sales_id=request_data.get('sales_id'),
-            request_id=request_data.get('request_id'),
-            created_by=admin_obj
-        )
+        # _, created = AdminModels.SalesRequest.objects.update_or_create(
+        #     sales_id=request_data.get('sales_id'),
+        #     request_id=request_data.get('request_id'),
+        #     created_by=admin_obj
+        # )
+        sales_id = request_data.get('sales_id')
+        request_id = request_data.get('request_id')
+        request_obj = CoreModels.UnitRequest.objects.get(id=request_id)
+        request_obj.sales_staff_id = sales_id
+        request_obj.updated_by = admin_obj
+        request_obj.save()
+        result.data = {
+            "sales_obj": {
+                "id": request_obj.sales_staff.sales.id,
+                "name": request_obj.sales_staff.sales.get_full_name()
+            }
+        }
         result.msg = f'تم تعيين {_.sales.get_full_name()} على الطلب بنجاح'
         result.is_success = True
+    except CoreModels.UnitRequest.DoesNotExist as e:
+        result.msg = 'هذا الطلب غير موجود'
+        result.data = {'errors': str(e)}
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء تعيين موظف المبيعات على الطلب'
         result.data = {'errors': str(e)}

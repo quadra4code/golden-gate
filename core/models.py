@@ -3,6 +3,7 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.forms import ValidationError
 from core.base_models import BaseEntity
+from users.models import CustomUser
 from cloudinary.models import CloudinaryField
 from cloudinary import uploader
 
@@ -149,6 +150,7 @@ class UnitRequest(BaseEntity):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
     status = models.CharField(max_length=1, default='0')
     status_msg = models.CharField(max_length=400, blank=True, null=True)
+    sales_staff = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='sales_staff_requests')
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['created_by', 'unit'], name='created_by_unit_request_unique_constraint', violation_error_message='لقد طلبت هذه الوحدة من قبل ولا يمكنك طلبها مره أخرى')
