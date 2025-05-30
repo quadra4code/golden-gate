@@ -676,8 +676,21 @@ def paginated_requests_service(request_data, staff_obj):
     try:
         page_number = request_data.get('page_number', 1)
         page_size = request_data.get('page_size', 12)
-        status_id = request_data.get('status_id', None)
-        all_requests = CoreModels.UnitRequest.objects.filter(is_deleted=False)
+        filter_kwargs = {
+            'is_deleted': False
+        }
+
+        optional_filters = {
+            'status': request_data.get('status_id', None),
+            'unit__unit_type_id': request_data.get('unit_type_id', None),
+            'unit__project_id': request_data.get('project_id', None),
+            'unit__city_id': request_data.get('city_id', None)
+        }
+
+        filter_kwargs.update({
+            k: v for k, v in optional_filters.items() if v is not None
+        })
+        all_requests = CoreModels.UnitRequest.objects.filter(**filter_kwargs)
         if staff_obj.groups.filter(name='Sales').exists() and not staff_obj.groups.filter(name__in=['Superuser', "Manager", "Admin"]):
             sales_requests = AdminModels.SalesRequest.objects.filter(sales=staff_obj).values_list('request_id', flat=True)
             all_requests = all_requests.filter(id__in=sales_requests)
@@ -687,7 +700,6 @@ def paginated_requests_service(request_data, staff_obj):
             result.data = {
                 "sales_staff": serialized_sales_staff.data
             }
-        all_requests = all_requests.filter(status=status_id) if status_id else all_requests
         paginator = Paginator(all_requests.order_by('-updated_at'), page_size)
         page = paginator.get_page(page_number)
         serialized_requests = AdminSerializers.AllRequestSerializer(page.object_list, many=True)
@@ -745,7 +757,7 @@ def assign_sales_request_service(request_data, admin_obj):
             request_id=request_data.get('request_id'),
             created_by=admin_obj
         )
-        result.msg = f'تم {'تعيين' if created else 'تحديث'} موظف المبيعات على الطلب بنجاح'
+        result.msg = f'تم تعيين {_.sales.get_full_name()} على الطلب بنجاح'
         result.is_success = True
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء تعيين موظف المبيعات على الطلب'
