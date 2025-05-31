@@ -766,11 +766,11 @@ def assign_sales_request_service(request_data, admin_obj):
         request_obj.save()
         result.data = {
             "sales_obj": {
-                "id": request_obj.sales_staff.sales.id,
-                "name": request_obj.sales_staff.sales.get_full_name()
+                "id": request_obj.sales_staff.id,
+                "name": request_obj.sales_staff.get_full_name()
             }
         }
-        result.msg = f'تم تعيين {_.sales.get_full_name()} على الطلب بنجاح'
+        result.msg = f'تم تعيين {request_obj.sales_staff.get_full_name()} على الطلب بنجاح'
         result.is_success = True
     except CoreModels.UnitRequest.DoesNotExist as e:
         result.msg = 'هذا الطلب غير موجود'
