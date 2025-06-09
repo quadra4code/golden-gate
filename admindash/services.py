@@ -696,7 +696,7 @@ def paginated_requests_service(request_data, staff_obj):
             # sales_requests = AdminModels.SalesRequest.objects.filter(sales=staff_obj).values_list('request_id', flat=True)
             # all_requests = all_requests.filter(id__in=sales_requests)
         else:
-            sales_staff = UsersModels.CustomUser.objects.filter(groups__name="Sales")
+            sales_staff = UsersModels.CustomUser.objects.filter(groups__name="Sales").exclude(is_superuser=True)
             serialized_sales_staff = AdminSerializers.GetAllUserSerializer(sales_staff, many=True)
             result.data = {
                 "sales_staff": serialized_sales_staff.data
