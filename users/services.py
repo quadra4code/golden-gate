@@ -25,7 +25,7 @@ def register_user_service(registration_data):
             if serialized_new_user_data.is_valid():
                 new_user = serialized_new_user_data.save()
                 UserPhoneNumber.objects.create(
-                    phone_number=phone_as_username,
+                    phone_number=f"+{phone_as_username}",
                     is_main_number=True,
                     created_by=new_user
                 )

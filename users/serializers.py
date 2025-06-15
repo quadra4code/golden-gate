@@ -32,6 +32,13 @@ class RegisterSerializer(serializers.ModelSerializer):
                 validated_data['referred_by'] = referrer
             except CustomUser.DoesNotExist:
                 raise serializers.ValidationError({"referral_code": "كود الدعوة غير صالح"})
+
+        phone_number = validated_data['username']
+        if phone_number:
+          if phone_number.startswith("9"):
+            validated_data["username"] = phone_number[3:]
+          elif phone_number.startswith("20"):
+            validated_data["username"] = phone_number[1:]
         new_user = super().create(validated_data)
         if interested_city_id:
             UserInteraction.objects.create(created_by=new_user, city_id=interested_city_id, interaction_type='register')
