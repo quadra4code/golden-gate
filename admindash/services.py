@@ -11,6 +11,7 @@ from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import StringAgg
 from django.contrib.auth import authenticate
 from django.core.paginator import Paginator
+from django.utils import timezone
 from users.utils import generate_jwt_token
 from admindash import utils
 import logging
@@ -104,6 +105,9 @@ def staff_login_service(request_data):
             elif not user_to_auth.is_active:
                 result.msg = 'الحساب غير مفعل؛ برجاء التواصل مع الدعم'
             else:
+                # Update last_login field
+                user_to_auth.last_login = timezone.now()
+                user_to_auth.save(update_fields=['last_login'])
                 logger.info(f"User {user_to_auth.username} logged in successfully.")
                 token_obj = generate_jwt_token(user_to_auth)
                 result.msg = 'تم تسجيل الدخول بنجاح'

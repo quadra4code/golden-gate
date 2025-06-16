@@ -1,4 +1,5 @@
 from django.http import QueryDict
+from django.utils import timezone
 from users.models import CustomUser, UserPhoneNumber
 from django.contrib.auth.models import Group
 from core.base_models import ResultView
@@ -99,6 +100,9 @@ def login_user_service(login_data):
                 elif not user_to_auth.is_active:
                     result.msg = 'الحساب غير مفعل؛ برجاء التواصل مع الدعم'
                 else:
+                    # Update last_login field
+                    user_to_auth.last_login = timezone.now()
+                    user_to_auth.save(update_fields=['last_login'])
                     logger.info(f"User {user_to_auth.username} logged in successfully.")
                     token_obj = generate_jwt_token(user_to_auth)
                     result.msg = 'تم تسجيل الدخول بنجاح'
