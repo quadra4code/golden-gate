@@ -36,7 +36,7 @@ def propose_unit_service(request_data, client_id):
                 unit_type = 'قطعة أرض' if request_data['unit_type_id'] == "1" else "وحدة سكنية"
                 notification_msg = f'تم إضافة {unit_type} جديدة فى مدينة {city.name}'
                 notifications = [
-                    Notification(created_by_id=user_id, message=notification_msg, city=city, unit_id=serialized_unit['id'])
+                    Notification(created_by_id=user_id, message=notification_msg, city=city, unit_id=serialized_unit.data['id'])
                     for user_id in interested_user_ids
                 ]
                 Notification.objects.bulk_create(notifications)
