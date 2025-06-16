@@ -3,24 +3,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from admindash import services
 from admindash import utils
-from django.core.serializers import serialize
-from django.http import HttpResponse
-from core.models import Unit, UnitImage
-from users.models import CustomUser
 
 # Create your views here.
-def export_units_json(request):
-    units = CustomUser.objects.all()
-    data = serialize('json', units, indent=2, use_natural_foreign_keys=True)
-    response = HttpResponse(data, content_type='application/json')
-    response['Content-Disposition'] = 'attachment; filename="units_export.json"'
-    return response
-def export_images_json(request):
-    units = UnitImage.objects.all()
-    data = serialize('json', units, indent=2, use_natural_foreign_keys=True)
-    response = HttpResponse(data, content_type='application/json')
-    response['Content-Disposition'] = 'attachment; filename="units_export.json"'
-    return response
 
 # region Statistics
 @api_view(['GET'])
