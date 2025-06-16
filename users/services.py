@@ -14,19 +14,21 @@ def register_user_service(registration_data):
     result = ResultView()
     try:
         phone_as_username = registration_data.get("username", '')
+        cleaned_phone = phone_as_username[1:] if phone_as_username.startswith('2') else phone_as_username[3:] if phone_as_username.startswith('9') else phone_as_username
         email = registration_data.get("email", '')
         password = registration_data.get("password", '')
         confirm_password = registration_data.get("confirm_password", '')
         if not password or password != confirm_password:
             result.msg = f"{'كلمتا السر غير متطابقتين' if password else 'كلمة السر مطلوبة'}"
-        elif UserPhoneNumber.objects.filter(phone_number=phone_as_username).exists() or CustomUser.objects.filter(username=phone_as_username, email=email).exists():
+        elif UserPhoneNumber.objects.filter(phone_number=phone_as_username).exists() or CustomUser.objects.filter(username=cleaned_phone, email=email).exists():
             result.msg = 'هذا المستخدم موجود بالفعل'
         else:
+            registration_data['username'] = cleaned_phone
             serialized_new_user_data = RegisterSerializer(data=registration_data) # here we should set the is_active to false and turn it on when verified phone number
             if serialized_new_user_data.is_valid():
                 new_user = serialized_new_user_data.save()
                 UserPhoneNumber.objects.create(
-                    phone_number=f"+{phone_as_username}",
+                    phone_number=phone_as_username,
                     is_main_number=True,
                     created_by=new_user
                 )
@@ -58,7 +60,7 @@ def register_user_service(registration_data):
             # print(response.text)
                 client_group, created = Group.objects.get_or_create(name='Client')
                 new_user.groups.add(client_group)
-                user_to_auth = authenticate(username=phone_as_username, password=password)
+                user_to_auth = authenticate(username=cleaned_phone, password=password)
                 token_obj = generate_jwt_token(user_to_auth)
                 result.data = {
                     'refresh_token': token_obj.get('refresh'),
