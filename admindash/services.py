@@ -475,10 +475,9 @@ def paginated_units_addition_requests_service(request_data):
         page_size = int(request_data.get('page_size', 10))
         
         filter_kwargs = {
-            'is_deleted': False,
-            'is_approved': None
+            'is_deleted': False
         }
-
+        is_approved_condition = Q(is_approved__isnull=True) | Q(is_approved=False)
         optional_filters = {
             'status_id': request_data.get('status_id', None),
             'unit_type_id': request_data.get('unit_type_id', None),
@@ -489,7 +488,7 @@ def paginated_units_addition_requests_service(request_data):
         filter_kwargs.update({
             k: v for k, v in optional_filters.items() if v is not None
         })
-        all_units_q = CoreModels.Unit.objects.filter(**filter_kwargs).order_by('created_at')
+        all_units_q = CoreModels.Unit.objects.filter(is_approved_condition, **filter_kwargs).order_by('created_at')
         all_units_count = all_units_q.count()
         if all_units_count <= 0:
             raise ValueError('لا يوجد وحدات جديدة متاحة للعرض')
