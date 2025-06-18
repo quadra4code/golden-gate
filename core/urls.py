@@ -1,5 +1,8 @@
 from django.urls import path
 from core import views as CoreViews
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('propose-unit', CoreViews.propose_unit_view, name='propose_unit'),
     path('request-unit', CoreViews.request_unit_view, name='request_unit'),
@@ -27,3 +30,6 @@ urlpatterns = [
     path('list-paginated-favorites', CoreViews.list_paginated_favorites_view, name='list_paginated_favorites'),
     path('delete-favorite/<int:favorite_id>', CoreViews.delete_favorite_view, name='delete_favorite'),
 ]
+
+if settings.DEBUG:
+  urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

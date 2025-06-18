@@ -77,6 +77,7 @@ class Unit(BaseEntity):
     ]
     unit_type = models.ForeignKey(UnitType, on_delete=models.PROTECT)
     proposal = models.ForeignKey(Proposal, on_delete=models.PROTECT, null=True)
+    proposal_str = models.CharField(max_length=255, blank=True, null=True)
     project = models.ForeignKey(Project, on_delete=models.PROTECT)
     city = models.ForeignKey(City, on_delete=models.PROTECT)
     region = models.ForeignKey(Region, on_delete=models.PROTECT, null=True)

@@ -43,6 +43,7 @@ class CreateUnitSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=False, allow_null=True)
     unit_type_id = serializers.CharField(max_length=1)
     proposal_id = serializers.CharField(max_length=3, required=False, allow_null=True)
+    proposal_str = serializers.CharField(max_length=255, required=False, allow_null=True, allow_blank=True)
     project_id = serializers.CharField(max_length=3)
     city_id = serializers.CharField(max_length=2)
     unit_number = serializers.CharField(max_length=5)
@@ -181,6 +182,7 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
             "title",
             "unit_type",
             "proposal",
+            "proposal_str",
             "project",
             "city",
             "area",
@@ -239,7 +241,7 @@ class UnitDetailsSerializer(serializers.ModelSerializer):
 class UpdateUnitSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     unit_type_id = serializers.CharField(max_length=1)
-    proposal_id = serializers.CharField(source='proposal.id')
+    # proposal_id = serializers.CharField(source='proposal.id')
     project_id = serializers.CharField(source='project.id')
     city_id = serializers.CharField(source='city.id')
     images = serializers.SerializerMethodField(read_only=True)
@@ -248,7 +250,8 @@ class UpdateUnitSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'unit_type_id',
-            'proposal_id',
+            # 'proposal_id',
+            'proposal_str',
             'project_id',
             'city_id',
             'unit_number',
@@ -299,6 +302,7 @@ class GetAllRequestsSerializer(serializers.ModelSerializer):
     unit_type = serializers.CharField(source='unit.unit_type.name', read_only=True)
     unit_title = serializers.CharField(source='unit.title', read_only=True)
     unit_proposal = serializers.CharField(source='unit.proposal.name', read_only=True)
+    unit_proposal_str = serializers.CharField(source='unit.proposal_str', read_only=True)
     unit_project = serializers.CharField(source='unit.project.name', read_only=True)
     unit_city = serializers.CharField(source='unit.city.name', read_only=True)
     unit_area = serializers.CharField(source='unit.area', read_only=True)
@@ -310,7 +314,7 @@ class GetAllRequestsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.UnitRequest
-        fields = ['id', 'unit_id', 'unit_type', 'unit_title', 'unit_proposal', 'unit_project', 'unit_city', 'unit_area', 'over_price_obj', 'total_price_obj', 'request_status_obj', 'created_at', 'updated_at']
+        fields = ['id', 'unit_id', 'unit_type', 'unit_title', 'unit_proposal', 'unit_proposal_str', 'unit_project', 'unit_city', 'unit_area', 'over_price_obj', 'total_price_obj', 'request_status_obj', 'created_at', 'updated_at']
     
     def get_over_price_obj(self, obj):
         return {'price_type': 'الأوفر', 'price_value': f'{obj.unit.over_price:,.0f}', 'currency': obj.unit.get_over_price_currency_display()} if obj.unit.over_price else None

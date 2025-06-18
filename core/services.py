@@ -305,6 +305,8 @@ def unit_details_service(unit_id, user_id):
                 .exclude(id=unit_id).order_by('-updated_at')
             or models.Unit.objects.filter(is_deleted=False, is_approved=True, proposal=unit.proposal)
                 .exclude(id=unit_id).order_by('-updated_at')
+            or models.Unit.objects.filter(is_deleted=False, is_approved=True, proposal_str=unit.proposal_str)
+                .exclude(id=unit_id).order_by('-updated_at')
         ).order_by('?')
         if (not unit.is_deleted and unit.is_approved):
             unit.view_count += 1

@@ -90,6 +90,7 @@ class AllUnitSerializer(serializers.ModelSerializer):
             'requests_count',
             'unit_type',
             'project',
+            'proposal_str',
             'city',
             'unit_number',
             'building_number',

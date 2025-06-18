@@ -1,5 +1,8 @@
 from django.urls import path
 from admindash import views as AdminViews
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('main-statistics', AdminViews.main_statistics_view, name='main_statistics'),
     path('active-visitors-count', AdminViews.active_visitors_count_view, name='active_visitors_count'),
@@ -48,3 +51,6 @@ urlpatterns = [
     path('toggle-hidden-review/<int:review_id>', AdminViews.toggle_hidden_review_view, name='toggle_hidden_review'),
     path('delete-review/<int:review_id>', AdminViews.delete_review_view, name='delete_review'),
 ]
+
+if settings.DEBUG:
+  urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
