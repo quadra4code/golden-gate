@@ -72,6 +72,7 @@ class AllUnitSerializer(serializers.ModelSerializer):
     city = serializers.CharField(source='city.name', read_only=True)
     unit_number = serializers.CharField(read_only=True)
     building_number = serializers.CharField(read_only=True)
+    floor = serializers.CharField(source="get_floor_display", read_only=True)
     over_price_obj = serializers.SerializerMethodField(read_only=True)
     total_price_obj = serializers.SerializerMethodField(read_only=True)
     status_obj = serializers.SerializerMethodField(read_only=True)
@@ -94,6 +95,7 @@ class AllUnitSerializer(serializers.ModelSerializer):
             'city',
             'unit_number',
             'building_number',
+            'floor',
             'status_obj',
             'hidden',
             'featured',
