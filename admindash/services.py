@@ -475,15 +475,22 @@ def paginated_units_addition_requests_service(request_data):
         page_size = int(request_data.get('page_size', 10))
         
         filter_kwargs = {
-            'is_deleted': False
+            'is_deleted': False,
+            'is_approved__isnull': True
         }
-        is_approved_condition = Q(is_approved__isnull=True) | Q(is_approved=False)
+        # is_approved_condition = Q(is_approved__isnull=True) | Q(is_approved=False)
         optional_filters = {
             'status_id': request_data.get('status_id', None),
             'unit_type_id': request_data.get('unit_type_id', None),
             'project_id': request_data.get('project_id', None),
             'city_id': request_data.get('city_id', None)
         }
+
+        approval_filter = request_data.get('approval_filter', None)
+        if approval_filter == "new_only":
+            optional_filters['approver_message__isnull'] = True
+        elif approval_filter == 'resubmitted':
+            optional_filters['approver_message__isnull'] = False
 
         filter_kwargs.update({
             k: v for k, v in optional_filters.items() if v is not None
@@ -515,6 +522,58 @@ def paginated_units_addition_requests_service(request_data):
     except Exception as e:
         logging.error(f'Unexpected error occurred: {str(e)}')
         result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات الوحدات الجديدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def paginated_rejected_units_service(request_data):
+    result = ResultView()
+    try:
+        page_number = int(request_data.get('page_number', 1))
+        page_size = int(request_data.get('page_size', 10))
+        
+        filter_kwargs = {
+            'is_deleted': False,
+            'is_approved': False
+        }
+        # is_approved_condition = Q(is_approved__isnull=True) | Q(is_approved=False)
+        optional_filters = {
+            'status_id': request_data.get('status_id', None),
+            'unit_type_id': request_data.get('unit_type_id', None),
+            'project_id': request_data.get('project_id', None),
+            'city_id': request_data.get('city_id', None)
+        }
+
+        filter_kwargs.update({
+            k: v for k, v in optional_filters.items() if v is not None
+        })
+        all_units_q = CoreModels.Unit.objects.filter(**filter_kwargs).order_by('created_at')
+        all_units_count = all_units_q.count()
+        if all_units_count <= 0:
+            raise ValueError('لا يوجد وحدات مرفوضة متاحة للعرض')
+        paginator = Paginator(all_units_q, page_size)
+        page = paginator.get_page(page_number)
+        serialized_units = AdminSerializers.AllUnitSerializer(page.object_list, many=True)
+        # statuses = CoreSerializers.StatusSerializer(CoreModels.Status.objects.all(), many=True)
+        result.data = {
+            "all": serialized_units.data,
+            # "statuses": statuses.data,
+            "pagination": {
+                "total_items": paginator.count,
+                "total_pages": paginator.num_pages,
+                "current_page": page.number,
+                "has_next": page.has_next(),
+                "has_previous": page.has_previous()
+            }
+        }
+        result.is_success = True
+        result.msg = 'تم جلب بيانات الوحدات المرفوضة بنجاح'
+    except ValueError as ve:
+        result.msg = str(ve)
+        result.is_success = True
+    except Exception as e:
+        logging.error(f'Unexpected error occurred: {str(e)}')
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب بيانات الوحدات المرفوضة'
         result.data = {'errors': str(e)}
     finally:
         return result
@@ -608,6 +667,25 @@ def toggle_unit_deleted_service(unit_id, user_id):
         result.data = {'errors': str(e)}
     except Exception as e:
         result.msg = 'حدث خطأ غير متوقع أثناء إخفاء الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def reset_unit_approval_service(unit_id, user_id):
+    result = ResultView()
+    try:
+        unit_obj = CoreModels.Unit.objects.get(id=unit_id)
+        unit_obj.is_approved = None
+        unit_obj.approver_message = None
+        unit_obj.updated_by_id = user_id
+        unit_obj.save()
+        result.is_success = True
+        result.msg = f'تم إرجاع حالة الوحدة لانتظار المراجعة بنجاح'
+    except CoreModels.Unit.DoesNotExist as e:
+        result.msg = 'الوحدة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إرجاع حالة الوحدة لانتظار المراجعة'
         result.data = {'errors': str(e)}
     finally:
         return result
