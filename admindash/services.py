@@ -383,25 +383,33 @@ def paginated_units_service(request_data):
         all_units_q = CoreModels.Unit.objects.annotate(
             requests_count=Count('unitrequest')  # Assuming 'unitrequest' is the related name
         ).filter(**filter_kwargs).order_by('-requests_count')
-        all_units_count = all_units_q.count()
-        if all_units_count <= 0:
-            raise ValueError('لا يوجد وحدات متاحة للعرض')
-        total_pages = (all_units_count + page_size - 1) // page_size
-        page_number = min(page_number, total_pages)
-        start_index = (page_number - 1) * page_size
-        end_index = start_index + page_size
-        all_units_q = all_units_q[start_index:end_index]
-        serialized_units = AdminSerializers.AllUnitSerializer(all_units_q, many=True)
+        search_keyword = request_data.get('search_keyword')
+        if search_keyword:
+            search_filter = Q(title__icontains=search_keyword) | Q(proposal_str__icontains=search_keyword) | Q(city__name__icontains=search_keyword) | \
+            Q(project__name__icontains=search_keyword) | Q(unit_type__name__icontains=search_keyword) | Q(unit_number__icontains=search_keyword) |\
+            Q(building_number__icontains=search_keyword) | Q(floor__icontains=search_keyword) | Q(created_by__first_name__icontains=search_keyword) | Q(created_by__last_name__icontains=search_keyword)
+            all_units_q = all_units_q.filter(search_filter)
+        # all_units_count = all_units_q.count()
+        # if all_units_count <= 0:
+        #     raise ValueError('لا يوجد وحدات متاحة للعرض')
+        # total_pages = (all_units_count + page_size - 1) // page_size
+        # page_number = min(page_number, total_pages)
+        # start_index = (page_number - 1) * page_size
+        # end_index = start_index + page_size
+        # all_units_q = all_units_q[start_index:end_index]
+        paginator = Paginator(all_units_q, page_size)
+        page = paginator.get_page(page_number)
+        serialized_units = AdminSerializers.AllUnitSerializer(page.object_list, many=True)
         statuses = CoreSerializers.StatusSerializer(CoreModels.Status.objects.all(), many=True)
         result.data = {
             "all": serialized_units.data,
             "statuses": statuses.data,
-            "pagination": {
-                "total_items": all_units_count,
-                "total_pages": total_pages,
-                "current_page": page_number,
-                "has_next": page_number < total_pages,
-                "has_previous": page_number > 1
+                "pagination": {
+                "total_items": paginator.count,
+                "total_pages": paginator.num_pages,
+                "current_page": page.number,
+                "has_next": page.has_next(),
+                "has_previous": page.has_previous()
             }
         }
         result.is_success = True
@@ -496,9 +504,16 @@ def paginated_units_addition_requests_service(request_data):
             k: v for k, v in optional_filters.items() if v is not None
         })
         all_units_q = CoreModels.Unit.objects.filter(is_approved_condition, **filter_kwargs).order_by('created_at')
-        all_units_count = all_units_q.count()
-        if all_units_count <= 0:
-            raise ValueError('لا يوجد وحدات جديدة متاحة للعرض')
+        search_keyword = request_data.get('search_keyword')
+        if search_keyword:
+            search_filter = Q(title__icontains=search_keyword) | Q(proposal_str__icontains=search_keyword) | Q(city__name__icontains=search_keyword) | \
+            Q(project__name__icontains=search_keyword) | Q(unit_type__name__icontains=search_keyword) | Q(unit_number__icontains=search_keyword) |\
+            Q(building_number__icontains=search_keyword) | Q(floor__icontains=search_keyword) | Q(created_by__first_name__icontains=search_keyword) |\
+            Q(created_by__last_name__icontains=search_keyword)
+            all_units_q = all_units_q.filter(search_filter)
+        # all_units_count = all_units_q.count()
+        # if all_units_count <= 0:
+        #     raise ValueError('لا يوجد وحدات جديدة متاحة للعرض')
         paginator = Paginator(all_units_q, page_size)
         page = paginator.get_page(page_number)
         serialized_units = AdminSerializers.AllUnitSerializer(page.object_list, many=True)
