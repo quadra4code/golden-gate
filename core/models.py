@@ -167,8 +167,8 @@ class ClientReview(BaseEntity):
     #     ]
 
 class Article(BaseEntity):
-    title = models.CharField(max_length=250)
-    body = models.CharField(max_length=2000)
+    title = models.CharField(max_length=400)
+    body = models.CharField(max_length=5000)
     class Meta:
         ordering = ['id']
 
