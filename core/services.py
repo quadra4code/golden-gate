@@ -9,7 +9,7 @@ from engagement.models import UserInteraction
 from users.utils import extract_payload_from_jwt
 from users.models import CustomUser
 from django.db.models import Min, Max, F, Value, DecimalField, Q
-from django.db.models.functions import Least, Greatest, Coalesce
+from django.db.models.functions import Least, Greatest, Coalesce, Length
 from django.core.paginator import Paginator
 import logging
 
@@ -482,8 +482,21 @@ def home_articles_service():
     result = ResultView()
     try:
         articles = models.Article.objects.filter(is_deleted=False)
-        serialized_articless = serializers.ArticleSerializer(articles, many=True)
-        result.data = serialized_articless.data
+        # Calculate the length of each body field and find the minimum
+        min_body_length = articles.annotate(
+            body_length=Length('body')
+        ).aggregate(
+            min_length=Min('body_length')
+        )['min_length']
+        main_article = articles.filter(is_main=True).first()
+        remaining_articles = articles.exclude(is_main=True)
+        serialized_articles = serializers.ArticleSerializer(remaining_articles, many=True)
+        serialized_main_article = serializers.ArticleSerializer(main_article)
+        result.data = {
+            'main_article': serialized_main_article.data if main_article else None,
+            'articles': serialized_articles.data,
+            'min_body_length': min_body_length or 0
+        }
         result.is_success = True
         result.msg = "Success"
     except Exception as e:

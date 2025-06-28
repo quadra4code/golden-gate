@@ -344,7 +344,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     hidden = serializers.BooleanField(source='is_deleted', read_only=True)
     class Meta:
         model = models.Article
-        fields = ['id', 'title', 'body', 'created_by_id', 'created_at', 'updated_by_id', 'hidden']
+        fields = ['id', 'title', 'body', 'image', 'created_by_id', 'created_at', 'updated_by_id', 'hidden']
 
 class ConsultationTypeSerializer(serializers.ModelSerializer):
     created_by_id = serializers.CharField(write_only=True)

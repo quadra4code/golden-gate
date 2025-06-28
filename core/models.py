@@ -169,8 +169,17 @@ class ClientReview(BaseEntity):
 class Article(BaseEntity):
     title = models.CharField(max_length=400)
     body = models.CharField(max_length=5000)
+    is_main = models.BooleanField(default=False)
+    image = CloudinaryField('image', folder='articles_images', null=True, blank=True)
     class Meta:
         ordering = ['id']
+
+@receiver(post_delete, sender=Article)
+def delete_article_image_from_cloudinary(sender, instance, **kwargs):
+    """
+    Signal handler to delete the image from Cloudinary when a Article is deleted.
+    """
+    uploader.destroy(instance.image.public_id)
 
 class ConsultationType(BaseEntity):
     name = models.CharField(max_length=100)

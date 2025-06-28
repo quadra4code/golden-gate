@@ -1,7 +1,10 @@
 import uuid
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
 from core.base_models import BaseEntity
+from cloudinary import uploader
 from cloudinary.models import CloudinaryField
 
 # Create your models here.
@@ -61,6 +64,13 @@ class CustomUser(AbstractUser):
         if not self.referral_code:
             self.referral_code = str(uuid.uuid4().hex[:12])  # Generate a unique 12-character code
         super().save(*args, **kwargs)
+
+@receiver(post_delete, sender=CustomUser)
+def delete_user_image_from_cloudinary(sender, instance, **kwargs):
+    """
+    Signal handler to delete the image from Cloudinary when a CustomUser is deleted.
+    """
+    uploader.destroy(instance.image.public_id)
 
 class UserPhoneNumber(BaseEntity):
     phone_number = models.CharField(max_length=20, unique=True)
