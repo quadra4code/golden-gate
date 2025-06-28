@@ -343,9 +343,12 @@ class ArticleSerializer(serializers.ModelSerializer):
     updated_by_id = serializers.CharField(write_only=True, required=False, allow_null=True)
     hidden = serializers.BooleanField(source='is_deleted', read_only=True)
     image = serializers.CharField(source='image.url', read_only=True)
+    image_upload = serializers.ImageField(write_only=True, required=False, allow_null=True)
+    is_main = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = models.Article
-        fields = ['id', 'title', 'body', 'image', 'created_by_id', 'created_at', 'updated_by_id', 'hidden']
+        fields = ['id', 'title', 'body', 'image_upload', 'image', 'is_main', 'created_by_id', 'created_at', 'updated_by_id', 'hidden']
 
 class ConsultationTypeSerializer(serializers.ModelSerializer):
     created_by_id = serializers.CharField(write_only=True)
