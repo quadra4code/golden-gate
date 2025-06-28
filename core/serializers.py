@@ -342,6 +342,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     created_by_id = serializers.CharField(write_only=True, required=False, allow_null=True)
     updated_by_id = serializers.CharField(write_only=True, required=False, allow_null=True)
     hidden = serializers.BooleanField(source='is_deleted', read_only=True)
+    image = serializers.CharField(source='image.url', read_only=True)
     class Meta:
         model = models.Article
         fields = ['id', 'title', 'body', 'image', 'created_by_id', 'created_at', 'updated_by_id', 'hidden']
