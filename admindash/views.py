@@ -534,3 +534,318 @@ def delete_review_view(request, review_id):
 # endregion
 
 
+
+
+# region Unit Type
+@api_view(['POST'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def create_unit_type_view(request):
+    result = services.create_unit_type_service(request.data, request.user)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def read_unit_types_view(request):
+    result = services.read_unit_types_service()
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PUT'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def update_unit_type_view(request, unit_type_id):
+    result = services.update_unit_type_service(request.data, request.user, unit_type_id)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['DELETE'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def delete_unit_type_view(request, unit_type_id):
+    result = services.delete_unit_type_service(unit_type_id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def toggle_hidden_unit_type_view(request, unit_type_id):
+    result = services.toggle_hidden_unit_type_service(unit_type_id, request.user)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    print(status_code)
+    return Response(result.to_dict(), status=status_code)
+# endregion
+
+# region Proposal
+@api_view(['POST'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def create_proposal_view(request):
+    result = services.create_proposal_service(request.data, request.user)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def read_proposals_view(request):
+    result = services.read_proposals_service()
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PUT'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def update_proposal_view(request, proposal_id):
+    result = services.update_proposal_service(request.data, request.user, proposal_id)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['DELETE'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def delete_proposal_view(request, proposal_id):
+    result = services.delete_proposal_service(proposal_id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def toggle_hidden_proposal_view(request, proposal_id):
+    result = services.toggle_hidden_proposal_service(proposal_id, request.user)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+# endregion
+
+# region Project
+@api_view(['POST'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def create_project_view(request):
+    result = services.create_project_service(request.data, request.user)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def read_projects_view(request):
+    result = services.read_projects_service()
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PUT'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def update_project_view(request, project_id):
+    result = services.update_project_service(request.data, request.user, project_id)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['DELETE'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def delete_project_view(request, project_id):
+    result = services.delete_project_service(project_id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def toggle_hidden_project_view(request, project_id):
+    result = services.toggle_hidden_project_service(project_id, request.user)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+# endregion
+
+# region City
+@api_view(['POST'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def create_city_view(request):
+    result = services.create_city_service(request.data, request.user)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def read_cities_view(request):
+    result = services.read_cities_service()
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PUT'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def update_city_view(request, city_id):
+    result = services.update_city_service(request.data, request.user, city_id)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['DELETE'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def delete_city_view(request, city_id):
+    result = services.delete_city_service(city_id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def toggle_hidden_city_view(request, city_id):
+    result = services.toggle_hidden_city_service(city_id, request.user)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+# endregion
+
+# region Region
+@api_view(['POST'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def create_region_view(request):
+    result = services.create_region_service(request.data, request.user)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def read_regions_view(request):
+    result = services.read_regions_service()
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PUT'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def update_region_view(request, region_id):
+    result = services.update_region_service(request.data, request.user, region_id)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['DELETE'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def delete_region_view(request, region_id):
+    result = services.delete_region_service(region_id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def toggle_hidden_region_view(request, region_id):
+    result = services.toggle_hidden_region_service(region_id, request.user)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+# endregion
+
+# region Status
+@api_view(['POST'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def create_status_view(request):
+    result = services.create_status_service(request.data, request.user)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['GET'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def read_status_view(request):
+    result = services.read_status_service()
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PUT'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def update_status_view(request, status_id):
+    result = services.update_status_service(request.data, request.user, status_id)
+    status_code = (
+        status.HTTP_201_CREATED if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['DELETE'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def delete_status_view(request, status_id):
+    result = services.delete_status_service(status_id)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def toggle_hidden_status_view(request, status_id):
+    result = services.toggle_hidden_status_service(status_id, request.user)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
+# endregion
+

@@ -258,3 +258,180 @@ class ClientReviewSerializer(serializers.ModelSerializer):
             'email_confirmed': obj.created_by.email_confirmed,
             'image': obj.created_by.image.url if obj.created_by.image else None,
         }
+
+class UnitTypeSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format='%d-%m-%Y | %I:%M:%S %p', read_only=True)
+    updated_at = serializers.DateTimeField(format='%d-%m-%Y | %I:%M:%S %p', read_only=True)
+    created_by_name = serializers.SerializerMethodField()
+    updated_by_name = serializers.SerializerMethodField()
+    created_by_id = serializers.CharField(write_only=True)
+    updated_by_id = serializers.CharField(write_only=True)
+    hidden = serializers.BooleanField(source='is_deleted', read_only=True)
+
+    class Meta:
+        model = CoreModels.UnitType
+        fields = ['id', 'name', 'created_at', 'updated_at', 'created_by_id', 'updated_by_id', 'created_by_name', 'updated_by_name', 'hidden']
+
+    def get_created_by_name(self, obj):
+        if obj.created_by:
+            return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip()
+        return None
+
+    def get_updated_by_name(self, obj):
+        if obj.updated_by:
+            return f"{obj.updated_by.first_name} {obj.updated_by.last_name}".strip()
+        return None
+
+class ProposalSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format='%d-%m-%Y | %I:%M:%S %p', read_only=True)
+    updated_at = serializers.DateTimeField(format='%d-%m-%Y | %I:%M:%S %p', read_only=True)
+    created_by_name = serializers.SerializerMethodField()
+    updated_by_name = serializers.SerializerMethodField()
+    created_by_id = serializers.CharField(write_only=True)
+    updated_by_id = serializers.CharField(write_only=True)
+    hidden = serializers.BooleanField(source='is_deleted', read_only=True)
+
+    class Meta:
+        model = CoreModels.Proposal
+        fields = ['id', 'name', 'created_at', 'updated_at', 'created_by_id', 'updated_by_id', 'created_by_name', 'updated_by_name', 'hidden']
+
+    def get_created_by_name(self, obj):
+        if obj.created_by:
+            return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip()
+        return None
+
+    def get_updated_by_name(self, obj):
+        if obj.updated_by:
+            return f"{obj.updated_by.first_name} {obj.updated_by.last_name}".strip()
+        return None
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format='%d-%m-%Y | %I:%M:%S %p', read_only=True)
+    updated_at = serializers.DateTimeField(format='%d-%m-%Y | %I:%M:%S %p', read_only=True)
+    created_by_name = serializers.SerializerMethodField()
+    updated_by_name = serializers.SerializerMethodField()
+    created_by_id = serializers.CharField(write_only=True)
+    updated_by_id = serializers.CharField(write_only=True)
+    hidden = serializers.BooleanField(source='is_deleted', read_only=True)
+    relation = serializers.SerializerMethodField()
+    unit_type_ids = serializers.ListField(write_only=True)
+    class Meta:
+        model = CoreModels.Project
+        fields = ['id', 'name', 'relation', 'unit_type_ids', 'created_at', 'updated_at', 'created_by_id', 'updated_by_id', 'created_by_name', 'updated_by_name', 'hidden']
+
+    def get_created_by_name(self, obj):
+        if obj.created_by:
+            return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip()
+        return None
+
+    def get_updated_by_name(self, obj):
+        if obj.updated_by:
+            return f"{obj.updated_by.first_name} {obj.updated_by.last_name}".strip()
+        return None
+
+    def get_relation(self, obj):
+        unit_types = obj.unittypeproject_set.all()
+        return [{'unit_type_id': ut.unit_type.id, 'unit_type_name': ut.unit_type.name} for ut in unit_types]
+
+    def create(self, validated_data):
+        unit_type_ids = validated_data.pop('unit_type_ids', [])
+        project = super().create(validated_data)
+        unit_types_projects = [
+            CoreModels.UnitTypeProject(project=project, unit_type_id=id)
+            for id in unit_type_ids]
+        CoreModels.UnitTypeProject.objects.bulk_create(unit_types_projects)
+        return project
+
+    def update(self, instance, validated_data):
+        unit_type_ids = validated_data.pop('unit_type_ids', [])
+        instance = super().update(instance, validated_data)
+        # Clear existing relations
+        instance.unittypeproject_set.all().delete()
+        # Create new relations
+        unit_types_projects = [
+            CoreModels.UnitTypeProject(project=instance, unit_type_id=id)
+            for id in unit_type_ids]
+        CoreModels.UnitTypeProject.objects.bulk_create(unit_types_projects)
+        return instance
+
+class CitySerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format='%d-%m-%Y | %I:%M:%S %p', read_only=True)
+    updated_at = serializers.DateTimeField(format='%d-%m-%Y | %I:%M:%S %p', read_only=True)
+    created_by_name = serializers.SerializerMethodField()
+    updated_by_name = serializers.SerializerMethodField()
+    created_by_id = serializers.CharField(write_only=True)
+    updated_by_id = serializers.CharField(write_only=True)
+    hidden = serializers.BooleanField(source='is_deleted', read_only=True)
+
+    class Meta:
+        model = CoreModels.City
+        fields = ['id', 'name', 'created_at', 'updated_at', 'created_by_id', 'updated_by_id', 'created_by_name', 'updated_by_name', 'hidden']
+
+    def get_created_by_name(self, obj):
+        if obj.created_by:
+            return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip()
+        return None
+
+    def get_updated_by_name(self, obj):
+        if obj.updated_by:
+            return f"{obj.updated_by.first_name} {obj.updated_by.last_name}".strip()
+        return None
+
+
+class RegionSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format='%d-%m-%Y | %I:%M:%S %p', read_only=True)
+    updated_at = serializers.DateTimeField(format='%d-%m-%Y | %I:%M:%S %p', read_only=True)
+    created_by_name = serializers.SerializerMethodField()
+    updated_by_name = serializers.SerializerMethodField()
+    created_by_id = serializers.CharField(write_only=True)
+    updated_by_id = serializers.CharField(write_only=True)
+    city_id = serializers.CharField(write_only=True)
+    city_obj = serializers.SerializerMethodField()
+    hidden = serializers.BooleanField(source='is_deleted', read_only=True)
+
+    class Meta:
+        model = CoreModels.Region
+        fields = ['id', 'name', 'city_id', 'city_obj', 'created_at', 'updated_at', 'created_by_id', 'updated_by_id', 'created_by_name', 'updated_by_name', 'hidden']
+
+    def get_created_by_name(self, obj):
+        if obj.created_by:
+            return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip()
+        return None
+
+    def get_updated_by_name(self, obj):
+        if obj.updated_by:
+            return f"{obj.updated_by.first_name} {obj.updated_by.last_name}".strip()
+        return None
+
+    def get_city_obj(self, obj):
+        if obj.city:
+            return {"city_id": obj.city.id, "city_name": obj.city.name}
+        return None
+
+class StatusSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format='%d-%m-%Y | %I:%M:%S %p', read_only=True)
+    updated_at = serializers.DateTimeField(format='%d-%m-%Y | %I:%M:%S %p', read_only=True)
+    created_by_name = serializers.SerializerMethodField()
+    updated_by_name = serializers.SerializerMethodField()
+    created_by_id = serializers.CharField(write_only=True)
+    updated_by_id = serializers.CharField(write_only=True)
+    hidden = serializers.BooleanField(source='is_deleted', read_only=True)
+
+    class Meta:
+        model = CoreModels.Status
+        fields = ['id', 'name', 'code', 'color', 'created_at', 'updated_at', 'created_by_id', 'updated_by_id', 'created_by_name', 'updated_by_name', 'hidden']
+
+    def get_created_by_name(self, obj):
+        if obj.created_by:
+            return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip()
+        return None
+
+    def get_updated_by_name(self, obj):
+        if obj.updated_by:
+            return f"{obj.updated_by.first_name} {obj.updated_by.last_name}".strip()
+        return None
+
+
+
+

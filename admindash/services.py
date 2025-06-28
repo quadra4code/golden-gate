@@ -958,6 +958,7 @@ def create_article_service(request_data, admin_id):
     result = ResultView()
     try:
         request_data['created_by_id'] = admin_id
+        request_data['updated_by_id'] = admin_id
         serialized_new_article = CoreSerializers.ArticleSerializer(data=request_data)
         if serialized_new_article.is_valid():
             serialized_new_article.save()
@@ -1052,6 +1053,7 @@ def create_consult_type_service(request_data, admin_id):
     result = ResultView()
     try:
         request_data['created_by_id'] = admin_id
+        request_data['updated_by_id'] = admin_id
         serialized_new_consult_type = CoreSerializers.ConsultationTypeSerializer(data=request_data)
         if serialized_new_consult_type.is_valid():
             serialized_new_consult_type.save()
@@ -1146,6 +1148,7 @@ def create_consultation_service(request_data, admin_id):
     result = ResultView()
     try:
         request_data['created_by_id'] = admin_id
+        request_data['updated_by_id'] = admin_id
         serialized_new_consultation = CoreSerializers.ConsultationSerializer(data=request_data)
         if serialized_new_consultation.is_valid():
             serialized_new_consultation.save()
@@ -1309,4 +1312,575 @@ def delete_review_service(review_id):
     finally:
         return result
 # endregion
+
+# region Unit Type
+def create_unit_type_service(request_data, admin_obj):
+    result = ResultView()
+    try:
+        request_data['created_by_id'] = admin_obj.id
+        request_data['updated_by_id'] = admin_obj.id
+        serialized_new_unit_type = AdminSerializers.UnitTypeSerializer(data=request_data)
+        if serialized_new_unit_type.is_valid():
+            serialized_new_unit_type.save()
+            result.msg = 'تم إضافة نوع الوحدة بنجاح'
+            result.data = AdminSerializers.UnitTypeSerializer(CoreModels.UnitType.objects.order_by('id'), many=True).data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات نوع الوحدة'
+            result.data = serialized_new_unit_type.errors
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حفظ نوع الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def read_unit_types_service():
+    result = ResultView()
+    try:
+        all_unit_types = CoreModels.UnitType.objects.order_by('id')
+        serialized_all_unit_types = AdminSerializers.UnitTypeSerializer(all_unit_types, many=True)
+        result.data = serialized_all_unit_types.data
+        result.msg = 'تم جلب أنواع الوحدات بنجاح'
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب أنواع الوحدات'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def update_unit_type_service(request_data, admin_obj, unit_type_id):
+    result = ResultView()
+    try:
+        request_data['updated_by_id'] = admin_obj.id
+        old_unit_type = CoreModels.UnitType.objects.get(id=unit_type_id)
+        serialized_update_unit_type = AdminSerializers.UnitTypeSerializer(old_unit_type, data=request_data, partial=True)
+        if serialized_update_unit_type.is_valid():
+            serialized_update_unit_type.save()
+            result.msg = 'تم تحديث نوع الوحدة بنجاح'
+            result.data = serialized_update_unit_type.data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات نوع الوحدة'
+            result.data = serialized_update_unit_type.errors
+    except CoreModels.UnitType.DoesNotExist as e:
+        result.msg = 'نوع الوحدة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تحديث نوع الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def delete_unit_type_service(unit_type_id):
+    result = ResultView()
+    try:
+        delete_count, _ = CoreModels.UnitType.objects.filter(id=unit_type_id).delete()
+        if delete_count == 0:
+            raise CoreModels.UnitType.DoesNotExist()
+        result.msg = 'تم حذف نوع الوحدة بنجاح'
+        result.is_success = True
+    except CoreModels.UnitType.DoesNotExist as e:
+        result.msg = 'نوع الوحدة غير موجود'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حذف نوع الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def toggle_hidden_unit_type_service(unit_type_id, admin_obj):
+    result = ResultView()
+    try:
+        unit_type = CoreModels.UnitType.objects.get(id=unit_type_id)
+        unit_type.is_deleted = not unit_type.is_deleted
+        unit_type.updated_by = admin_obj
+        unit_type.save()
+        result.msg = f'تم {'إخفاء' if unit_type.is_deleted else 'إظهار'} نوع الوحدة بنجاح'
+        result.data = AdminSerializers.UnitTypeSerializer(unit_type).data
+        result.is_success = True
+    except CoreModels.UnitType.DoesNotExist as e:
+        result.msg = 'نوع الوحدة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إخفاء / إظهار نوع الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+# endregion
+
+# region Proposal
+def create_proposal_service(request_data, admin_obj):
+    result = ResultView()
+    try:
+        request_data['created_by_id'] = admin_obj.id
+        request_data['updated_by_id'] = admin_obj.id
+        serialized_new_proposal = AdminSerializers.ProposalSerializer(data=request_data)
+        if serialized_new_proposal.is_valid():
+            serialized_new_proposal.save()
+            result.msg = 'تم إضافة الطرح بنجاح'
+            result.data = AdminSerializers.ProposalSerializer(CoreModels.Proposal.objects.order_by('id'), many=True).data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات الطرح'
+            result.data = serialized_new_proposal.errors
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حفظ الطرح'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def read_proposals_service():
+    result = ResultView()
+    try:
+        all_proposals = CoreModels.Proposal.objects.order_by('id')
+        serialized_all_proposals = AdminSerializers.ProposalSerializer(all_proposals, many=True)
+        result.data = serialized_all_proposals.data
+        result.msg = 'تم جلب الطروحات بنجاح'
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب الطروحات'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def update_proposal_service(request_data, admin_obj, proposal_id):
+    result = ResultView()
+    try:
+        request_data['updated_by_id'] = admin_obj.id
+        old_proposal = CoreModels.Proposal.objects.get(id=proposal_id)
+        serialized_update_proposal = AdminSerializers.ProposalSerializer(old_proposal, data=request_data, partial=True)
+        if serialized_update_proposal.is_valid():
+            serialized_update_proposal.save()
+            result.msg = 'تم تحديث الطرح بنجاح'
+            result.data = serialized_update_proposal.data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات الطرح'
+            result.data = serialized_update_proposal.errors
+    except CoreModels.Proposal.DoesNotExist as e:
+        result.msg = 'الطرح غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تحديث الطرح'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def delete_proposal_service(proposal_id):
+    result = ResultView()
+    try:
+        delete_count, _ = CoreModels.Proposal.objects.filter(id=proposal_id).delete()
+        if delete_count == 0:
+            raise CoreModels.Proposal.DoesNotExist()
+        result.msg = 'تم حذف الطرح بنجاح'
+        result.is_success = True
+    except CoreModels.Proposal.DoesNotExist as e:
+        result.msg = 'الطرح غير موجود'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حذف الطرح'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def toggle_hidden_proposal_service(proposal_id, admin_obj):
+    result = ResultView()
+    try:
+        proposal = CoreModels.Proposal.objects.get(id=proposal_id)
+        proposal.is_deleted = not proposal.is_deleted
+        proposal.updated_by = admin_obj
+        proposal.save()
+        result.msg = f'تم {'إخفاء' if proposal.is_deleted else 'إظهار'} الطرح بنجاح'
+        result.data = AdminSerializers.ProposalSerializer(proposal).data
+        result.is_success = True
+    except CoreModels.Proposal.DoesNotExist as e:
+        result.msg = 'الطرح غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إخفاء / إظهار الطرح'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+# endregion
+
+# region Project
+def create_project_service(request_data, admin_obj):
+    result = ResultView()
+    try:
+        request_data['created_by_id'] = admin_obj.id
+        request_data['updated_by_id'] = admin_obj.id
+        serialized_new_project = AdminSerializers.ProjectSerializer(data=request_data)
+        if serialized_new_project.is_valid():
+            serialized_new_project.save()
+            result.msg = 'تم إضافة المشروع بنجاح'
+            result.data = AdminSerializers.ProjectSerializer(CoreModels.Project.objects.order_by('id'), many=True).data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات المشروع'
+            result.data = serialized_new_project.errors
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حفظ المشروع'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def read_projects_service():
+    result = ResultView()
+    try:
+        all_projects = CoreModels.Project.objects.order_by('id')
+        serialized_all_projects = AdminSerializers.ProjectSerializer(all_projects, many=True)
+        result.data = serialized_all_projects.data
+        result.msg = 'تم جلب المشاريع بنجاح'
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب المشاريع'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def update_project_service(request_data, admin_obj, project_id):
+    result = ResultView()
+    try:
+        request_data['updated_by_id'] = admin_obj.id
+        old_project = CoreModels.Project.objects.get(id=project_id)
+        serialized_update_project = AdminSerializers.ProjectSerializer(old_project, data=request_data, partial=True)
+        if serialized_update_project.is_valid():
+            serialized_update_project.save()
+            result.msg = 'تم تحديث المشروع بنجاح'
+            result.data = serialized_update_project.data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات المشروع'
+            result.data = serialized_update_project.errors
+    except CoreModels.Project.DoesNotExist as e:
+        result.msg = 'المشروع غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تحديث المشروع'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def delete_project_service(project_id):
+    result = ResultView()
+    try:
+        project_qs = CoreModels.Project.objects.get(id=project_id)
+        related_delete_count, _ = project_qs.unittypeproject_set.all().delete()
+        project_qs.delete()
+        result.msg = f'تم حذف المشروع {'وارتباطاته' if related_delete_count > 0 else ''} بنجاح'
+        result.is_success = True
+    except CoreModels.Project.DoesNotExist as e:
+        result.msg = 'المشروع غير موجود'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حذف المشروع'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def toggle_hidden_project_service(project_id, admin_obj):
+    result = ResultView()
+    try:
+        project = CoreModels.Project.objects.get(id=project_id)
+        project.is_deleted = not project.is_deleted
+        project.updated_by = admin_obj
+        project.save()
+        result.msg = f'تم {'إخفاء' if project.is_deleted else 'إظهار'} المشروع بنجاح'
+        result.data = AdminSerializers.ProjectSerializer(project).data
+        result.is_success = True
+    except CoreModels.Project.DoesNotExist as e:
+        result.msg = 'المشروع غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إخفاء / إظهار المشروع'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+# endregion
+
+# region City
+def create_city_service(request_data, admin_obj):
+    result = ResultView()
+    try:
+        request_data['created_by_id'] = admin_obj.id
+        request_data['updated_by_id'] = admin_obj.id
+        serialized_new_city = AdminSerializers.CitySerializer(data=request_data)
+        if serialized_new_city.is_valid():
+            serialized_new_city.save()
+            result.msg = 'تم إضافة المدينة بنجاح'
+            result.data = AdminSerializers.CitySerializer(CoreModels.City.objects.order_by('id'), many=True).data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات المدينة'
+            result.data = serialized_new_city.errors
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حفظ المدينة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def read_cities_service():
+    result = ResultView()
+    try:
+        all_cities = CoreModels.City.objects.order_by('id')
+        serialized_all_cities = AdminSerializers.CitySerializer(all_cities, many=True)
+        result.data = serialized_all_cities.data
+        result.msg = 'تم جلب المدن بنجاح'
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب المدن'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def update_city_service(request_data, admin_obj, city_id):
+    result = ResultView()
+    try:
+        request_data['updated_by_id'] = admin_obj.id
+        old_city = CoreModels.City.objects.get(id=city_id)
+        serialized_update_city = AdminSerializers.CitySerializer(old_city, data=request_data, partial=True)
+        if serialized_update_city.is_valid():
+            serialized_update_city.save()
+            result.msg = 'تم تحديث المدينة بنجاح'
+            result.data = serialized_update_city.data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات المدينة'
+            result.data = serialized_update_city.errors
+    except CoreModels.City.DoesNotExist as e:
+        result.msg = 'المدينة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تحديث المدينة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def delete_city_service(city_id):
+    result = ResultView()
+    try:
+        delete_count, _ = CoreModels.City.objects.filter(id=city_id).delete()
+        if delete_count == 0:
+            raise CoreModels.City.DoesNotExist()
+        result.msg = 'تم حذف المدينة بنجاح'
+        result.is_success = True
+    except CoreModels.City.DoesNotExist as e:
+        result.msg = 'المدينة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حذف المدينة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def toggle_hidden_city_service(city_id, admin_obj):
+    result = ResultView()
+    try:
+        city = CoreModels.City.objects.get(id=city_id)
+        city.is_deleted = not city.is_deleted
+        city.updated_by = admin_obj
+        city.save()
+        result.msg = f'تم {'إخفاء' if city.is_deleted else 'إظهار'} المدينة بنجاح'
+        result.data = AdminSerializers.CitySerializer(city).data
+        result.is_success = True
+    except CoreModels.City.DoesNotExist as e:
+        result.msg = 'المدينة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إخفاء / إظهار المدينة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+# endregion
+
+# region Region
+def create_region_service(request_data, admin_obj):
+    result = ResultView()
+    try:
+        request_data['created_by_id'] = admin_obj.id
+        request_data['updated_by_id'] = admin_obj.id
+        serialized_new_region = AdminSerializers.RegionSerializer(data=request_data)
+        if serialized_new_region.is_valid():
+            serialized_new_region.save()
+            result.msg = 'تم إضافة المنطقة بنجاح'
+            result.data = AdminSerializers.RegionSerializer(CoreModels.Region.objects.order_by('id'), many=True).data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات المنطقة'
+            result.data = serialized_new_region.errors
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حفظ المنطقة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def read_regions_service():
+    result = ResultView()
+    try:
+        all_regions = CoreModels.Region.objects.order_by('id')
+        serialized_all_regions = AdminSerializers.RegionSerializer(all_regions, many=True)
+        result.data = serialized_all_regions.data
+        result.msg = 'تم جلب المناطق بنجاح'
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب المناطق'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def update_region_service(request_data, admin_obj, region_id):
+    result = ResultView()
+    try:
+        request_data['updated_by_id'] = admin_obj.id
+        old_region = CoreModels.Region.objects.get(id=region_id)
+        serialized_update_region = AdminSerializers.RegionSerializer(old_region, data=request_data, partial=True)
+        if serialized_update_region.is_valid():
+            serialized_update_region.save()
+            result.msg = 'تم تحديث المنطقة بنجاح'
+            result.data = serialized_update_region.data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات المنطقة'
+            result.data = serialized_update_region.errors
+    except CoreModels.Region.DoesNotExist as e:
+        result.msg = 'المنطقة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تحديث المنطقة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def delete_region_service(region_id):
+    result = ResultView()
+    try:
+        delete_count, _ = CoreModels.Region.objects.filter(id=region_id).delete()
+        if delete_count == 0:
+            raise CoreModels.Region.DoesNotExist()
+        result.msg = 'تم حذف المنطقة بنجاح'
+        result.is_success = True
+    except CoreModels.Region.DoesNotExist as e:
+        result.msg = 'المنطقة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حذف المنطقة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def toggle_hidden_region_service(region_id, admin_obj):
+    result = ResultView()
+    try:
+        region = CoreModels.Region.objects.get(id=region_id)
+        region.is_deleted = not region.is_deleted
+        region.updated_by = admin_obj
+        region.save()
+        result.msg = f'تم {'إخفاء' if region.is_deleted else 'إظهار'} المنطقة بنجاح'
+        result.data = AdminSerializers.RegionSerializer(region).data
+        result.is_success = True
+    except CoreModels.Region.DoesNotExist as e:
+        result.msg = 'المنطقة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إخفاء / إظهار المنطقة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+# endregion
+
+# region Status
+def create_status_service(request_data, admin_obj):
+    result = ResultView()
+    try:
+        request_data['created_by_id'] = admin_obj.id
+        request_data['updated_by_id'] = admin_obj.id
+        serialized_new_status = AdminSerializers.StatusSerializer(data=request_data)
+        if serialized_new_status.is_valid():
+            serialized_new_status.save()
+            result.msg = 'تم إضافة حالة الوحدة بنجاح'
+            result.data = AdminSerializers.StatusSerializer(CoreModels.Status.objects.order_by('id'), many=True).data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات حالة الوحدة'
+            result.data = serialized_new_status.errors
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حفظ حالة الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def read_status_service():
+    result = ResultView()
+    try:
+        all_statuses = CoreModels.Status.objects.order_by('id')
+        serialized_all_statuses = AdminSerializers.StatusSerializer(all_statuses, many=True)
+        result.data = serialized_all_statuses.data
+        result.msg = 'تم جلب حالات الوحدة بنجاح'
+        result.is_success = True
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء جلب حالات الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def update_status_service(request_data, admin_obj, status_id):
+    result = ResultView()
+    try:
+        request_data['updated_by_id'] = admin_obj.id
+        old_status = CoreModels.Status.objects.get(id=status_id)
+        serialized_update_status = AdminSerializers.StatusSerializer(old_status, data=request_data, partial=True)
+        if serialized_update_status.is_valid():
+            serialized_update_status.save()
+            result.msg = 'تم تحديث حالة الوحدة بنجاح'
+            result.data = serialized_update_status.data
+            result.is_success = True
+        else:
+            result.msg = 'حدث خطأ أثناء معالجة بيانات حالة الوحدة'
+            result.data = serialized_update_status.errors
+    except CoreModels.Status.DoesNotExist as e:
+        result.msg = 'حالة الوحدة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء تحديث حالة الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def delete_status_service(status_id):
+    result = ResultView()
+    try:
+        delete_count, _ = CoreModels.Status.objects.filter(id=status_id).delete()
+        if delete_count == 0:
+            raise CoreModels.Status.DoesNotExist()
+        result.msg = 'تم حذف حالة الوحدة بنجاح'
+        result.is_success = True
+    except CoreModels.Status.DoesNotExist as e:
+        result.msg = 'حالة الوحدة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء حذف حالة الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def toggle_hidden_status_service(status_id, admin_obj):
+    result = ResultView()
+    try:
+        status = CoreModels.Status.objects.get(id=status_id)
+        status.is_deleted = not status.is_deleted
+        status.updated_by = admin_obj
+        status.save()
+        result.msg = f'تم {'إخفاء' if status.is_deleted else 'إظهار'} حالة الوحدة بنجاح'
+        result.data = AdminSerializers.StatusSerializer(status).data
+        result.is_success = True
+    except CoreModels.Status.DoesNotExist as e:
+        result.msg = 'حالة الوحدة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إخفاء / إظهار حالة الوحدة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+# endregion
+
 
