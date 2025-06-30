@@ -168,6 +168,7 @@ class AllRequestSerializer(serializers.ModelSerializer):
     updated_at = serializers.DateTimeField(format="%d-%m-%Y | %I:%M:%S %p", read_only=True)
     status_obj = serializers.SerializerMethodField(read_only=True)
     sales_obj = serializers.SerializerMethodField(read_only=True)
+    unit_id = serializers.CharField(source='unit.id', read_only=True)
     title = serializers.CharField(source='unit.title', read_only=True)
     unit_type = serializers.CharField(source='unit.unit_type.name', read_only=True)
     project = serializers.CharField(source='unit.project.name', read_only=True)
@@ -188,6 +189,7 @@ class AllRequestSerializer(serializers.ModelSerializer):
         model = CoreModels.UnitRequest
         fields = [
             'id',
+            'unit_id',
             'created_at',
             'updated_at',
             'status_obj',
