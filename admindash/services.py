@@ -977,7 +977,7 @@ def create_article_service(request_data, admin_id):
 def read_articles_service():
     result = ResultView()
     try:
-        all_articles = CoreModels.Article.objects.order_by('-updated_at')
+        all_articles = CoreModels.Article.objects.all()
         serialized_all_articles = CoreSerializers.ArticleSerializer(all_articles, many=True)
         result.data = serialized_all_articles.data
         result.msg = 'تم جلب المقالات بنجاح'
@@ -997,7 +997,7 @@ def update_article_service(request_data, admin_id, article_id):
         if serialized_update_article.is_valid():
             serialized_update_article.save()
             result.msg = 'تم تحديث المقالة بنجاح'
-            result.data = CoreSerializers.ArticleSerializer(CoreModels.Article.objects.order_by('-updated_at'), many=True).data
+            result.data = serialized_update_article.data
             result.is_success = True
         else:
             result.msg = 'حدث خطأ أثناء معالجة بيانات المقالة'
@@ -1036,6 +1036,27 @@ def toggle_hidden_article_service(article_id, admin_obj):
         article.updated_by = admin_obj
         article.save()
         result.msg = f'تم {'إخفاء' if article.is_deleted else 'إظهار'} المقالة بنجاح'
+        result.data = CoreSerializers.ArticleSerializer(article).data
+        result.is_success = True
+    except CoreModels.Article.DoesNotExist as e:
+        result.msg = 'المقالة غير موجودة'
+        result.data = {'errors': str(e)}
+    except Exception as e:
+        result.msg = 'حدث خطأ غير متوقع أثناء إخفاء / إظهار المقالة'
+        result.data = {'errors': str(e)}
+    finally:
+        return result
+
+def toggle_main_article_service(article_id, admin_obj):
+    result = ResultView()
+    try:
+        article = CoreModels.Article.objects.get(id=article_id)
+        if not article.is_main:
+            CoreModels.Article.objects.filter(is_main=True).update(is_main=False)
+        article.is_main = not article.is_main
+        article.updated_by = admin_obj
+        article.save()
+        result.msg = f'تم {'تعيين المقالة أساسية' if article.is_main else 'تعيين المقالة كغير أساسية'} بنجاح'
         result.data = CoreSerializers.ArticleSerializer(article).data
         result.is_success = True
     except CoreModels.Article.DoesNotExist as e:

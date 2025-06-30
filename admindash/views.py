@@ -395,6 +395,16 @@ def toggle_hidden_article_view(request, article_id):
         else status.HTTP_400_BAD_REQUEST
     )
     return Response(result.to_dict(), status=status_code)
+
+@api_view(['PATCH'])
+@permission_classes([utils.IsManagerOrAdminUser])
+def toggle_main_article_view(request, article_id):
+    result = services.toggle_main_article_service(article_id, request.user if request.user else None)
+    status_code = (
+        status.HTTP_200_OK if result.is_success
+        else status.HTTP_400_BAD_REQUEST
+    )
+    return Response(result.to_dict(), status=status_code)
 # endregion
 
 # region Consultation Type

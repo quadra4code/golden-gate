@@ -339,16 +339,38 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class ArticleSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format='%d-%b-%Y', read_only=True)
+    updated_at = serializers.DateTimeField(format='%d-%m-%Y | %I:%M:%S %p', read_only=True)
     created_by_id = serializers.CharField(write_only=True, required=False, allow_null=True)
     updated_by_id = serializers.CharField(write_only=True, required=False, allow_null=True)
+    created_by_name = serializers.SerializerMethodField()
+    updated_by_name = serializers.SerializerMethodField()
     hidden = serializers.BooleanField(source='is_deleted', read_only=True)
-    image = serializers.CharField(source='image.url', read_only=True)
-    image_upload = serializers.ImageField(write_only=True, required=False, allow_null=True)
+    image_url = serializers.CharField(source='image.url', read_only=True)
     is_main = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = models.Article
-        fields = ['id', 'title', 'body', 'image_upload', 'image', 'is_main', 'created_by_id', 'created_at', 'updated_by_id', 'hidden']
+        fields = ['id', 'title', 'body', 'image_url', 'image', 'created_by_name', 'updated_by_name',
+            'is_main', 'created_by_id', 'created_at', 'updated_by_id', 'updated_at', 'hidden']
+
+    def get_created_by_name(self, obj):
+        if obj.created_by:
+            return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip()
+        return None
+
+    def get_updated_by_name(self, obj):
+        if obj.updated_by:
+            return f"{obj.updated_by.first_name} {obj.updated_by.last_name}".strip()
+        return None
+
+    def update(self, instance, validated_data):
+        new_image = validated_data.get('image', None)
+        if new_image and instance.image:
+            # Delete the old image from Cloudinary
+            public_id = instance.image.public_id if hasattr(instance.image, 'public_id') else None
+            if public_id:
+                cloudinary.uploader.destroy(public_id)
+        return super().update(instance, validated_data)
 
 class ConsultationTypeSerializer(serializers.ModelSerializer):
     created_by_id = serializers.CharField(write_only=True)

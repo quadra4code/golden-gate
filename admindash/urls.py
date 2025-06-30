@@ -39,6 +39,7 @@ urlpatterns = [
     path('update-article/<int:article_id>', AdminViews.update_article_view, name='update_article'),
     path('delete-article/<int:article_id>', AdminViews.delete_article_view, name='delete_article'),
     path('toggle-hidden-article/<int:article_id>', AdminViews.toggle_hidden_article_view, name='toggle_hidden_article'),
+    path('toggle-main-article/<int:article_id>', AdminViews.toggle_main_article_view, name='toggle_main_article'),
     path('create-consult-type', AdminViews.create_consult_type_view, name='create_consult_type'),
     path('all-consult-types', AdminViews.read_consult_types_view, name='all_consult_types'),
     path('update-consult-type/<int:consult_type_id>', AdminViews.update_consult_type_view, name='update_consult_type'),
